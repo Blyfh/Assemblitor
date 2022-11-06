@@ -445,7 +445,7 @@ class GUI:
     def __init__(self, test_str = ""):
         self.is_saved   = False
         self.file_path  = None
-        self.last_dir   = os.path.join(os.path.expanduser( '~' ), "Documents")
+        self.last_dir   = os.path.join(os.path.expanduser('~'), "Documents")
         self.file_types = (("Assembler files", "*.asm"), ("Text files", "*.txt"))
         self.code_font  = ("Courier New", 10)
         self.emu        = Emulator()
@@ -474,11 +474,12 @@ class GUI:
         self.root.config(menu = self.menubar)
 
         self.file_MNU = tk.Menu(self.menubar, tearoff = False)
-        self.file_MNU.add_command(label = "Open",    command = self.open_file)
-        self.file_MNU.add_command(label = "Reload",  command = self.reload_file)
-        self.file_MNU.add_command(label = "Save",    command = self.save_file)
-        self.file_MNU.add_command(label = "Save As", command = self.save_file_as)
-        self.file_MNU.add_command(label = "Exit",    command = self.exit)
+        self.file_MNU.add_command(label = "Open",     command = self.open_file)
+        self.file_MNU.add_command(label = "Reload",   command = self.reload_file)
+        self.file_MNU.add_command(label = "Save",     command = self.save_file)
+        self.file_MNU.add_command(label = "Save As",  command = self.save_file_as)
+        self.file_MNU.add_command(label = "Settings", command = self.open_settings_win)
+        self.file_MNU.add_command(label = "Exit",     command = self.exit)
         self.menubar.add_cascade(label = "File", menu = self.file_MNU, underline = 0)
 
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
@@ -538,7 +539,7 @@ class GUI:
         self.root.bind(sequence = "<Control-S>",      func = self.save_file_as)
         self.inp_SCT.bind(sequence="<Key>",           func = self.writing)
     # protocols
-        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.exit)
+        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.exit) # when clicking the red x of the window
 
     def exit(self):
         if self.is_saved or self.inp_SCT.get(1.0, "end-1c").strip() == "":
@@ -614,11 +615,43 @@ class GUI:
         if self.file_path:
             self.save_file()
 
+    def open_settings_win(self):
+        pass
+
     def open_assembly_win(self):
         pass
 
     def open_shortcuts_win(self):
-        pass
+        title = "Shortcuts"
+        combos = """Ctrl + Enter
+Shift + Enter
+Ctrl + O
+F5
+Ctr + S
+Ctrl + Shift + S"""
+        actions = """–  Run program
+–  Line break without new address
+–  Open file
+–  Reload file
+–  Save file
+–  Save file as"""
+        shortcuts_WIN = tk.Tk()
+        shortcuts_WIN.geometry("275x140")
+        shortcuts_WIN.resizable(0, 0)
+        shortcuts_WIN.config(bg = "black")
+        shortcuts_WIN.title("Shortcuts")
+
+        shortcuts_FRM = tk.Frame(shortcuts_WIN, bg = "#222222")
+        title_LBL     = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,  justify = tk.LEFT, font = ("Segoe", 15, "underline"))
+        #title2_LBL = tk.Label(shortcuts_FRM, bg="#222222", fg="white", text=title, justify=tk.LEFT, font=("Sedsdsd", 15, "underline"))
+        combos_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = combos, justify = tk.LEFT)
+        actions_LBL   = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = actions,justify = tk.LEFT)
+        shortcuts_FRM.pack(side = tk.LEFT, fill = "both", expand = True)
+        title_LBL.grid(  row = 0, column = 0, columnspan = 2)
+        #title2_LBL.grid(row=0, column=3, columnspan=2)
+        combos_LBL.grid( row = 1, column = 0, padx = 1)
+        actions_LBL.grid(row = 1, column = 1, padx = 1)
+
 
     def open_about_win(self):
         pass
@@ -656,9 +689,11 @@ class GUI:
 # Exception optional in Konsole ausgeben
 # ask to save bei schließen (mit messagebox)
 # strg + del löscht ganzes Wort
+# Settings
 
 # BUGS:
 # Register Adresse vorne 0 (??)
+# insert_addres buggy (fügt 03 ein, wenn inp = "wewe'\n\n23")
 t = """;auto-test
 00 JMP 03
 01 4
@@ -670,4 +705,4 @@ t = """;auto-test
 07 JMP 04
 08 STP
 """
-program = GUI()
+ed = GUI()
