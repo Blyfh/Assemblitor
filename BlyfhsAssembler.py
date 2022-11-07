@@ -463,6 +463,10 @@ class GUI:
         self.out_SCT.configure(state = "disabled")
 
     def tkinter_gui(self):
+        self.is_settings_win_open  = False
+        self.is_shortcuts_win_open = False
+        self.is_assembly_win_open  = False
+        self.is_about_win_open     = False
         self.root = tk.Tk()
         #tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
         self.root.minsize(642, 500)
@@ -523,8 +527,8 @@ class GUI:
 
         self.text_FRM = tk.Frame(self.root, bg = "#222222")
         self.text_FRM.pack(fill = "both", expand = True)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#222222", fg = "white", width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
-        self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#222222", fg = "white", width = 10, wrap = "word")
+        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
+        self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", width = 10, wrap = "word")
         self.inp_SCT.pack(side = tk.LEFT,  fill = "both", expand = True, padx = 5)
         self.out_SCT.pack(side = tk.RIGHT, fill = "both", expand = True, padx = 5)
         self.out_SCT.tag_configure("pc_is_here", foreground = "#00FF00")
@@ -622,6 +626,9 @@ class GUI:
         pass
 
     def open_shortcuts_win(self):
+        if self.is_shortcuts_win_open:
+            return
+        self.is_shortcuts_win_open = True
         title = "Shortcuts"
         combos = """Ctrl + Enter
 Shift + Enter
@@ -629,29 +636,32 @@ Ctrl + O
 F5
 Ctr + S
 Ctrl + Shift + S"""
-        actions = """–  Run program
-–  Line break without new address
-–  Open file
-–  Reload file
-–  Save file
-–  Save file as"""
-        shortcuts_WIN = tk.Tk()
-        shortcuts_WIN.geometry("275x140")
+        actions = """Run program
+Line break without new address
+Open file
+Reload file
+Save file
+Save file as"""
+        shortcuts_WIN = tk.Toplevel(self.root)
+        shortcuts_WIN.geometry("275x120")
         shortcuts_WIN.resizable(0, 0)
         shortcuts_WIN.config(bg = "black")
         shortcuts_WIN.title("Shortcuts")
 
-        shortcuts_FRM = tk.Frame(shortcuts_WIN, bg = "#222222")
-        title_LBL     = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,  justify = tk.LEFT, font = ("Segoe", 15, "underline"))
-        #title2_LBL = tk.Label(shortcuts_FRM, bg="#222222", fg="white", text=title, justify=tk.LEFT, font=("Sedsdsd", 15, "underline"))
-        combos_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = combos, justify = tk.LEFT)
-        actions_LBL   = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = actions,justify = tk.LEFT)
+        shortcuts_FRM = tk.Frame(shortcuts_WIN, bg = "#222222", bd = 5)
+        #title_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = tk.LEFT, font = ("Segoe", 15, "bold"))
+        combos_LBL    = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = tk.LEFT)
+        actions_LBL   = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = tk.LEFT)
         shortcuts_FRM.pack(side = tk.LEFT, fill = "both", expand = True)
-        title_LBL.grid(  row = 0, column = 0, columnspan = 2)
-        #title2_LBL.grid(row=0, column=3, columnspan=2)
-        combos_LBL.grid( row = 1, column = 0, padx = 1)
-        actions_LBL.grid(row = 1, column = 1, padx = 1)
+        #title_LBL.pack( side = "top",   fill = "x", expand = True)
+        combos_LBL.pack( side = "left",  fill = "both", expand = True, padx = (0, 5))
+        actions_LBL.pack(side = "right", fill = "both", expand = True)
+        shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_shortcuts_win_close(shortcuts_WIN))
 
+
+    def on_shortcuts_win_close(self, win):
+        self.is_shortcuts_win_open = False
+        win.destroy()
 
     def open_about_win(self):
         pass
