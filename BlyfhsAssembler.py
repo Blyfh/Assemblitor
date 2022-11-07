@@ -634,7 +634,7 @@ class GUI:
 Shift + Enter
 Ctrl + O
 F5
-Ctr + S
+Ctrl + S
 Ctrl + Shift + S"""
         actions = """Run program
 Line break without new address
@@ -652,10 +652,10 @@ Save file as"""
         #title_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = tk.LEFT, font = ("Segoe", 15, "bold"))
         combos_LBL    = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = tk.LEFT)
         actions_LBL   = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = tk.LEFT)
-        shortcuts_FRM.pack(side = tk.LEFT, fill = "both", expand = True)
+        shortcuts_FRM.pack(fill = "both", expand = True)
         #title_LBL.pack( side = "top",   fill = "x", expand = True)
-        combos_LBL.pack( side = "left",  fill = "both", expand = True, padx = (0, 5))
-        actions_LBL.pack(side = "right", fill = "both", expand = True)
+        combos_LBL.pack( side = tk.LEFT,  fill = "both", expand = True, padx = (0, 5))
+        actions_LBL.pack(side = tk.RIGHT, fill = "both", expand = True)
         shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_shortcuts_win_close(shortcuts_WIN))
 
 
@@ -664,7 +664,34 @@ Save file as"""
         win.destroy()
 
     def open_about_win(self):
-        pass
+        if self.is_about_win_open:
+            return
+        self.is_about_win_open = True
+        title = "[Assembler Name]"
+        text  = """
+    A simple emulator for [Assembly Dialect]
+    Version: 0.1 Alpha
+    Made by Blyfh in 2022
+        
+    Created with love in Berlin <3
+        """
+        about_WIN = tk.Toplevel(self.root)
+        about_WIN.geometry("275x130")
+        about_WIN.resizable(0, 0)
+        about_WIN.config(bg = "black")
+        about_WIN.title("Shortcuts")
+
+        about_FRM = tk.Frame(about_WIN, bg = "#222222", bd = 5)
+        title_LBL = tk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = tk.CENTER, justify = tk.LEFT, font = ("Segoe", 15, "bold"))
+        text_LBL  = tk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = tk.W, justify = tk.LEFT)
+        about_FRM.pack(fill = "both", expand = True)
+        title_LBL.pack(fill = "x",    expand = True)
+        text_LBL.pack( fill = "x",    expand = True)
+        about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_shortcuts_win_close(about_WIN))
+
+    def on_about_win_close(self, win):
+        self.is_shortcuts_win_open = False
+        win.destroy()
 
     def key_enter(self, event):
         self.insert_address()
@@ -686,7 +713,6 @@ Save file as"""
         lines = txt.split("\n")
         try:
             last_adr = int(lines[pos].split()[0])
-            print(last_adr)
         except:
             return
         new_adr  = str(last_adr + 1)
