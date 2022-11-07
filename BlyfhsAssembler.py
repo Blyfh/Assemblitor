@@ -681,11 +681,12 @@ Save file as"""
 
     def insert_address(self):
         txt = self.inp_SCT.get(1.0, "end-1c")
-        txt = txt[:len(txt) - 2]
+        txt = txt[:len(txt) - 1]
         pos = int(float(self.inp_SCT.index(tk.INSERT))) - 2
         lines = txt.split("\n")
         try:
             last_adr = int(lines[pos].split()[0])
+            print(last_adr)
         except:
             return
         new_adr  = str(last_adr + 1)
@@ -695,15 +696,12 @@ Save file as"""
 
 # TO-DO:
 # bei Adressverschiebung alle Adressen anpassen
-# ALU und die Busse?
 # Exception optional in Konsole ausgeben
-# ask to save bei schließen (mit messagebox)
 # strg + del löscht ganzes Wort
 # Settings
 
 # BUGS:
 # Register Adresse vorne 0 (??)
-# insert_addres buggy (fügt 03 ein, wenn inp = "wewe'\n\n23")
 t = """;auto-test
 00 JMP 03
 01 4
