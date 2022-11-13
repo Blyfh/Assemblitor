@@ -472,7 +472,7 @@ class Editor:
         #tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
         self.root.minsize(642, 500)
         self.root.config(bg = "black")
-        self.root.title("Blyfh's Assembler")
+        self.root.title("Assemblitor")
         self.only_one_step = tk.IntVar()
     # elements
         self.menubar = tk.Menu(self.root)
@@ -596,7 +596,7 @@ class Editor:
     def open_file(self, event = None):
         self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
-            self.root.title(self.file_path + " – Blyfh's Assembler")
+            self.root.title(self.file_path + " – Assemblitor")
             file_name = os.path.basename(self.file_path)
             self.last_dir = self.file_path.split(file_name)[0]
             self.is_saved = True
@@ -616,7 +616,7 @@ class Editor:
 
     def save_file_as(self, event = None):
         self.file_path = self.file_path = fd.asksaveasfilename(title = "Save File", initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
-        self.root.title(self.file_path + " – Blyfh's Assembler")
+        self.root.title(self.file_path + " – Assemblitor")
         if self.file_path:
             self.save_file()
 
@@ -738,7 +738,7 @@ Save file as"""
         if self.about_WIN:
             return
         self.is_about_win_open = True
-        title = "[Assembler Name]"
+        title = "Assemblitor"
         text  = """
     A simple emulator and editor for [Assembly Dialect]
     Version: 0.1 Alpha
