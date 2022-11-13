@@ -1,3 +1,4 @@
+import sys
 import os
 import string
 import traceback
@@ -440,7 +441,7 @@ class Operand:
             return "(" + str(self.type) + ", " + str(self.opr) + ")"
     
 
-class GUI:
+class Editor:
 
     def __init__(self, test_str = ""):
         self.is_saved   = False
@@ -782,7 +783,7 @@ Save file as"""
 # Demo-Programm
 
 # BUGS:
-# Register Adresse vorne 0 (??)
+#
 t = """;auto-test
 00 JMP 03
 01 4
@@ -794,4 +795,13 @@ t = """;auto-test
 07 JMP 04
 08 STP
 """
-ed = GUI()
+
+min_version = (3, 10)
+cur_version = sys.version_info
+
+if cur_version >= min_version:
+    ed = Editor()
+else:
+    root = tk.Tk()
+    root.withdraw()
+    mb.showerror("Error", "Your version of Python is not supported. Please use Python 3.10 or higher.")
