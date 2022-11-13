@@ -627,29 +627,34 @@ class Editor:
         if self.is_assembly_win_open:
             return
         self.is_assembly_win_open = True
-        title = "[Assembly Dialect]"
-        text = """[Assembly Dialect] is a very low-level column-oriented programming language that is close to machine code. It is not case sensitive.
+        text1 = """[Assembly Dialect] is a very low-level column-oriented programming language that is close to machine code. It is not case sensitive.
 
 It consists of a sequence of 'memory cells' that can store values or commands. Each memory cell starts with its address and ends with a line break. The memory cells have to be in increasing order but empty memory cells don't have to be displayed. A value has to be stored after the address as an integer. An empty memory cell will be interpreted as having a value of 0. A command is also stored after the address. There are many commands and some of them require operands to work.
 Comments can be made with a semicolon. All text between the semicolon and the next line break will be ignored by the computer.
 
-The program orients itself to the architecture of a Von-Neumann processor. This means it takes usage of the program counter (PC), the accumulator (ACC) and the instruction register (IR). The PC is set to 0 by default. If the program is executed, the command at the address stored in the ACC will be loaded into the instruction register. There the command can be executed. After its execution the PC gets increased by one (excluding jumps and stops) and the next command can be loaded.
+The program orients itself to the architecture of a Von-Neumann processor. This means it takes usage of the program counter (PC), the accumulator (ACC) and the instruction register (IR). The PC is set to 0 by default. If the program is executed, the command at the address stored in the PC will be loaded into the IR. There the command can be executed. After its execution the PC gets increased by one (excluding jumps and stops) and the next command can be loaded.
+
 
 A simple program may look like this:
+<code>
     00 LDA 04 ; load the value of the 4th memory cell into the ACC
     01 STA 05 ; store the value of the ACC into the 5th memory cell
     02 STP    ; stop the program
     04 42     ; a stored value
+</code>
+    
 This would be the result after executing the program:
+<code>
     00 LDA 04
     01 STA 05
     02 STP 
     03        ; <--- Notice how the formerly hidden 3rd memory cell is now displayed
     04 42
     05 42
-
-A list of all accepted commands:
-    STP     - stops the program
+</code>
+"""
+        text2 = "\n\nA list of all accepted commands:\n"
+        text3 = """    STP     - stops the program
     LDA n   - loads the value at memory cell n into the ACC
     LDA #n  - loads the value n into the ACC
     LDA (n) - loads the value of the memory cell that has the address that is stored in memory cell n
@@ -659,21 +664,34 @@ A list of all accepted commands:
     MUL n   - multiplies the value at memory cell n by the value of the ACC and stores the result into the ACC
     JMP n   - jumps to memory cell n by setting the PC to n
     JZE n   - jumps to memory cell n by setting the PC to n if the value of the ACC is equal to zero
-    JLE n   - jumps to memory cell n by setting the PC to n if the value of the ACC is less or equal to zero
-"""
+    JLE n   - jumps to memory cell n by setting the PC to n if the value of the ACC is less or equal to zero"""
+
         assembly_WIN = tk.Toplevel(self.root)
-        assembly_WIN.minsize(730, 200)
+        assembly_WIN.minsize(710, 200)
         assembly_WIN.config(bg = "black")
         assembly_WIN.title("Assembly")
 
-        assembly_FRM = tk.Frame(assembly_WIN, bg="#222222", bd = 5)
-        #title_LBL = tk.Label(assembly_FRM, bg = "#333333", fg = "white", text = title, anchor = tk.CENTER, justify = tk.LEFT, font = ("Segoe", 15, "bold"))
-        text_SCT = st.ScrolledText(assembly_FRM, bg = "#333333", fg = "white", wrap = tk.WORD, font = ("Segoe", 10, "bold"))
-        assembly_FRM.pack(fill = "both", expand = True)
-        #title_LBL.pack(   fill = "both")
-        text_SCT.pack(    fill = "both", expand = True)
-        text_SCT.insert(tk.INSERT, text)
-        text_SCT.configure(state = "disabled")
+        assembly_FRM = tk.Frame(assembly_WIN, bg = "#222222", bd = 5)
+        text_SCB = tk.Scrollbar(assembly_FRM)
+        text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = tk.WORD, font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
+        #text_SCT = st.ScrolledText(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = tk.WORD, font = ("TkDefaultFont", 10))
+        assembly_FRM.pack(fill = tk.BOTH, expand = True)
+        text_TXT.pack(side = tk.LEFT,  fill = tk.BOTH, expand = True)
+        text_SCB.pack(side = tk.RIGHT, fill = tk.Y)
+        text_TXT.tag_configure("asm_code", font = self.code_font)
+
+        for foo in text1.split("</code>\n"):
+            if foo:
+                text_TXT.insert(tk.END, foo.split("<code>\n")[0])
+                text_TXT.insert(tk.END, foo.split("<code>\n")[1], "asm_code")
+        text_TXT.insert(tk.END, text2)
+        for line in text3.split("\n"):
+            text_TXT.insert(tk.END, line.split(" -")[0], "asm_code")
+            text_TXT.insert(tk.END, line.split(" -")[1] + "\n")
+        text_SCB.config(command = text_TXT.yview)
+        #text_SCT.pack(    fill = "both", expand = True)
+        #text_SCT.insert(tk.INSERT, text)
+        #text_SCT.configure(state = "disabled")
         assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_assembly_win_close(assembly_WIN))
 
     def on_assembly_win_close(self, win):
