@@ -488,9 +488,10 @@ class Editor:
         self.menubar.add_cascade(label = "File", menu = self.file_MNU, underline = 0)
 
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
-        self.help_MNU.add_command(label = "Assembly",  command = self.open_assembly_win)
-        self.help_MNU.add_command(label = "Shortcuts", command = self.open_shortcuts_win)
-        self.help_MNU.add_command(label = "About",     command = self.open_about_win)
+        self.help_MNU.add_command(label = "Assembly",     command = self.open_assembly_win)
+        self.help_MNU.add_command(label = "Shortcuts",    command = self.open_shortcuts_win)
+        self.help_MNU.add_command(label = "Demo Program", command = self.open_demo_pro)
+        self.help_MNU.add_command(label = "About",        command = self.open_about_win)
         self.menubar.add_cascade(label = "Help", menu = self.help_MNU, underline = 0)
 
         self.taskbar_FRM = tk.Frame(self.root, bg = "#222222")
@@ -557,9 +558,10 @@ class Editor:
             elif is_saving == False:
                 self.root.destroy()
 
-    def writing(self, event):
+    def writing(self, event = None):
         if self.is_saved:
             self.is_saved = False
+            print(self.root.title())
             self.root.title("*" + self.root.title())
 
     def reset_pro(self):
@@ -593,8 +595,12 @@ class Editor:
                 self.is_saved = True
                 self.root.title(self.root.title()[1:])
 
-    def open_file(self, event = None):
-        self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
+    def open_file(self, file_path = None, event = None):
+        if file_path:
+            self.file_path = file_path
+        else:
+            self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
+        print(self.file_path)
         if self.file_path:
             self.root.title(self.file_path + " – Assemblitor")
             file_name = os.path.basename(self.file_path)
@@ -609,7 +615,6 @@ class Editor:
             file.close()
             if not self.is_saved:
                 self.is_saved = True
-                print("savin")
                 self.root.title(self.root.title()[1:])
         else:
             self.save_file_as()
@@ -734,6 +739,23 @@ Save file as"""
         self.shortcuts_WIN.destroy()
         self.shortcuts_WIN = None
 
+    def open_demo_pro(self):
+        demo = """; A simple countdown program
+00 JMP 03
+01 5
+02 1
+03 LDA 01
+04 SUB 02
+05 JLE 08
+06 STA 01
+07 JMP 04
+08 STP"""
+        self.inp_SCT.delete("1.0", tk.END)
+        self.inp_SCT.insert(tk.INSERT, demo)
+        print("heyy")
+        self.is_saved = True
+        self.writing()
+
     def open_about_win(self):
         if self.about_WIN:
             return
@@ -793,24 +815,14 @@ Save file as"""
 
 # TO-DO:
 # bei Adressverschiebung alle Adressen anpassen
+# Demo-Programm
+# ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte
+# SETTINGS:
 # Exception optional in Konsole ausgeben
 # strg + del löscht ganzes Wort
-# Settings
-# Demo-Programm
 
 # BUGS:
-#
-t = """;auto-test
-00 JMP 03
-01 4
-02 1
-03 LDA 01
-04 SUB 02
-05 JLE 08
-06 STA 01
-07 JMP 04
-08 STP
-"""
+# Editor schließt sich ungespeichert, wenn man nach askToSave->yes beim Speichern auf cancel drückt
 
 min_version = (3, 10)
 cur_version = sys.version_info
