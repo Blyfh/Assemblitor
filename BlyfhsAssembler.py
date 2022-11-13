@@ -464,10 +464,10 @@ class Editor:
         self.out_SCT.configure(state = "disabled")
 
     def tkinter_gui(self):
-        self.is_settings_win_open  = False
-        self.is_shortcuts_win_open = False
-        self.is_assembly_win_open  = False
-        self.is_about_win_open     = False
+        self.settings_WIN  = None
+        self.shortcuts_WIN = None
+        self.assembly_WIN  = None
+        self.about_WIN     = False
         self.root = tk.Tk()
         #tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
         self.root.minsize(642, 500)
@@ -624,9 +624,8 @@ class Editor:
         pass
 
     def open_assembly_win(self):
-        if self.is_assembly_win_open:
+        if self.assembly_WIN:
             return
-        self.is_assembly_win_open = True
         text1 = """[Assembly Dialect] is a very low-level column-oriented programming language that is close to machine code. It is not case sensitive.
 
 It consists of a sequence of 'memory cells' that can store values or commands. Each memory cell starts with its address and ends with a line break. The memory cells have to be in increasing order but empty memory cells don't have to be displayed. A value has to be stored after the address as an integer. An empty memory cell will be interpreted as having a value of 0. A command is also stored after the address. There are many commands and some of them require operands to work.
@@ -666,12 +665,12 @@ This would be the result after executing the program:
     JZE n   - jumps to memory cell n by setting the PC to n if the value of the ACC is equal to zero
     JLE n   - jumps to memory cell n by setting the PC to n if the value of the ACC is less or equal to zero"""
 
-        assembly_WIN = tk.Toplevel(self.root)
-        assembly_WIN.minsize(710, 200)
-        assembly_WIN.config(bg = "black")
-        assembly_WIN.title("Assembly")
+        self.assembly_WIN = tk.Toplevel(self.root)
+        self.assembly_WIN.minsize(710, 200)
+        self.assembly_WIN.config(bg = "black")
+        self.assembly_WIN.title("Assembly")
 
-        assembly_FRM = tk.Frame(assembly_WIN, bg = "#222222", bd = 5)
+        assembly_FRM = tk.Frame(self.assembly_WIN, bg = "#222222", bd = 5)
         text_SCB = tk.Scrollbar(assembly_FRM)
         text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = tk.WORD, font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
         #text_SCT = st.ScrolledText(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = tk.WORD, font = ("TkDefaultFont", 10))
@@ -692,17 +691,15 @@ This would be the result after executing the program:
         #text_SCT.pack(    fill = "both", expand = True)
         #text_SCT.insert(tk.INSERT, text)
         #text_SCT.configure(state = "disabled")
-        assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_assembly_win_close(assembly_WIN))
+        self.assembly_WIN.protocol("WM_DELETE_WINDOW", self.on_assembly_win_close)
 
-    def on_assembly_win_close(self, win):
-        self.is_assembly_win_open = False
-        win.destroy()
+    def on_assembly_win_close(self):
+        self.assembly_WIN.destroy()
+        self.assembly_WIN = None
 
     def open_shortcuts_win(self):
-        if self.is_shortcuts_win_open:
+        if self.shortcuts_WIN:
             return
-        self.is_shortcuts_win_open = True
-        title = "Shortcuts"
         combos = """Ctrl + Enter
 Shift + Enter
 Ctrl + O
@@ -715,13 +712,14 @@ Open file
 Reload file
 Save file
 Save file as"""
-        shortcuts_WIN = tk.Toplevel(self.root)
-        shortcuts_WIN.geometry("275x120")
-        shortcuts_WIN.resizable(False, False)
-        shortcuts_WIN.config(bg = "black")
-        shortcuts_WIN.title("Shortcuts")
+        self.shortcuts_WIN = tk.Toplevel(self.root)
+        self.shortcuts_WIN.geometry("275x120")
+        self.shortcuts_WIN.resizable(False, False)
+        self.shortcuts_WIN.config(bg = "black")
+        self.shortcuts_WIN.title("Shortcuts")
 
-        shortcuts_FRM = tk.Frame(shortcuts_WIN, bg = "#222222", bd = 5)
+        shortcuts_FRM = tk.Frame(self.
+                shortcuts_WIN, bg = "#222222", bd = 5)
         #title_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = tk.LEFT, font = ("Segoe", 15, "bold"))
         combos_LBL    = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = tk.LEFT)
         actions_LBL   = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = tk.LEFT)
@@ -729,42 +727,42 @@ Save file as"""
         #title_LBL.pack( side = "top",   fill = "x", expand = True)
         combos_LBL.pack( side = tk.LEFT,  fill = "both", expand = True, padx = (0, 5))
         actions_LBL.pack(side = tk.RIGHT, fill = "both", expand = True)
-        shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_shortcuts_win_close(shortcuts_WIN))
+        self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", self.on_shortcuts_win_close)
 
 
-    def on_shortcuts_win_close(self, win):
-        self.is_shortcuts_win_open = False
-        win.destroy()
+    def on_shortcuts_win_close(self):
+        self.shortcuts_WIN.destroy()
+        self.shortcuts_WIN = None
 
     def open_about_win(self):
-        if self.is_about_win_open:
+        if self.about_WIN:
             return
         self.is_about_win_open = True
         title = "[Assembler Name]"
         text  = """
-    A simple emulator for [Assembly Dialect]
+    A simple emulator and editor for [Assembly Dialect]
     Version: 0.1 Alpha
     Made by Blyfh in 2022
         
     Created with love in Berlin <3
         """
-        about_WIN = tk.Toplevel(self.root)
-        about_WIN.geometry("275x130")
-        about_WIN.resizable(False, False)
-        about_WIN.config(bg = "black")
-        about_WIN.title("About")
+        self.about_WIN = tk.Toplevel(self.root)
+        self.about_WIN.geometry("275x130")
+        self.about_WIN.resizable(False, False)
+        self.about_WIN.config(bg = "black")
+        self.about_WIN.title("About")
 
-        about_FRM = tk.Frame(about_WIN, bg = "#222222", bd = 5)
+        about_FRM = tk.Frame(self.about_WIN, bg ="#222222", bd = 5)
         title_LBL = tk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = tk.CENTER, justify = tk.LEFT, font = ("Segoe", 15, "bold"))
         text_LBL  = tk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = tk.W, justify = tk.LEFT)
         about_FRM.pack(fill = "both", expand = True)
         title_LBL.pack(fill = "both", expand = True)
         text_LBL.pack( fill = "both", expand = True)
-        about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_shortcuts_win_close(about_WIN))
+        self.about_WIN.protocol("WM_DELETE_WINDOW", self.on_about_win_close)
 
-    def on_about_win_close(self, win):
-        self.is_shortcuts_win_open = False
-        win.destroy()
+    def on_about_win_close(self):
+        self.about_WIN.destroy()
+        self.about_WIN = None
 
     def key_enter(self, event):
         self.insert_address()
