@@ -444,7 +444,7 @@ class Operand:
 class Editor:
 
     def __init__(self, test_str = ""):
-        self.is_saved   = False
+        self.is_saved   = True
         self.file_path  = None
         self.last_dir   = os.path.join(os.path.expanduser('~'), "Documents")
         self.file_types = (("Assembler files", "*.asm"), ("Text files", "*.txt"))
@@ -484,7 +484,7 @@ class Editor:
         self.file_MNU.add_command(label = "Save",     command = self.save_file)
         self.file_MNU.add_command(label = "Save As",  command = self.save_file_as)
         self.file_MNU.add_command(label = "Settings", command = self.open_settings_win)
-        self.file_MNU.add_command(label = "Exit",     command = self.exit)
+        self.file_MNU.add_command(label = "Exit",     command = self.exiting)
         self.menubar.add_cascade(label = "File", menu = self.file_MNU, underline = 0)
 
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
@@ -545,16 +545,17 @@ class Editor:
         self.root.bind(sequence = "<Control-S>",      func = self.save_file_as)
         self.inp_SCT.bind(sequence="<Key>",           func = self.writing)
     # protocols
-        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.exit) # when clicking the red x of the window
+        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.exiting) # when clicking the red x of the window
 
-    def exit(self):
+    def exiting(self):
         if self.is_saved or self.inp_SCT.get(1.0, "end-1c").strip() == "":
             self.root.destroy()
         else:
             is_saving = mb.askyesnocancel("Unsaved Changes", "Save program before exiting?") # returns None when clicking 'Cancel'
             if is_saving:
                 self.save_file()
-                self.root.destroy()
+                if self.is_saved:
+                    self.root.destroy()
             elif is_saving == False:
                 self.root.destroy()
 
@@ -600,7 +601,6 @@ class Editor:
             self.file_path = file_path
         else:
             self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
-        print(self.file_path)
         if self.file_path:
             self.root.title(self.file_path + " – Assemblitor")
             file_name = os.path.basename(self.file_path)
@@ -621,9 +621,10 @@ class Editor:
 
     def save_file_as(self, event = None):
         self.file_path = self.file_path = fd.asksaveasfilename(title = "Save File", initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
-        self.root.title(self.file_path + " – Assemblitor")
         if self.file_path:
+            self.is_saved = True
             self.save_file()
+            self.root.title(self.file_path + " – Assemblitor")
 
     def open_settings_win(self):
         pass
@@ -752,7 +753,6 @@ Save file as"""
 08 STP"""
         self.inp_SCT.delete("1.0", tk.END)
         self.inp_SCT.insert(tk.INSERT, demo)
-        print("heyy")
         self.is_saved = True
         self.writing()
 
@@ -816,13 +816,13 @@ Save file as"""
 # TO-DO:
 # bei Adressverschiebung alle Adressen anpassen
 # Demo-Programm
-# ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte
+# ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte ("wirklich verwerfen?")
 # SETTINGS:
 # Exception optional in Konsole ausgeben
 # strg + del löscht ganzes Wort
 
 # BUGS:
-# Editor schließt sich ungespeichert, wenn man nach askToSave->yes beim Speichern auf cancel drückt
+#
 
 min_version = (3, 10)
 cur_version = sys.version_info
