@@ -458,10 +458,10 @@ class Editor:
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
-        self.out_SCT.configure(state = "normal", fg = "#FF5555")
+        self.out_SCT.config(state = "normal", fg = "#FF5555")
         self.out_SCT.delete("1.0", tk.END)
         self.out_SCT.insert(tk.INSERT, traceback.format_exception_only(exc, val)[0])
-        self.out_SCT.configure(state = "disabled")
+        self.out_SCT.config(state = tk.DISABLED)
 
     def tkinter_gui(self):
         self.settings_WIN  = None
@@ -533,8 +533,8 @@ class Editor:
         self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word")
         self.inp_SCT.pack(side = tk.LEFT,  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
         self.out_SCT.pack(side = tk.RIGHT, fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
-        self.out_SCT.tag_configure("pc_is_here", foreground = "#00FF00")
-        self.out_SCT.configure(state = "disabled")
+        self.out_SCT.tag_config("pc_is_here", foreground = "#00FF00")
+        self.out_SCT.config(state = tk.DISABLED)
     # events
         self.root.bind(sequence = "<Return>",         func = self.key_enter)
         self.root.bind(sequence = "<Shift-Return>",   func = self.key_shift_enter)
@@ -573,20 +573,20 @@ class Editor:
         pro_str = self.inp_SCT.get(1.0, "end-1c")
         out = self.emu.gt_out(pro_str, not is_only_one_step)
         if out:
-            self.proc_value_LBL.configure(text = str(out[1]))
-            self.accu_value_LBL.configure(text = str(out[2]))
-            self.ireg_cmd_LBL.configure(text   = out[3][0])
-            self.ireg_opr_LBL.configure(text   = out[3][1])
-            self.out_SCT.configure(state = "normal", fg = "#FFFFFF")
+            self.proc_value_LBL.config(text = str(out[1]))
+            self.accu_value_LBL.config(text = str(out[2]))
+            self.ireg_cmd_LBL.config(text   = out[3][0])
+            self.ireg_opr_LBL.config(text   = out[3][1])
+            self.out_SCT.config(state = "normal", fg = "#FFFFFF")
             self.out_SCT.delete("1.0", tk.END)
             self.out_SCT.insert(tk.INSERT, out[0][0])
             self.out_SCT.insert(tk.INSERT, out[0][1], "pc_is_here")
             self.out_SCT.insert(tk.INSERT, out[0][2])
-            self.out_SCT.configure(state = "disabled")
+            self.out_SCT.config(state = tk.DISABLED)
         else:
-            self.out_SCT.configure(state = "normal", fg = "#FFFFFF")
+            self.out_SCT.config(state = "normal", fg = "#FFFFFF")
             self.out_SCT.delete("1.0", tk.END)
-            self.out_SCT.configure(state = "disabled")
+            self.out_SCT.config(state = tk.DISABLED)
 
     def reload_file(self, event = None):
         if self.file_path:
@@ -683,7 +683,7 @@ This would be the result after executing the program:
         assembly_FRM.pack(fill = tk.BOTH, expand = True)
         text_TXT.pack(side = tk.LEFT,  fill = tk.BOTH, expand = True)
         text_SCB.pack(side = tk.RIGHT, fill = tk.Y)
-        text_TXT.tag_configure("asm_code", font = self.code_font)
+        text_TXT.tag_config("asm_code", font = self.code_font)
 
         for foo in text1.split("</code>\n"):
             if foo:
@@ -694,9 +694,10 @@ This would be the result after executing the program:
             text_TXT.insert(tk.END, line.split(" -")[0], "asm_code")
             text_TXT.insert(tk.END, line.split(" -")[1] + "\n")
         text_SCB.config(command = text_TXT.yview)
+        text_TXT.config(state=tk.DISABLED)
         #text_SCT.pack(    fill = "both", expand = True)
         #text_SCT.insert(tk.INSERT, text)
-        #text_SCT.configure(state = "disabled")
+        #text_SCT.config(state = tk.DISABLED)
         self.assembly_WIN.protocol("WM_DELETE_WINDOW", self.on_assembly_win_close)
 
     def on_assembly_win_close(self):
@@ -821,7 +822,7 @@ Save file as"""
 # Exception optional in Konsole ausgeben
 
 # BUGS:
-#
+# can't handle whitespaces before address
 
 min_version = (3, 10)
 cur_version = sys.version_info
