@@ -470,7 +470,7 @@ class Editor:
         self.about_WIN     = False
         self.root = tk.Tk()
         #tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
-        self.root.minsize(642, 500)
+        self.root.minsize(637, 500)
         self.root.config(bg = "black")
         self.root.title("Assemblitor")
         self.only_one_step = tk.IntVar()
@@ -529,10 +529,10 @@ class Editor:
 
         self.text_FRM = tk.Frame(self.root, bg = "#222222")
         self.text_FRM.pack(fill = "both", expand = True)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
-        self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", width = 10, wrap = "word")
-        self.inp_SCT.pack(side = tk.LEFT,  fill = "both", expand = True, padx = 5)
-        self.out_SCT.pack(side = tk.RIGHT, fill = "both", expand = True, padx = 5)
+        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
+        self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word")
+        self.inp_SCT.pack(side = tk.LEFT,  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
+        self.out_SCT.pack(side = tk.RIGHT, fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
         self.out_SCT.tag_configure("pc_is_here", foreground = "#00FF00")
         self.out_SCT.configure(state = "disabled")
     # events
@@ -815,11 +815,10 @@ Save file as"""
 
 # TO-DO:
 # bei Adressverschiebung alle Adressen anpassen
-# Demo-Programm
 # ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte ("wirklich verwerfen?")
+# strg + del löscht ganzes Wort
 # SETTINGS:
 # Exception optional in Konsole ausgeben
-# strg + del löscht ganzes Wort
 
 # BUGS:
 #
