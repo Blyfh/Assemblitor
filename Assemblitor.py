@@ -120,7 +120,7 @@ class Program:
             if len(line[1]) > 0:
                 line[1] = ";" + line[1]
             if line[0].strip() == "": # no cell in line
-                if len(cells) > 0: # not first line = some empty line in between
+                if len(cells) > 0: # not first line; some empty line in between
                     cells[-1].cmt += "\n" + line[0] + line[1]
                 elif i == 0:
                     self.top_cmt = line[0] + line[1]
@@ -257,10 +257,13 @@ class Cell:
         tok_strs = []
         last_split_pos = 0
         for i in range(len(cel_str)):
-            if cel_str[i] in string.whitespace and i < len(cel_str) - 1 and cel_str[i+1] not in string.whitespace: # split at last whitespace between tokens
-                tok_str = cel_str[last_split_pos:i] + cel_str[i]
-                tok_strs.append(tok_str)
-                last_split_pos = i + 1
+            if cel_str[i] in string.whitespace and i < len(cel_str) - 1 and cel_str[i+1] not in string.whitespace: #last whitespace between tokens
+                if i > 0:
+                    tok_str = cel_str[last_split_pos:i+1]
+                    tok_strs.append(tok_str)
+                    last_split_pos = i + 1
+                else:
+                    pass
         tok_str = cel_str[last_split_pos:]
         tok_strs.append(tok_str)
         while len(tok_strs) < 3:
@@ -316,7 +319,7 @@ class Token:
         tok = tok_str.rstrip()
         if self.tpos == 0:
             try:
-                tok_int = int(tok)
+                tok_int = int(tok.lstrip()) # allow whitespaces before address
             except:
                 raise ValueError("Expected an address, not '" + str(tok) + "'. An address of a memory cell has to be a nonnegative integer.")
             if tok_int >= 0:
@@ -346,12 +349,14 @@ class Token:
             raise SyntaxError("Memory cell " + str(self.cpos) + " has too many tokens. A memory cell can only have up to 3 tokens (excluding comments): 1. address, 2. command/value, 3. operand")
 
     def add_leading_zero(self, tok_str):
-        if self.type == 0 and len(self.tok_str.strip()) == 1:
-            tok_str = "0" + tok_str
+        tok_str_stripped = tok_str.strip()
+        if self.type == 0 and len(tok_str_stripped) == 1:
+            whitespace_wrapping = tok_str.split(tok_str_stripped)
+            tok_str = whitespace_wrapping[0] + "0" + tok_str_stripped + whitespace_wrapping[1]
         elif self.type == 3:
-            if self.tok.type == 0 and len(self.tok_str.strip()) == 1: # direct operand (e.g. 00 LDA 5)
+            if self.tok.type == 0 and len(tok_str_stripped) == 1: # direct operand (e.g. 00 LDA 5)
                 tok_str = "0" + tok_str
-            elif self.tok.type == 1 and len(self.tok_str.strip()) == 3: # indirect operand (e.g. 00 LDA (5))
+            elif self.tok.type == 1 and len(tok_str_stripped) == 3: # indirect operand (e.g. 00 LDA (5))
                 tok_str = "(0" + tok_str[1:]                
         return tok_str
 
@@ -805,30 +810,36 @@ Save file as"""
         txt = txt[:len(txt) - 1]
         pos = int(float(self.inp_SCT.index(tk.INSERT))) - 2
         lines = txt.split("\n")
+        last_line = lines[pos].lstrip()
         try:
-            last_adr = int(lines[pos].split()[0])
+            last_adr = int(last_line.split()[0])
         except:
             return
+        whitespace_wrapping = lines[pos].split(last_line)[0]
         new_adr  = str(last_adr + 1)
+        print(new_adr, "len:", len(new_adr))
         if len(new_adr) == 1: # add leading zero
             new_adr = "0" + new_adr
-        self.inp_SCT.insert(tk.INSERT, new_adr + " ")
+        self.inp_SCT.insert(tk.INSERT, whitespace_wrapping + new_adr + " ")
 
 # TO-DO:
 # bei Adressverschiebung alle Adressen anpassen
 # ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte ("wirklich verwerfen?")
 # strg + del löscht ganzes Wort
+# horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # SETTINGS:
 # Exception optional in Konsole ausgeben
+# Anzahl Vornullen (Editor.insert_address())
 
 # BUGS:
 # can't handle whitespaces before address
+# error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
 
 min_version = (3, 10)
 cur_version = sys.version_info
 
 if cur_version >= min_version:
-    ed = Editor()
+    ed = Editor("0   jmp 1\n 1 stp")
 else:
     root = tk.Tk()
     root.withdraw()
