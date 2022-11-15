@@ -2,6 +2,7 @@ import sys
 import os
 import string
 import traceback
+import time                 as ti
 import tkinter              as tk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
@@ -449,7 +450,8 @@ class Operand:
 class Editor:
 
     def __init__(self, test_str = ""):
-        self.dirty_flag   = False
+        self.init_inp   = test_str
+        self.dirty_flag = False
         self.file_path  = None
         self.last_dir   = os.path.join(os.path.expanduser('~'), "Documents")
         self.file_types = (("Assembler files", "*.asm"), ("Text files", "*.txt"))
@@ -548,7 +550,7 @@ class Editor:
         self.root.bind(sequence = "<F5>",             func = self.reload_file)
         self.root.bind(sequence = "<Control-s>",      func = self.save_file)
         self.root.bind(sequence = "<Control-S>",      func = self.save_file_as)
-        self.inp_SCT.bind(sequence = "<Key>",         func = self.writing)
+        self.inp_SCT.bind(sequence = "<<Modified>>",  func = self.on_modified)
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
@@ -568,7 +570,20 @@ class Editor:
         elif self.ask_to_save() == True: # checks if user didn't abort in ask_to_save()
             self.root.destroy()
 
-    def writing(self, event = None):
+    def on_modified(self, event):
+        self.inp_SCT.edit_modified(False)
+        if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask_to_save-ing)
+            self.remove_dirty_flag()
+        else:
+            self.add_dirty_flag()
+
+
+    def remove_dirty_flag(self):
+        if self.dirty_flag:
+            self.dirty_flag = False
+            self.root.title(self.root.title()[1:])
+
+    def add_dirty_flag(self):
         if not self.dirty_flag:
             self.dirty_flag = True
             self.root.title("*" + self.root.title())
@@ -578,8 +593,8 @@ class Editor:
 
     def run(self):
         is_only_one_step = self.only_one_step.get()
-        pro_str = self.inp_SCT.get(1.0, "end-1c")
-        out = self.emu.gt_out(pro_str, not is_only_one_step)
+        inp = self.inp_SCT.get(1.0, "end-1c")
+        out = self.emu.gt_out(inp, not is_only_one_step)
         if out:
             self.proc_value_LBL.config(text = str(out[1]))
             self.accu_value_LBL.config(text = str(out[2]))
@@ -602,7 +617,8 @@ class Editor:
                 return
         if self.file_path:
             self.inp_SCT.delete("1.0", tk.END)
-            self.inp_SCT.insert(tk.INSERT, open(self.file_path).read())
+            self.init_inp = open(self.file_path).read()
+            self.inp_SCT.insert(tk.INSERT, self.init_inp)
             if self.dirty_flag:
                 self.dirty_flag = False
                 self.root.title(self.root.title()[1:])
@@ -622,7 +638,8 @@ class Editor:
     def save_file(self, event = None):
         if self.file_path:
             file = open(self.file_path, "w")
-            file.write(self.inp_SCT.get(1.0, "end-1c"))
+            self.init_inp = self.inp_SCT.get(1.0, "end-1c")
+            file.write(self.init_inp)
             file.close()
             if self.dirty_flag:
                 self.dirty_flag = False
@@ -827,6 +844,7 @@ Save file as"""
 # ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte ("wirklich verwerfen?")
 # dirty flag geht weg, wenn man wieder seine Änderungen wieder löscht
 # strg + del löscht ganzes Wort
+# strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # SETTINGS:
 #   Exception optional in Konsole ausgeben
@@ -837,7 +855,6 @@ Save file as"""
 
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
-# dirty_flag geht bei F5 an
 
 min_version = (3, 10)
 cur_version = sys.version_info
@@ -848,3 +865,5 @@ else:
     root = tk.Tk()
     root.withdraw()
     mb.showerror("Error", "Your version of Python is not supported. Please use Python 3.10 or higher.")
+
+#UNFERTG (on_modified)
