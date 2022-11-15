@@ -662,9 +662,11 @@ This would be the result after executing the program:
     04 42
     05 42
 </code>
+
+
+A list of all accepted commands:
 """
-        text2 = "\n\nA list of all accepted commands:\n"
-        text3 = """    STP     - stops the program
+        text2 = """    STP     - stops the program
     LDA n   - loads the value at memory cell n into the ACC
     LDA #n  - loads the value n into the ACC
     LDA (n) - loads the value of the memory cell that has the address that is stored in memory cell n
@@ -684,26 +686,27 @@ This would be the result after executing the program:
         assembly_FRM = tk.Frame(self.assembly_WIN, bg = "#222222", bd = 5)
         text_SCB = tk.Scrollbar(assembly_FRM)
         text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = tk.WORD, font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
-        #text_SCT = st.ScrolledText(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = tk.WORD, font = ("TkDefaultFont", 10))
         assembly_FRM.pack(fill = tk.BOTH, expand = True)
         text_TXT.pack(side = tk.LEFT,  fill = tk.BOTH, expand = True)
         text_SCB.pack(side = tk.RIGHT, fill = tk.Y)
         text_TXT.tag_config("asm_code", font = self.code_font)
 
-        for foo in text1.split("</code>\n"):
-            if foo:
-                text_TXT.insert(tk.END, foo.split("<code>\n")[0])
-                text_TXT.insert(tk.END, foo.split("<code>\n")[1], "asm_code")
-        text_TXT.insert(tk.END, text2)
-        for line in text3.split("\n"):
+        for block in text1.split("</code>\n"):
+            code_text_pair = self.bisect(block, "<code>\n")
+            text_TXT.insert(tk.END, code_text_pair[0])
+            text_TXT.insert(tk.END, code_text_pair[1], "asm_code")
+        for line in text2.split("\n"):
             text_TXT.insert(tk.END, line.split(" -")[0], "asm_code")
             text_TXT.insert(tk.END, line.split(" -")[1] + "\n")
         text_SCB.config(command = text_TXT.yview)
-        text_TXT.config(state=tk.DISABLED)
-        #text_SCT.pack(    fill = "both", expand = True)
-        #text_SCT.insert(tk.INSERT, text)
-        #text_SCT.config(state = tk.DISABLED)
+        text_TXT.config(state = tk.DISABLED)
         self.assembly_WIN.protocol("WM_DELETE_WINDOW", self.on_assembly_win_close)
+
+    def bisect(self, text:str, bisector = None):
+        pair = text.split(sep = bisector, maxsplit = 1)
+        if len(pair) < 2:
+            pair.append("")
+        return pair
 
     def on_assembly_win_close(self):
         self.assembly_WIN.destroy()
@@ -823,23 +826,27 @@ Save file as"""
         self.inp_SCT.insert(tk.INSERT, whitespace_wrapping + new_adr + " ")
 
 # TO-DO:
+# execute() oder ähnliches
 # bei Adressverschiebung alle Adressen anpassen
 # ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte ("wirklich verwerfen?")
+# dirty flag geht weg, wenn man wieder seine Änderungen wieder löscht
 # strg + del löscht ganzes Wort
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # SETTINGS:
-# Exception optional in Konsole ausgeben
-# Anzahl Vornullen (Editor.insert_address())
+#   Exception optional in Konsole ausgeben
+#   Anzahl Vornullen (Editor.insert_address())
+#   asktosave bei Schließen ausstellbar
+#   light mode
+#   Deutsch (auch Errors?)
 
 # BUGS:
-# can't handle whitespaces before address
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
 
 min_version = (3, 10)
 cur_version = sys.version_info
 
 if cur_version >= min_version:
-    ed = Editor("0   jmp 1\n 1 stp")
+    ed = Editor()
 else:
     root = tk.Tk()
     root.withdraw()
