@@ -544,15 +544,15 @@ class Editor:
         self.out_SCT.tag_config("pc_is_here", foreground = "#00FF00")
         self.out_SCT.config(state = tk.DISABLED)
     # events
-        self.root.bind(sequence = "<Return>",            func = self.key_enter)
-        self.root.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
-        self.root.bind(sequence = "<Control-Return>",    func = self.key_ctrl_enter)
-        self.root.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
-        self.root.bind(sequence = "<Control-o>",         func = self.open_file)
-        self.root.bind(sequence = "<F5>",                func = self.reload_file)
-        self.root.bind(sequence = "<Control-s>",         func = self.save_file)
-        self.root.bind(sequence = "<Control-S>",         func = self.save_file_as)
-        self.inp_SCT.bind(sequence = "<<Modified>>",     func = self.on_modified)
+        self.root.bind(sequence = "<Control-o>",            func = self.open_file)
+        self.root.bind(sequence = "<F5>",                   func = self.reload_file)
+        self.root.bind(sequence = "<Control-s>",            func = self.save_file)
+        self.root.bind(sequence = "<Control-S>",            func = self.save_file_as)
+        self.inp_SCT.bind(sequence = "<Return>",            func = self.key_enter)
+        self.inp_SCT.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
+        self.inp_SCT.bind(sequence = "<Control-Return>",    func = self.key_ctrl_enter)
+        self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
+        self.inp_SCT.bind(sequence = "<<Modified>>",        func = self.on_modified)
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
@@ -820,20 +820,19 @@ Save file as"""
 
     def key_enter(self, event):
         self.insert_address()
+        return "break" # overwrites the line break printing
 
     def key_shift_enter(self, event):
         pass # overwrites self.key_enter()
 
     def key_ctrl_enter(self, event):
-        txt = self.inp_SCT.get(1.0, "end-1c")
-        txt = txt[:len(txt) - 1]
-        self.inp_SCT.delete(1.0, tk.END)
-        self.inp_SCT.insert("insert", txt)
         self.run()
+        return "break" # overwrites the line break printing
 
     def key_ctrl_backspace(self, event):
         last_line = self.inp_SCT.get("end-1c linestart", "end-1c")
         i = len(last_line) - 1
+        last_word_index = 0
         while i >= 0:
             if last_line[i] in string.whitespace:
                 last_word_index = len(last_line) - i - 1
@@ -843,28 +842,25 @@ Save file as"""
                 break
             else:
                 i -= 1
-        self.inp_SCT.delete("insert -%d chars" % last_word_index, "insert")
+        self.inp_SCT.delete("insert-%dc" % last_word_index, "insert")
 
     def insert_address(self):
-        txt = self.inp_SCT.get(1.0, "end-1c")
-        txt = txt[:len(txt) - 1]
-        pos = int(float(self.inp_SCT.index("insert"))) - 2
-        lines = txt.split("\n")
-        last_line = lines[pos].lstrip()
+        last_line = self.inp_SCT.get("insert linestart", "insert")
+        last_line_stripped = last_line.lstrip()
         try:
-            last_adr = int(last_line.split()[0])
+            last_adr = int(last_line_stripped.split()[0])
         except:
+            self.inp_SCT.insert("insert", "\n")
             return
-        whitespace_wrapping = lines[pos].split(last_line)[0]
+        whitespace_wrapping = last_line.split(last_line_stripped)[0]
         new_adr  = str(last_adr + 1)
         if len(new_adr) == 1: # add leading zero
             new_adr = "0" + new_adr
-        self.inp_SCT.insert("insert", whitespace_wrapping + new_adr + " ")
+        self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
 
 # TO-DO:
 # execute() oder ähnliches
 # bei Adressverschiebung alle Adressen anpassen
-# ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte ("wirklich verwerfen?")
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # SETTINGS:
@@ -876,6 +872,9 @@ Save file as"""
 
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
+# ctrl + enter is printing \n if code has an error
+# accu + co werden bei code error nicht resettet
+# ctrl + backspace löscht " " und "test " nur halb
 
 min_version = (3, 10)
 cur_version = sys.version_info
