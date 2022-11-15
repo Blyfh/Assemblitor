@@ -489,7 +489,7 @@ class Editor:
         self.file_MNU.add_command(label = "Save",     command = self.save_file)
         self.file_MNU.add_command(label = "Save As",  command = self.save_file_as)
         self.file_MNU.add_command(label = "Settings", command = self.open_settings_win)
-        self.file_MNU.add_command(label = "Exit",     command = self.exiting)
+        self.file_MNU.add_command(label = "Exit",     command = self.destroy)
         self.menubar.add_cascade(label = "File", menu = self.file_MNU, underline = 0)
 
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
@@ -550,19 +550,23 @@ class Editor:
         self.root.bind(sequence = "<Control-S>",      func = self.save_file_as)
         self.inp_SCT.bind(sequence = "<Key>",         func = self.writing)
     # protocols
-        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.exiting) # when clicking the red x of the window
+        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
-    def exiting(self):
+    def ask_to_save(self):
+        is_saving = mb.askyesnocancel("Unsaved Changes", "Save program before exiting?") # returns None when clicking 'Cancel'
+        if is_saving:
+            self.save_file()
+            return not self.dirty_flag # checks if user clicked cancel in save_file_as()
+        elif is_saving == None:
+            return "aborting"
+        else:
+            return True
+
+    def destroy(self):
         if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
             self.root.destroy()
-        else:
-            is_saving = mb.askyesnocancel("Unsaved Changes", "Save program before exiting?") # returns None when clicking 'Cancel'
-            if is_saving:
-                self.save_file()
-                if not self.dirty_flag:
-                    self.root.destroy()
-            elif is_saving == False:
-                self.root.destroy()
+        elif self.ask_to_save() == True: # checks if user didn't abort in ask_to_save()
+            self.root.destroy()
 
     def writing(self, event = None):
         if not self.dirty_flag:
@@ -600,11 +604,11 @@ class Editor:
                 self.dirty_flag = False
                 self.root.title(self.root.title()[1:])
 
-    def open_file(self, file_path = None, event = None):
-        if file_path:
-            self.file_path = file_path
-        else:
-            self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
+    def open_file(self, event = None):
+        if self.dirty_flag:
+            if self.ask_to_save() == "aborting":
+                return
+        self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
             self.root.title(self.file_path + " – Assemblitor")
             file_name = os.path.basename(self.file_path)
@@ -763,17 +767,18 @@ Save file as"""
     Version: 0.1 Alpha
     Made by Blyfh in 2022
     
-    Found a bug? Tell me on https://github.com/Blyfh/assemblitor/issues/new
+    Found a bug? Tell me on
+    https://github.com/Blyfh/assemblitor/issues/new
         """
         self.about_WIN = tk.Toplevel(self.root)
-        self.about_WIN.geometry("275x130")
+        self.about_WIN.geometry("310x140")
         self.about_WIN.resizable(False, False)
         self.about_WIN.config(bg = "black")
         self.about_WIN.title("About")
 
         about_FRM = tk.Frame(self.about_WIN, bg ="#222222", bd = 5)
         title_LBL = tk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = tk.CENTER, justify = tk.LEFT, font = ("Segoe", 15, "bold"))
-        text_LBL  = tk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = tk.W, justify = tk.LEFT)
+        text_LBL  = tk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = tk.W,      justify = tk.LEFT)
         about_FRM.pack(fill = "both", expand = True)
         title_LBL.pack(fill = "both", expand = True)
         text_LBL.pack( fill = "both", expand = True)
@@ -829,6 +834,7 @@ Save file as"""
 
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
+# dirty_flag geht bei F5 an
 
 min_version = (3, 10)
 cur_version = sys.version_info
