@@ -449,7 +449,7 @@ class Operand:
 class Editor:
 
     def __init__(self, test_str = ""):
-        self.is_saved   = True
+        self.dirty_flag   = False
         self.file_path  = None
         self.last_dir   = os.path.join(os.path.expanduser('~'), "Documents")
         self.file_types = (("Assembler files", "*.asm"), ("Text files", "*.txt"))
@@ -548,26 +548,25 @@ class Editor:
         self.root.bind(sequence = "<F5>",             func = self.reload_file)
         self.root.bind(sequence = "<Control-s>",      func = self.save_file)
         self.root.bind(sequence = "<Control-S>",      func = self.save_file_as)
-        self.inp_SCT.bind(sequence="<Key>",           func = self.writing)
+        self.inp_SCT.bind(sequence = "<Key>",         func = self.writing)
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.exiting) # when clicking the red x of the window
 
     def exiting(self):
-        if self.is_saved or self.inp_SCT.get(1.0, "end-1c").strip() == "":
+        if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
             self.root.destroy()
         else:
             is_saving = mb.askyesnocancel("Unsaved Changes", "Save program before exiting?") # returns None when clicking 'Cancel'
             if is_saving:
                 self.save_file()
-                if self.is_saved:
+                if not self.dirty_flag:
                     self.root.destroy()
             elif is_saving == False:
                 self.root.destroy()
 
     def writing(self, event = None):
-        if self.is_saved:
-            self.is_saved = False
-            print(self.root.title())
+        if not self.dirty_flag:
+            self.dirty_flag = True
             self.root.title("*" + self.root.title())
 
     def reset_pro(self):
@@ -597,8 +596,8 @@ class Editor:
         if self.file_path:
             self.inp_SCT.delete("1.0", tk.END)
             self.inp_SCT.insert(tk.INSERT, open(self.file_path).read())
-            if not self.is_saved:
-                self.is_saved = True
+            if self.dirty_flag:
+                self.dirty_flag = False
                 self.root.title(self.root.title()[1:])
 
     def open_file(self, file_path = None, event = None):
@@ -610,7 +609,7 @@ class Editor:
             self.root.title(self.file_path + " – Assemblitor")
             file_name = os.path.basename(self.file_path)
             self.last_dir = self.file_path.split(file_name)[0]
-            self.is_saved = True
+            self.dirty_flag = False
             self.reload_file()
 
     def save_file(self, event = None):
@@ -618,8 +617,8 @@ class Editor:
             file = open(self.file_path, "w")
             file.write(self.inp_SCT.get(1.0, "end-1c"))
             file.close()
-            if not self.is_saved:
-                self.is_saved = True
+            if self.dirty_flag:
+                self.dirty_flag = False
                 self.root.title(self.root.title()[1:])
         else:
             self.save_file_as()
@@ -627,7 +626,7 @@ class Editor:
     def save_file_as(self, event = None):
         self.file_path = self.file_path = fd.asksaveasfilename(title = "Save File", initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
         if self.file_path:
-            self.is_saved = True
+            self.dirty_flag = False
             self.save_file()
             self.root.title(self.file_path + " – Assemblitor")
 
