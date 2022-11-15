@@ -467,9 +467,10 @@ class Editor:
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
         self.out_SCT.config(state = "normal", fg = "#FF5555")
-        self.out_SCT.delete("1.0", tk.END)
+        self.out_SCT.delete("1.0", "end")
         self.out_SCT.insert("insert", traceback.format_exception_only(exc, val)[0])
         self.out_SCT.config(state = tk.DISABLED)
+        print("".join(traceback.format_exception(exc, val, tb = tb)))
 
     def tkinter_gui(self):
         self.settings_WIN  = None
@@ -477,7 +478,7 @@ class Editor:
         self.assembly_WIN  = None
         self.about_WIN     = False
         self.root = tk.Tk()
-        #tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
+        tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
         self.root.minsize(637, 500)
         self.root.config(bg = "black")
         self.root.title("Assemblitor")
@@ -611,14 +612,14 @@ class Editor:
             self.ireg_cmd_LBL.config(text   = out[3][0])
             self.ireg_opr_LBL.config(text   = out[3][1])
             self.out_SCT.config(state = "normal", fg = "#FFFFFF")
-            self.out_SCT.delete("1.0", tk.END)
+            self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", out[0][0])
             self.out_SCT.insert("insert", out[0][1], "pc_is_here")
             self.out_SCT.insert("insert", out[0][2])
             self.out_SCT.config(state = tk.DISABLED)
         else:
             self.out_SCT.config(state = "normal", fg = "#FFFFFF")
-            self.out_SCT.delete("1.0", tk.END)
+            self.out_SCT.delete("1.0", "end")
             self.out_SCT.config(state = tk.DISABLED)
 
     def reload_file(self, event = None):
@@ -626,7 +627,7 @@ class Editor:
             if self.ask_to_save() == "aborting":
                 return
         if self.file_path:
-            self.inp_SCT.delete("1.0", tk.END)
+            self.inp_SCT.delete("1.0", "end")
             self.init_inp = open(self.file_path).read()
             self.inp_SCT.insert("insert", self.init_inp)
             if self.dirty_flag:
@@ -726,11 +727,11 @@ A list of all accepted commands:
 
         for block in text1.split("</code>\n"):
             code_text_pair = self.bisect(block, "<code>\n")
-            text_TXT.insert(tk.END, code_text_pair[0])
-            text_TXT.insert(tk.END, code_text_pair[1], "asm_code")
+            text_TXT.insert("end", code_text_pair[0])
+            text_TXT.insert("end", code_text_pair[1], "asm_code")
         for line in text2.split("\n"):
-            text_TXT.insert(tk.END, line.split(" -")[0], "asm_code")
-            text_TXT.insert(tk.END, line.split(" -")[1] + "\n")
+            text_TXT.insert("end", line.split(" -")[0], "asm_code")
+            text_TXT.insert("end", line.split(" -")[1] + "\n")
         text_SCB.config(command = text_TXT.yview)
         text_TXT.config(state = tk.DISABLED)
         self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.assembly_WIN"))
@@ -787,7 +788,7 @@ Save file as"""
 06 STA 01
 07 JMP 04
 08 STP"""
-        self.inp_SCT.delete("1.0", tk.END)
+        self.inp_SCT.delete("1.0", "end")
         self.init_inp = demo
         self.inp_SCT.insert("insert", demo)
 
@@ -824,6 +825,7 @@ Save file as"""
 
     def key_enter(self, event):
         self.insert_address()
+        print(self.inp_SCT.get("end-1c", "end"))
         return "break" # overwrites the line break printing
 
     def key_shift_enter(self, event):
@@ -877,7 +879,6 @@ Save file as"""
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
 # ctrl + enter is printing \n if code has an error
-# accu + co werden bei code error nicht resettet
 # ctrl + backspace löscht " " und "test " nur halb
 
 min_version = (3, 10)
