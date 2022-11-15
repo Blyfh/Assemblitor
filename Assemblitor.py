@@ -598,6 +598,10 @@ class Editor:
         self.emu.is_new_pro = True
 
     def run(self):
+        self.proc_value_LBL.config(text = "")
+        self.accu_value_LBL.config(text = "")
+        self.ireg_cmd_LBL.config(text   = "")
+        self.ireg_opr_LBL.config(text   = "")
         is_only_one_step = self.only_one_step.get()
         inp = self.inp_SCT.get(1.0, "end-1c")
         out = self.emu.gt_out(inp, not is_only_one_step)
