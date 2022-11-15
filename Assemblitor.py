@@ -753,8 +753,6 @@ Save file as"""
 08 STP"""
         self.inp_SCT.delete("1.0", tk.END)
         self.inp_SCT.insert(tk.INSERT, demo)
-        self.is_saved = True
-        self.writing()
 
     def open_about_win(self):
         if self.about_WIN:
