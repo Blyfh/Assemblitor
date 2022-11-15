@@ -597,6 +597,9 @@ class Editor:
             self.out_SCT.config(state = tk.DISABLED)
 
     def reload_file(self, event = None):
+        if self.dirty_flag:
+            if self.ask_to_save() == "aborting":
+                return
         if self.file_path:
             self.inp_SCT.delete("1.0", tk.END)
             self.inp_SCT.insert(tk.INSERT, open(self.file_path).read())
