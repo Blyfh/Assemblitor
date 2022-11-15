@@ -458,16 +458,17 @@ class Editor:
         self.code_font  = ("Courier New", 10)
         self.emu        = Emulator()
         self.is_new_pro = False
+        self.already_modified = False
         self.tkinter_gui()
         if test_str != "":
-            self.inp_SCT.insert(tk.INSERT, test_str)
+            self.inp_SCT.insert("insert", test_str)
             self.run()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
         self.out_SCT.config(state = "normal", fg = "#FF5555")
         self.out_SCT.delete("1.0", tk.END)
-        self.out_SCT.insert(tk.INSERT, traceback.format_exception_only(exc, val)[0])
+        self.out_SCT.insert("insert", traceback.format_exception_only(exc, val)[0])
         self.out_SCT.config(state = tk.DISABLED)
 
     def tkinter_gui(self):
@@ -543,14 +544,15 @@ class Editor:
         self.out_SCT.tag_config("pc_is_here", foreground = "#00FF00")
         self.out_SCT.config(state = tk.DISABLED)
     # events
-        self.root.bind(sequence = "<Return>",         func = self.key_enter)
-        self.root.bind(sequence = "<Shift-Return>",   func = self.key_shift_enter)
-        self.root.bind(sequence = "<Control-Return>", func = self.key_ctrl_enter)
-        self.root.bind(sequence = "<Control-o>",      func = self.open_file)
-        self.root.bind(sequence = "<F5>",             func = self.reload_file)
-        self.root.bind(sequence = "<Control-s>",      func = self.save_file)
-        self.root.bind(sequence = "<Control-S>",      func = self.save_file_as)
-        self.inp_SCT.bind(sequence = "<<Modified>>",  func = self.on_modified)
+        self.root.bind(sequence = "<Return>",            func = self.key_enter)
+        self.root.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
+        self.root.bind(sequence = "<Control-Return>",    func = self.key_ctrl_enter)
+        self.root.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
+        self.root.bind(sequence = "<Control-o>",         func = self.open_file)
+        self.root.bind(sequence = "<F5>",                func = self.reload_file)
+        self.root.bind(sequence = "<Control-s>",         func = self.save_file)
+        self.root.bind(sequence = "<Control-S>",         func = self.save_file_as)
+        self.inp_SCT.bind(sequence = "<<Modified>>",     func = self.on_modified)
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
@@ -571,11 +573,15 @@ class Editor:
             self.root.destroy()
 
     def on_modified(self, event):
-        self.inp_SCT.edit_modified(False)
-        if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask_to_save-ing)
-            self.remove_dirty_flag()
+        if not self.already_modified: # because somehow on_modified always gets called twice
+            self.inp_SCT.edit_modified(False)
+            if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask_to_save-ing)
+                self.remove_dirty_flag()
+            else:
+                self.add_dirty_flag()
+            self.already_modified = True
         else:
-            self.add_dirty_flag()
+            self.already_modified = False
 
 
     def remove_dirty_flag(self):
@@ -602,9 +608,9 @@ class Editor:
             self.ireg_opr_LBL.config(text   = out[3][1])
             self.out_SCT.config(state = "normal", fg = "#FFFFFF")
             self.out_SCT.delete("1.0", tk.END)
-            self.out_SCT.insert(tk.INSERT, out[0][0])
-            self.out_SCT.insert(tk.INSERT, out[0][1], "pc_is_here")
-            self.out_SCT.insert(tk.INSERT, out[0][2])
+            self.out_SCT.insert("insert", out[0][0])
+            self.out_SCT.insert("insert", out[0][1], "pc_is_here")
+            self.out_SCT.insert("insert", out[0][2])
             self.out_SCT.config(state = tk.DISABLED)
         else:
             self.out_SCT.config(state = "normal", fg = "#FFFFFF")
@@ -618,7 +624,7 @@ class Editor:
         if self.file_path:
             self.inp_SCT.delete("1.0", tk.END)
             self.init_inp = open(self.file_path).read()
-            self.inp_SCT.insert(tk.INSERT, self.init_inp)
+            self.inp_SCT.insert("insert", self.init_inp)
             if self.dirty_flag:
                 self.dirty_flag = False
                 self.root.title(self.root.title()[1:])
@@ -764,6 +770,9 @@ Save file as"""
         self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.shortcuts_WIN"))
 
     def open_demo_pro(self):
+        if self.dirty_flag:
+            if self.ask_to_save() == "aborting":
+                return
         demo = """; A simple countdown program
 00 JMP 03
 01 5
@@ -775,7 +784,8 @@ Save file as"""
 07 JMP 04
 08 STP"""
         self.inp_SCT.delete("1.0", tk.END)
-        self.inp_SCT.insert(tk.INSERT, demo)
+        self.init_inp = demo
+        self.inp_SCT.insert("insert", demo)
 
     def open_about_win(self):
         if self.about_WIN:
@@ -818,13 +828,27 @@ Save file as"""
         txt = self.inp_SCT.get(1.0, "end-1c")
         txt = txt[:len(txt) - 1]
         self.inp_SCT.delete(1.0, tk.END)
-        self.inp_SCT.insert(tk.INSERT, txt)
+        self.inp_SCT.insert("insert", txt)
         self.run()
+
+    def key_ctrl_backspace(self, event):
+        last_line = self.inp_SCT.get("end-1c linestart", "end-1c")
+        i = len(last_line) - 1
+        while i >= 0:
+            if last_line[i] in string.whitespace:
+                last_word_index = len(last_line) - i - 1
+                break
+            elif i == 0:
+                last_word_index = len(last_line)
+                break
+            else:
+                i -= 1
+        self.inp_SCT.delete("insert -%d chars" % last_word_index, "insert")
 
     def insert_address(self):
         txt = self.inp_SCT.get(1.0, "end-1c")
         txt = txt[:len(txt) - 1]
-        pos = int(float(self.inp_SCT.index(tk.INSERT))) - 2
+        pos = int(float(self.inp_SCT.index("insert"))) - 2
         lines = txt.split("\n")
         last_line = lines[pos].lstrip()
         try:
@@ -833,17 +857,14 @@ Save file as"""
             return
         whitespace_wrapping = lines[pos].split(last_line)[0]
         new_adr  = str(last_adr + 1)
-        print(new_adr, "len:", len(new_adr))
         if len(new_adr) == 1: # add leading zero
             new_adr = "0" + new_adr
-        self.inp_SCT.insert(tk.INSERT, whitespace_wrapping + new_adr + " ")
+        self.inp_SCT.insert("insert", whitespace_wrapping + new_adr + " ")
 
 # TO-DO:
 # execute() oder ähnliches
 # bei Adressverschiebung alle Adressen anpassen
 # ask to save altes Programm, wenn man neue Datei/Demo öffnen möchte ("wirklich verwerfen?")
-# dirty flag geht weg, wenn man wieder seine Änderungen wieder löscht
-# strg + del löscht ganzes Wort
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # SETTINGS:
