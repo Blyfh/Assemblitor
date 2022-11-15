@@ -700,17 +700,13 @@ A list of all accepted commands:
             text_TXT.insert(tk.END, line.split(" -")[1] + "\n")
         text_SCB.config(command = text_TXT.yview)
         text_TXT.config(state = tk.DISABLED)
-        self.assembly_WIN.protocol("WM_DELETE_WINDOW", self.on_assembly_win_close)
+        self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.assembly_WIN"))
 
     def bisect(self, text:str, bisector = None):
         pair = text.split(sep = bisector, maxsplit = 1)
         if len(pair) < 2:
             pair.append("")
         return pair
-
-    def on_assembly_win_close(self):
-        self.assembly_WIN.destroy()
-        self.assembly_WIN = None
 
     def open_shortcuts_win(self):
         if self.shortcuts_WIN:
@@ -742,12 +738,7 @@ Save file as"""
         #title_LBL.pack( side = "top",   fill = "x", expand = True)
         combos_LBL.pack( side = tk.LEFT,  fill = "both", expand = True, padx = (0, 5))
         actions_LBL.pack(side = tk.RIGHT, fill = "both", expand = True)
-        self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", self.on_shortcuts_win_close)
-
-
-    def on_shortcuts_win_close(self):
-        self.shortcuts_WIN.destroy()
-        self.shortcuts_WIN = None
+        self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.shortcuts_WIN"))
 
     def open_demo_pro(self):
         demo = """; A simple countdown program
@@ -774,8 +765,8 @@ Save file as"""
     A simple emulator and editor for [Assembly Dialect]
     Version: 0.1 Alpha
     Made by Blyfh in 2022
-        
-    Created with love in Berlin <3
+    
+    Found a bug? Tell me on https://github.com/Blyfh/assemblitor/issues/new
         """
         self.about_WIN = tk.Toplevel(self.root)
         self.about_WIN.geometry("275x130")
@@ -789,11 +780,11 @@ Save file as"""
         about_FRM.pack(fill = "both", expand = True)
         title_LBL.pack(fill = "both", expand = True)
         text_LBL.pack( fill = "both", expand = True)
-        self.about_WIN.protocol("WM_DELETE_WINDOW", self.on_about_win_close)
+        self.about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.about_WIN"))
 
-    def on_about_win_close(self):
-        self.about_WIN.destroy()
-        self.about_WIN = None
+    def on_child_win_close(self, win_str):
+        eval(win_str + ".destroy()")
+        exec(win_str + " = None")
 
     def key_enter(self, event):
         self.insert_address()
