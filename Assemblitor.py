@@ -557,43 +557,40 @@ class Editor:
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
-    def ask_to_save(self):
+    def wants_to_save(self):
         is_saving = mb.askyesnocancel("Unsaved Changes", "Save program before exiting?") # returns None when clicking 'Cancel'
         if is_saving:
             self.save_file()
             return not self.dirty_flag # checks if user clicked cancel in save_file_as()
         elif is_saving == None:
-            return "aborting"
+            return "abort"
         else:
             return True
 
     def destroy(self):
         if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
             self.root.destroy()
-        elif self.ask_to_save() == True: # checks if user didn't abort in ask_to_save()
+        elif self.wants_to_save() == True: # checks if user didn't abort in wants_to_save()
             self.root.destroy()
 
     def on_modified(self, event):
         if not self.already_modified: # because somehow on_modified always gets called twice
             self.inp_SCT.edit_modified(False)
-            if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask_to_save-ing)
-                self.remove_dirty_flag()
+            if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless wants_to_save()-ing)
+                self.set_dirty_flag(False)
             else:
-                self.add_dirty_flag()
+                self.set_dirty_flag(True)
             self.already_modified = True
         else:
             self.already_modified = False
 
-
-    def remove_dirty_flag(self):
-        if self.dirty_flag:
-            self.dirty_flag = False
-            self.root.title(self.root.title()[1:])
-
-    def add_dirty_flag(self):
-        if not self.dirty_flag:
-            self.dirty_flag = True
-            self.root.title("*" + self.root.title())
+    def set_dirty_flag(self, new_bool):
+        if self.dirty_flag != new_bool:
+            self.dirty_flag = not self.dirty_flag
+            if self.dirty_flag:
+                self.root.title("*" + self.root.title())
+            else:
+                self.root.title(self.root.title()[1:])
 
     def reset_pro(self):
         self.emu.is_new_pro = True
@@ -624,26 +621,24 @@ class Editor:
 
     def reload_file(self, event = None):
         if self.dirty_flag:
-            if self.ask_to_save() == "aborting":
+            if self.wants_to_save() == "abort":
                 return
         if self.file_path:
             self.inp_SCT.delete("1.0", "end")
             self.init_inp = open(self.file_path).read()
             self.inp_SCT.insert("insert", self.init_inp)
-            if self.dirty_flag:
-                self.dirty_flag = False
-                self.root.title(self.root.title()[1:])
+            self.set_dirty_flag(False)
 
     def open_file(self, event = None):
         if self.dirty_flag:
-            if self.ask_to_save() == "aborting":
+            if self.wants_to_save() == "abort":
                 return
         self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
             self.root.title(self.file_path + " – Assemblitor")
             file_name = os.path.basename(self.file_path)
             self.last_dir = self.file_path.split(file_name)[0]
-            self.dirty_flag = False
+            self.set_dirty_flag(False)
             self.reload_file()
 
     def save_file(self, event = None):
@@ -652,16 +647,13 @@ class Editor:
             self.init_inp = self.inp_SCT.get(1.0, "end-1c")
             file.write(self.init_inp)
             file.close()
-            if self.dirty_flag:
-                self.dirty_flag = False
-                self.root.title(self.root.title()[1:])
+            self.set_dirty_flag(False)
         else:
             self.save_file_as()
 
     def save_file_as(self, event = None):
         self.file_path = self.file_path = fd.asksaveasfilename(title = "Save File", initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
         if self.file_path:
-            self.dirty_flag = False
             self.save_file()
             self.root.title(self.file_path + " – Assemblitor")
 
@@ -776,7 +768,7 @@ Save file as"""
 
     def open_demo_pro(self):
         if self.dirty_flag:
-            if self.ask_to_save() == "aborting":
+            if self.wants_to_save() == "abort":
                 return
         demo = """; A simple countdown program
 00 JMP 03
