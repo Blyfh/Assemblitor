@@ -449,8 +449,8 @@ class Operand:
 
 class Editor:
 
-    def __init__(self, test_str = ""):
-        self.init_inp   = test_str
+    def __init__(self, testing = False):
+        self.init_inp   = ""
         self.dirty_flag = False
         self.file_path  = None
         self.last_dir   = os.path.join(os.path.expanduser('~'), "Documents")
@@ -460,9 +460,9 @@ class Editor:
         self.is_new_pro = False
         self.already_modified = False
         self.tkinter_gui()
-        if test_str != "":
-            self.inp_SCT.insert("insert", test_str)
-            self.run()
+        if testing:
+            self.open_demo_pro()
+            #self.run()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -625,7 +625,8 @@ class Editor:
                 return
         if self.file_path:
             self.inp_SCT.delete("1.0", "end")
-            self.init_inp = open(self.file_path).read()
+            with open(self.file_path, "r") as file:
+                self.init_inp = file.read()
             self.inp_SCT.insert("insert", self.init_inp)
             self.set_dirty_flag(False)
 
@@ -643,10 +644,9 @@ class Editor:
 
     def save_file(self, event = None):
         if self.file_path:
-            file = open(self.file_path, "w")
             self.init_inp = self.inp_SCT.get(1.0, "end-1c")
-            file.write(self.init_inp)
-            file.close()
+            with open(self.file_path, "w") as file:
+                file.write(self.init_inp)
             self.set_dirty_flag(False)
         else:
             self.save_file_as()
@@ -778,7 +778,7 @@ Save file as"""
 04 SUB 02
 05 JLE 08
 06 STA 01
-07 JMP 04
+07 JMP 04o
 08 STP"""
         self.inp_SCT.delete("1.0", "end")
         self.init_inp = demo
@@ -828,7 +828,6 @@ Save file as"""
         return "break" # overwrites the line break printing
 
     def key_ctrl_backspace(self, event):
-        print("---", self.inp_SCT.get("insert-1c wordstart", "insert wordend"))
         self.inp_SCT.delete("insert-1c wordstart", "insert wordend")
 
     def insert_address(self):
@@ -858,14 +857,14 @@ Save file as"""
 
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
-# ctrl + enter is printing \n if code has an error
-# darkmode nicth für Fenster
+# ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
+# darkmode nicht für Fenster
 
 min_version = (3, 10)
 cur_version = sys.version_info
 
 if cur_version >= min_version:
-    ed = Editor()
+    ed = Editor(True)
 else:
     root = tk.Tk()
     root.withdraw()
