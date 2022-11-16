@@ -2,8 +2,8 @@ import sys
 import os
 import string
 import traceback
-import time                 as ti
 import tkinter              as tk
+import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
@@ -483,6 +483,16 @@ class Editor:
         self.root.config(bg = "black")
         self.root.title("Assemblitor")
         self.only_one_step = tk.IntVar()
+    # styles:
+        self.style = ttk.Style(self.root)
+        self.style.theme_use("winnative")
+        self.style.configure("TButton",)
+        self.style.configure("TFrame",            background = "#222222", bd = 5)
+        self.style.configure("info.TFrame",       background = "#FFFFFF")
+        self.style.configure("TLabel",            background = "#333333", foreground = "#FFFFFF")
+        self.style.configure("info_title.TLabel", background = "#EEEEEE", foreground = "#000000", anchor = "center")
+        self.style.configure("info_value.TLabel", background = "#DDDDDD", foreground = "#000000", anchor = "center", font = self.code_font)
+        self.style.configure("Vertical.TScrollbar", background = "green", bordercolor = "red", arrowcolor = "white")
     # elements
         self.menubar = tk.Menu(self.root)
         self.root.config(menu = self.menubar)
@@ -503,40 +513,40 @@ class Editor:
         self.help_MNU.add_command(label = "About",        command = self.open_about_win)
         self.menubar.add_cascade(label = "Help", menu = self.help_MNU, underline = 0)
 
-        self.taskbar_FRM = tk.Frame(self.root, bg = "#222222")
+        self.taskbar_FRM = ttk.Frame(self.root)
         self.taskbar_FRM.pack(fill = "x")
 
-        self.run_BTN = tk.Button(self.taskbar_FRM, text = "Run", command = self.run, width = 5)
-        self.run_BTN.pack(side = "left", fill = "y", anchor = "n", padx = 5, pady = 5)
+        self.run_BTN = ttk.Button(self.taskbar_FRM, style = "TButton", text = "Run", command = self.run, width = 5)
+        self.run_BTN.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
 
-        self.step_CHB = tk.Checkbutton(self.taskbar_FRM, text = "Step-By-Step Mode", variable = self.only_one_step, command = self.reset_pro, onvalue = True, offvalue = False)
-        self.step_CHB.pack(side = "left", fill = "y", anchor = "n", padx = 5, pady = 5)
-        self.step_CHB.deselect()
+        self.step_CHB = ttk.Checkbutton(self.taskbar_FRM, text = "Step-By-Step Mode", variable = self.only_one_step, command = self.reset_pro, onvalue = True, offvalue = False)
+        self.step_CHB.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
+        self.step_CHB.state(["!alternate"]) # deselect the checkbutton
 
-        self.ireg_FRM = tk.Frame(self.taskbar_FRM, bg = "white")
+        self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.ireg_FRM.pack(side = "right", padx = 5, pady = 5)
-        self.ireg_title_LBL = tk.Label(self.ireg_FRM, bg = "#EEEEEE", fg = "black", text = "Instruction Register:")
-        self.ireg_cmd_LBL   = tk.Label(self.ireg_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 6)
-        self.ireg_opr_LBL   = tk.Label(self.ireg_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 6)
+        self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = "Instruction Register:")
+        self.ireg_cmd_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
+        self.ireg_opr_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
         self.ireg_title_LBL.grid(row = 0, column = 0, columnspan = 2)
         self.ireg_cmd_LBL.grid(row = 1, column = 0, padx = 1)
         self.ireg_opr_LBL.grid(row = 1, column = 1, padx = 1)
 
-        self.accu_FRM = tk.Frame(self.taskbar_FRM, bg = "white")
+        self.accu_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.accu_FRM.pack(side = "right", padx = 5, pady = 5)
-        self.accu_title_LBL = tk.Label(self.accu_FRM, bg = "#EEEEEE", fg = "black", text = "Accumulator:")
-        self.accu_value_LBL = tk.Label(self.accu_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 5)
+        self.accu_title_LBL = ttk.Label(self.accu_FRM, style = "info_title.TLabel", text = "Accumulator:")
+        self.accu_value_LBL = ttk.Label(self.accu_FRM, style = "info_value.TLabel", width = 5)
         self.accu_title_LBL.pack(side = "top",    fill = "x")
         self.accu_value_LBL.pack(side = "bottom", fill = "x")
 
-        self.proc_FRM = tk.Frame(self.taskbar_FRM, bg = "white")
+        self.proc_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.proc_FRM.pack(side = "right", padx = 5, pady = 5)
-        self.proc_title_LBL = tk.Label(self.proc_FRM, bg = "#EEEEEE", fg = "black", text = "Program Counter:")
-        self.proc_value_LBL = tk.Label(self.proc_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 5)
+        self.proc_title_LBL = ttk.Label(self.proc_FRM, style = "info_title.TLabel", text = "Program Counter:")
+        self.proc_value_LBL = ttk.Label(self.proc_FRM, style = "info_value.TLabel", width = 5)
         self.proc_title_LBL.pack(side = "top",    fill = "x")
         self.proc_value_LBL.pack(side = "bottom", fill = "x")
 
-        self.text_FRM = tk.Frame(self.root, bg = "#222222")
+        self.text_FRM = ttk.Frame(self.root)
         self.text_FRM.pack(fill = "both", expand = True)
         self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
         self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word")
@@ -709,8 +719,8 @@ A list of all accepted commands:
         self.assembly_WIN.config(bg = "black")
         self.assembly_WIN.title("Assembly")
 
-        assembly_FRM = tk.Frame(self.assembly_WIN, bg = "#222222", bd = 5)
-        text_SCB = tk.Scrollbar(assembly_FRM)
+        assembly_FRM = ttk.Frame(self.assembly_WIN, style = "TFrame")
+        text_SCB = ttk.Scrollbar(assembly_FRM, style = "Vertical.TScrollbar")
         text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = "word", font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
         assembly_FRM.pack(fill = "both", expand = True)
         text_TXT.pack(side = "left",  fill = "both", expand = True)
@@ -749,17 +759,17 @@ Open file
 Reload file
 Save file
 Save file as"""
-        self.shortcuts_WIN = tk.Toplevel(self.root)
+        self.shortcuts_WIN = ttk.Toplevel(self.root)
         self.shortcuts_WIN.geometry("275x120")
         self.shortcuts_WIN.resizable(False, False)
         self.shortcuts_WIN.config(bg = "black")
         self.shortcuts_WIN.title("Shortcuts")
 
-        shortcuts_FRM = tk.Frame(self.
+        shortcuts_FRM = ttk.Frame(self.
                 shortcuts_WIN, bg = "#222222", bd = 5)
-        #title_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = "left", font = ("Segoe", 15, "bold"))
-        combos_LBL    = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = "left")
-        actions_LBL   = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = "left")
+        #title_LBL    = ttk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = "left", font = ("Segoe", 15, "bold"))
+        combos_LBL    = ttk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = "left")
+        actions_LBL   = ttk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = "left")
         shortcuts_FRM.pack(fill = "both", expand = True)
         #title_LBL.pack( side = "top",   fill = "x", expand = True)
         combos_LBL.pack( side = "left",  fill = "both", expand = True, padx = (0, 5))
@@ -797,15 +807,15 @@ Save file as"""
     Found a bug? Tell me on
     https://github.com/Blyfh/assemblitor/issues/new
         """
-        self.about_WIN = tk.Toplevel(self.root)
+        self.about_WIN = ttk.Toplevel(self.root)
         self.about_WIN.geometry("310x140")
         self.about_WIN.resizable(False, False)
         self.about_WIN.config(bg = "black")
         self.about_WIN.title("About")
 
-        about_FRM = tk.Frame(self.about_WIN, bg ="#222222", bd = 5)
-        title_LBL = tk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = "center", justify = "left", font = ("Segoe", 15, "bold"))
-        text_LBL  = tk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = "w",      justify = "left")
+        about_FRM = ttk.Frame(self.about_WIN, bg ="#222222", bd = 5)
+        title_LBL = ttk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = "center", justify = "left", font = ("Segoe", 15, "bold"))
+        text_LBL  = ttk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = "w",      justify = "left")
         about_FRM.pack(fill = "both", expand = True)
         title_LBL.pack(fill = "both", expand = True)
         text_LBL.pack( fill = "both", expand = True)
@@ -848,6 +858,7 @@ Save file as"""
 # bei Adressverschiebung alle Adressen anpassen
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
+# styles von child_WINs
 # SETTINGS:
 #   Exception optional in Konsole ausgeben
 #   Anzahl Vornullen (Editor.insert_address())
@@ -856,9 +867,10 @@ Save file as"""
 #   Deutsch (auch Errors?)
 
 # BUGS:
-# error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
+# error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # darkmode nicht für Fenster
+# run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
 
 min_version = (3, 10)
 cur_version = sys.version_info
