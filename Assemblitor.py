@@ -469,7 +469,7 @@ class Editor:
         self.out_SCT.config(state = "normal", fg = "#FF5555")
         self.out_SCT.delete("1.0", "end")
         self.out_SCT.insert("insert", traceback.format_exception_only(exc, val)[0])
-        self.out_SCT.config(state = tk.DISABLED)
+        self.out_SCT.config(state = "disabled")
         print("".join(traceback.format_exception(exc, val, tb = tb)))
 
     def tkinter_gui(self):
@@ -507,14 +507,14 @@ class Editor:
         self.taskbar_FRM.pack(fill = "x")
 
         self.run_BTN = tk.Button(self.taskbar_FRM, text = "Run", command = self.run, width = 5)
-        self.run_BTN.pack(side = tk.LEFT, fill = "y", anchor = "n", padx = 5, pady = 5)
+        self.run_BTN.pack(side = "left", fill = "y", anchor = "n", padx = 5, pady = 5)
 
         self.step_CHB = tk.Checkbutton(self.taskbar_FRM, text = "Step-By-Step Mode", variable = self.only_one_step, command = self.reset_pro, onvalue = True, offvalue = False)
-        self.step_CHB.pack(side = tk.LEFT, fill = "y", anchor = "n", padx = 5, pady = 5)
+        self.step_CHB.pack(side = "left", fill = "y", anchor = "n", padx = 5, pady = 5)
         self.step_CHB.deselect()
 
         self.ireg_FRM = tk.Frame(self.taskbar_FRM, bg = "white")
-        self.ireg_FRM.pack(side = tk.RIGHT, padx = 5, pady = 5)
+        self.ireg_FRM.pack(side = "right", padx = 5, pady = 5)
         self.ireg_title_LBL = tk.Label(self.ireg_FRM, bg = "#EEEEEE", fg = "black", text = "Instruction Register:")
         self.ireg_cmd_LBL   = tk.Label(self.ireg_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 6)
         self.ireg_opr_LBL   = tk.Label(self.ireg_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 6)
@@ -523,27 +523,27 @@ class Editor:
         self.ireg_opr_LBL.grid(row = 1, column = 1, padx = 1)
 
         self.accu_FRM = tk.Frame(self.taskbar_FRM, bg = "white")
-        self.accu_FRM.pack(side = tk.RIGHT, padx = 5, pady = 5)
+        self.accu_FRM.pack(side = "right", padx = 5, pady = 5)
         self.accu_title_LBL = tk.Label(self.accu_FRM, bg = "#EEEEEE", fg = "black", text = "Accumulator:")
         self.accu_value_LBL = tk.Label(self.accu_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 5)
-        self.accu_title_LBL.pack(side = tk.TOP,    fill = "x")
-        self.accu_value_LBL.pack(side = tk.BOTTOM, fill = "x")
+        self.accu_title_LBL.pack(side = "top",    fill = "x")
+        self.accu_value_LBL.pack(side = "bottom", fill = "x")
 
         self.proc_FRM = tk.Frame(self.taskbar_FRM, bg = "white")
-        self.proc_FRM.pack(side = tk.RIGHT, padx = 5, pady = 5)
+        self.proc_FRM.pack(side = "right", padx = 5, pady = 5)
         self.proc_title_LBL = tk.Label(self.proc_FRM, bg = "#EEEEEE", fg = "black", text = "Program Counter:")
         self.proc_value_LBL = tk.Label(self.proc_FRM, bg = "#DDDDDD", fg = "black", font = self.code_font, width = 5)
-        self.proc_title_LBL.pack(side = tk.TOP,    fill = "x")
-        self.proc_value_LBL.pack(side = tk.BOTTOM, fill = "x")
+        self.proc_title_LBL.pack(side = "top",    fill = "x")
+        self.proc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = tk.Frame(self.root, bg = "#222222")
         self.text_FRM.pack(fill = "both", expand = True)
         self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
         self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word")
-        self.inp_SCT.pack(side = tk.LEFT,  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
-        self.out_SCT.pack(side = tk.RIGHT, fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
+        self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
+        self.out_SCT.pack(side = "right", fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
         self.out_SCT.tag_config("pc_is_here", foreground = "#00FF00")
-        self.out_SCT.config(state = tk.DISABLED)
+        self.out_SCT.config(state = "disabled")
     # events
         self.root.bind(sequence = "<Control-o>",            func = self.open_file)
         self.root.bind(sequence = "<F5>",                   func = self.reload_file)
@@ -613,11 +613,11 @@ class Editor:
             self.out_SCT.insert("insert", out[0][0])
             self.out_SCT.insert("insert", out[0][1], "pc_is_here")
             self.out_SCT.insert("insert", out[0][2])
-            self.out_SCT.config(state = tk.DISABLED)
+            self.out_SCT.config(state = "disabled")
         else:
             self.out_SCT.config(state = "normal", fg = "#FFFFFF")
             self.out_SCT.delete("1.0", "end")
-            self.out_SCT.config(state = tk.DISABLED)
+            self.out_SCT.config(state = "disabled")
 
     def reload_file(self, event = None):
         if self.dirty_flag:
@@ -711,10 +711,10 @@ A list of all accepted commands:
 
         assembly_FRM = tk.Frame(self.assembly_WIN, bg = "#222222", bd = 5)
         text_SCB = tk.Scrollbar(assembly_FRM)
-        text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = tk.WORD, font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
-        assembly_FRM.pack(fill = tk.BOTH, expand = True)
-        text_TXT.pack(side = tk.LEFT,  fill = tk.BOTH, expand = True)
-        text_SCB.pack(side = tk.RIGHT, fill = tk.Y)
+        text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = "word", font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
+        assembly_FRM.pack(fill = "both", expand = True)
+        text_TXT.pack(side = "left",  fill = "both", expand = True)
+        text_SCB.pack(side = "right", fill = "y")
         text_TXT.tag_config("asm_code", font = self.code_font)
 
         for block in text1.split("</code>\n"):
@@ -725,7 +725,7 @@ A list of all accepted commands:
             text_TXT.insert("end", line.split(" -")[0], "asm_code")
             text_TXT.insert("end", line.split(" -")[1] + "\n")
         text_SCB.config(command = text_TXT.yview)
-        text_TXT.config(state = tk.DISABLED)
+        text_TXT.config(state = "disabled")
         self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.assembly_WIN"))
 
     def bisect(self, text:str, bisector = None):
@@ -757,13 +757,13 @@ Save file as"""
 
         shortcuts_FRM = tk.Frame(self.
                 shortcuts_WIN, bg = "#222222", bd = 5)
-        #title_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = tk.LEFT, font = ("Segoe", 15, "bold"))
-        combos_LBL    = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = tk.LEFT)
-        actions_LBL   = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = tk.LEFT)
+        #title_LBL    = tk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = "left", font = ("Segoe", 15, "bold"))
+        combos_LBL    = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = "left")
+        actions_LBL   = tk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = "left")
         shortcuts_FRM.pack(fill = "both", expand = True)
         #title_LBL.pack( side = "top",   fill = "x", expand = True)
-        combos_LBL.pack( side = tk.LEFT,  fill = "both", expand = True, padx = (0, 5))
-        actions_LBL.pack(side = tk.RIGHT, fill = "both", expand = True)
+        combos_LBL.pack( side = "left",  fill = "both", expand = True, padx = (0, 5))
+        actions_LBL.pack(side = "right", fill = "both", expand = True)
         self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.shortcuts_WIN"))
 
     def open_demo_pro(self):
@@ -804,8 +804,8 @@ Save file as"""
         self.about_WIN.title("About")
 
         about_FRM = tk.Frame(self.about_WIN, bg ="#222222", bd = 5)
-        title_LBL = tk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = tk.CENTER, justify = tk.LEFT, font = ("Segoe", 15, "bold"))
-        text_LBL  = tk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = tk.W,      justify = tk.LEFT)
+        title_LBL = tk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = "center", justify = "left", font = ("Segoe", 15, "bold"))
+        text_LBL  = tk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = "w",      justify = "left")
         about_FRM.pack(fill = "both", expand = True)
         title_LBL.pack(fill = "both", expand = True)
         text_LBL.pack( fill = "both", expand = True)
@@ -828,19 +828,8 @@ Save file as"""
         return "break" # overwrites the line break printing
 
     def key_ctrl_backspace(self, event):
-        last_line = self.inp_SCT.get("end-1c linestart", "end-1c")
-        i = len(last_line) - 1
-        last_word_index = 0
-        while i >= 0:
-            if last_line[i] in string.whitespace:
-                last_word_index = len(last_line) - i - 1
-                break
-            elif i == 0:
-                last_word_index = len(last_line)
-                break
-            else:
-                i -= 1
-        self.inp_SCT.delete("insert-%dc" % last_word_index, "insert")
+        print("---", self.inp_SCT.get("insert-1c wordstart", "insert wordend"))
+        self.inp_SCT.delete("insert-1c wordstart", "insert wordend")
 
     def insert_address(self):
         last_line = self.inp_SCT.get("insert linestart", "insert")
@@ -857,7 +846,6 @@ Save file as"""
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
 
 # TO-DO:
-# execute() oder ähnliches
 # bei Adressverschiebung alle Adressen anpassen
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
@@ -871,7 +859,7 @@ Save file as"""
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed no of tokens for value cells
 # ctrl + enter is printing \n if code has an error
-# ctrl + backspace löscht " " und "test " nur halb
+# darkmode nicth für Fenster
 
 min_version = (3, 10)
 cur_version = sys.version_info
