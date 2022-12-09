@@ -486,13 +486,13 @@ class Editor:
     # styles:
         self.style = ttk.Style(self.root)
         self.style.theme_use("winnative")
-        self.style.configure("TButton",)
-        self.style.configure("TFrame",            background = "#222222", bd = 5)
+        self.style.configure("TButton", relief = "flat", borderwidth = 1)
+        self.style.configure("TFrame",            background = "#222222")
         self.style.configure("info.TFrame",       background = "#FFFFFF")
+        self.style.configure("text.TFrame",            background = "#333333")
         self.style.configure("TLabel",            background = "#333333", foreground = "#FFFFFF")
         self.style.configure("info_title.TLabel", background = "#EEEEEE", foreground = "#000000", anchor = "center")
         self.style.configure("info_value.TLabel", background = "#DDDDDD", foreground = "#000000", anchor = "center", font = self.code_font)
-        self.style.configure("Vertical.TScrollbar", background = "green", bordercolor = "red", arrowcolor = "white")
     # elements
         self.menubar = tk.Menu(self.root)
         self.root.config(menu = self.menubar)
@@ -673,7 +673,7 @@ class Editor:
     def open_assembly_win(self):
         if self.assembly_WIN:
             return
-        text1 = """[Assembly Dialect] is a very low-level column-oriented programming language that is close to machine code. It is not case sensitive.
+        text1 = """This Assembly dialect is a very low-level column-oriented programming language that is close to machine code. It is not case sensitive.
 
 It consists of a sequence of 'memory cells' that can store values or commands. Each memory cell starts with its address and ends with a line break. The memory cells have to be in increasing order but empty memory cells don't have to be displayed. A value has to be stored after the address as an integer. An empty memory cell will be interpreted as having a value of 0. A command is also stored after the address. There are many commands and some of them require operands to work.
 Comments can be made with a semicolon. All text between the semicolon and the next line break will be ignored by the computer.
@@ -720,8 +720,8 @@ A list of all accepted commands:
         self.assembly_WIN.title("Assembly")
 
         assembly_FRM = ttk.Frame(self.assembly_WIN, style = "TFrame")
-        text_SCB = ttk.Scrollbar(assembly_FRM, style = "Vertical.TScrollbar")
-        text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 0, wrap = "word", font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
+        text_SCB = tk.Scrollbar(assembly_FRM)
+        text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 5, relief = "flat", wrap = "word", font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
         assembly_FRM.pack(fill = "both", expand = True)
         text_TXT.pack(side = "left",  fill = "both", expand = True)
         text_SCB.pack(side = "right", fill = "y")
@@ -759,22 +759,49 @@ Open file
 Reload file
 Save file
 Save file as"""
-        self.shortcuts_WIN = ttk.Toplevel(self.root)
-        self.shortcuts_WIN.geometry("275x120")
+        self.shortcuts_WIN = tk.Toplevel(self.root)
+        self.shortcuts_WIN.geometry("272x110")
         self.shortcuts_WIN.resizable(False, False)
         self.shortcuts_WIN.config(bg = "black")
         self.shortcuts_WIN.title("Shortcuts")
 
-        shortcuts_FRM = ttk.Frame(self.
-                shortcuts_WIN, bg = "#222222", bd = 5)
-        #title_LBL    = ttk.Label(shortcuts_FRM, bg = "#222222", fg = "white", text = title,   justify = "left", font = ("Segoe", 15, "bold"))
-        combos_LBL    = ttk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = combos,  justify = "left")
-        actions_LBL   = ttk.Label(shortcuts_FRM, bg = "#333333", fg = "white", text = actions, justify = "left")
+        shortcuts_FRM = ttk.Frame(self.shortcuts_WIN, style = "text.TFrame")
+        combos_LBL    = ttk.Label(shortcuts_FRM, style = "TLabel", text = combos,  justify = "left")
+        actions_LBL   = ttk.Label(shortcuts_FRM, style = "TLabel", text = actions, justify = "left")
         shortcuts_FRM.pack(fill = "both", expand = True)
-        #title_LBL.pack( side = "top",   fill = "x", expand = True)
-        combos_LBL.pack( side = "left",  fill = "both", expand = True, padx = (0, 5))
-        actions_LBL.pack(side = "right", fill = "both", expand = True)
+        combos_LBL.pack( side = "left",  fill = "both", expand = True, pady = 5, padx = 5)
+        actions_LBL.pack(side = "right", fill = "both", expand = True, pady = 5, padx = (0, 5))
         self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.shortcuts_WIN"))
+
+    def open_about_win(self):
+        if self.about_WIN:
+            return
+        self.is_about_win_open = True
+        title = "Assemblitor"
+        text  = """    A simple emulator and editor for Assembly
+    Version: 0.1 Alpha
+    Made by Blyfh in 2022
+    
+    Found a bug? Tell me on
+    https://github.com/Blyfh/assemblitor/issues/new
+        """
+        self.about_WIN = tk.Toplevel(self.root)
+        self.about_WIN.geometry("310x140")
+        self.about_WIN.resizable(False, False)
+        self.about_WIN.config(bg = "black")
+        self.about_WIN.title("About")
+
+        about_FRM = ttk.Frame(self.about_WIN, style = "text.TFrame")
+        title_LBL = ttk.Label(about_FRM, style = "TLabel", text = title, anchor = "center", justify = "left", font = ("Segoe", 15, "bold"))
+        text_LBL  = ttk.Label(about_FRM, style = "TLabel", text = text,  anchor = "w",      justify = "left")
+        about_FRM.pack(fill = "both", expand = True)
+        title_LBL.pack(fill = "both", expand = True, padx = 5, pady = (5, 0))
+        text_LBL.pack( fill = "both", expand = True, padx = 5, pady = (0, 5))
+        self.about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.about_WIN"))
+
+    def on_child_win_close(self, win_str):
+        eval(win_str + ".destroy()")
+        exec(win_str + " = None")
 
     def open_demo_pro(self):
         if self.dirty_flag:
@@ -793,37 +820,6 @@ Save file as"""
         self.inp_SCT.delete("1.0", "end")
         self.init_inp = demo
         self.inp_SCT.insert("insert", demo)
-
-    def open_about_win(self):
-        if self.about_WIN:
-            return
-        self.is_about_win_open = True
-        title = "Assemblitor"
-        text  = """
-    A simple emulator and editor for [Assembly Dialect]
-    Version: 0.1 Alpha
-    Made by Blyfh in 2022
-    
-    Found a bug? Tell me on
-    https://github.com/Blyfh/assemblitor/issues/new
-        """
-        self.about_WIN = ttk.Toplevel(self.root)
-        self.about_WIN.geometry("310x140")
-        self.about_WIN.resizable(False, False)
-        self.about_WIN.config(bg = "black")
-        self.about_WIN.title("About")
-
-        about_FRM = ttk.Frame(self.about_WIN, bg ="#222222", bd = 5)
-        title_LBL = ttk.Label(about_FRM, bg = "#333333", fg = "white", text = title, anchor = "center", justify = "left", font = ("Segoe", 15, "bold"))
-        text_LBL  = ttk.Label(about_FRM, bg = "#333333", fg = "white", text = text,  anchor = "w",      justify = "left")
-        about_FRM.pack(fill = "both", expand = True)
-        title_LBL.pack(fill = "both", expand = True)
-        text_LBL.pack( fill = "both", expand = True)
-        self.about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.about_WIN"))
-
-    def on_child_win_close(self, win_str):
-        eval(win_str + ".destroy()")
-        exec(win_str + " = None")
 
     def key_enter(self, event):
         self.insert_address()
@@ -876,10 +872,10 @@ min_version = (3, 10)
 cur_version = sys.version_info
 
 if cur_version >= min_version:
-    ed = Editor(True)
+    ed = Editor(testing = True)
 else:
     root = tk.Tk()
     root.withdraw()
-    mb.showerror("Error", "Your version of Python is not supported. Please use Python 3.10 or higher.")
+    mb.showerror("Error", "Your version of Python is not supported. Please use Python " + str(min_version[0]) + "." + str(min_version[1]) + " or higher.")
 
 #UNFERTG (on_modified)
