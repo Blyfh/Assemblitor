@@ -481,9 +481,10 @@ class Editor:
         self.about_WIN     = False
         self.root = tk.Tk()
         tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
-        self.root.minsize(637, 500)
+        minsize = lh.gui("minsize")
+        self.root.minsize(minsize[0], minsize[1])
         self.root.config(bg = "black")
-        self.root.title("Assemblitor")
+        self.root.title(lh.gui("title"))
         self.only_one_step = tk.IntVar()
     # styles:
         self.style = ttk.Style(self.root)
@@ -500,34 +501,34 @@ class Editor:
         self.root.config(menu = self.menubar)
 
         self.file_MNU = tk.Menu(self.menubar, tearoff = False)
-        self.file_MNU.add_command(label = "Open",     command = self.open_file)
-        self.file_MNU.add_command(label = "Reload",   command = self.reload_file)
-        self.file_MNU.add_command(label = "Save",     command = self.save_file)
-        self.file_MNU.add_command(label = "Save As",  command = self.save_file_as)
-        self.file_MNU.add_command(label = "Settings", command = self.open_settings_win)
-        self.file_MNU.add_command(label = "Exit",     command = self.destroy)
-        self.menubar.add_cascade(label = "File", menu = self.file_MNU, underline = 0)
+        self.file_MNU.add_command(label = lh.gui("Open"),     command = self.open_file)
+        self.file_MNU.add_command(label = lh.gui("Reload"),   command = self.reload_file)
+        self.file_MNU.add_command(label = lh.gui("Save"),     command = self.save_file)
+        self.file_MNU.add_command(label = lh.gui("SaveAs"),   command = self.save_file_as)
+        self.file_MNU.add_command(label = lh.gui("Settings"), command = self.open_settings_win)
+        self.file_MNU.add_command(label = lh.gui("Exit"),     command = self.destroy)
+        self.menubar.add_cascade(label = lh.gui("File"), menu = self.file_MNU, underline = 0)
 
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
-        self.help_MNU.add_command(label = "Assembly",     command = self.open_assembly_win)
-        self.help_MNU.add_command(label = "Shortcuts",    command = self.open_shortcuts_win)
-        self.help_MNU.add_command(label = "Demo Program", command = self.open_demo_pro)
-        self.help_MNU.add_command(label = "About",        command = self.open_about_win)
-        self.menubar.add_cascade(label = "Help", menu = self.help_MNU, underline = 0)
+        self.help_MNU.add_command(label = lh.gui("Assembly"),  command = self.open_assembly_win)
+        self.help_MNU.add_command(label = lh.gui("Shortcuts"), command = self.open_shortcuts_win)
+        self.help_MNU.add_command(label = lh.gui("DemoPrg"),   command = self.open_demo_pro)
+        self.help_MNU.add_command(label = lh.gui("About"),     command = self.open_about_win)
+        self.menubar.add_cascade(label = lh.gui("Help"), menu = self.help_MNU, underline = 0)
 
         self.taskbar_FRM = ttk.Frame(self.root)
         self.taskbar_FRM.pack(fill = "x")
 
-        self.run_BTN = ttk.Button(self.taskbar_FRM, style = "TButton", text = "Run", command = self.run, width = 5)
+        self.run_BTN = ttk.Button(self.taskbar_FRM, style = "TButton", text = lh.gui("Run"), command = self.run, width = 5)
         self.run_BTN.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
 
-        self.step_CHB = ttk.Checkbutton(self.taskbar_FRM, text = "Step-By-Step Mode", variable = self.only_one_step, command = self.reset_pro, onvalue = True, offvalue = False)
+        self.step_CHB = ttk.Checkbutton(self.taskbar_FRM, text = lh.gui("StepMode"), variable = self.only_one_step, command = self.reset_pro, onvalue = True, offvalue = False)
         self.step_CHB.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
         self.step_CHB.state(["!alternate"]) # deselect the checkbutton
 
         self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.ireg_FRM.pack(side = "right", padx = 5, pady = 5)
-        self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = "Instruction Register:")
+        self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = lh.gui("IR:"))
         self.ireg_cmd_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
         self.ireg_opr_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
         self.ireg_title_LBL.grid(row = 0, column = 0, columnspan = 2)
@@ -536,14 +537,14 @@ class Editor:
 
         self.accu_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.accu_FRM.pack(side = "right", padx = 5, pady = 5)
-        self.accu_title_LBL = ttk.Label(self.accu_FRM, style = "info_title.TLabel", text = "Accumulator:")
+        self.accu_title_LBL = ttk.Label(self.accu_FRM, style = "info_title.TLabel", text = lh.gui("ACC:"))
         self.accu_value_LBL = ttk.Label(self.accu_FRM, style = "info_value.TLabel", width = 5)
         self.accu_title_LBL.pack(side = "top",    fill = "x")
         self.accu_value_LBL.pack(side = "bottom", fill = "x")
 
         self.proc_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.proc_FRM.pack(side = "right", padx = 5, pady = 5)
-        self.proc_title_LBL = ttk.Label(self.proc_FRM, style = "info_title.TLabel", text = "Program Counter:")
+        self.proc_title_LBL = ttk.Label(self.proc_FRM, style = "info_title.TLabel", text = lh.gui("PC:"))
         self.proc_value_LBL = ttk.Label(self.proc_FRM, style = "info_value.TLabel", width = 5)
         self.proc_title_LBL.pack(side = "top",    fill = "x")
         self.proc_value_LBL.pack(side = "bottom", fill = "x")
@@ -648,7 +649,7 @@ class Editor:
                 return
         self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
-            self.root.title(self.file_path + " – Assemblitor")
+            self.root.title(self.file_path + " – " + lh.gui("title"))
             file_name = os.path.basename(self.file_path)
             self.last_dir = self.file_path.split(file_name)[0]
             self.set_dirty_flag(False)
@@ -667,7 +668,7 @@ class Editor:
         self.file_path = self.file_path = fd.asksaveasfilename(title = "Save File", initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
         if self.file_path:
             self.save_file()
-            self.root.title(self.file_path + " – Assemblitor")
+            self.root.title(self.file_path + " – " + lh.gui("title"))
 
     def open_settings_win(self):
         pass
@@ -769,7 +770,7 @@ A list of all accepted commands:
         if self.about_WIN:
             return
         self.is_about_win_open = True
-        title = "Assemblitor"
+        title = lh.gui("title")
         text  = lh.abt_win("text")
         self.about_WIN = tk.Toplevel(self.root)
         self.about_WIN.geometry(lh.abt_win("geometry"))

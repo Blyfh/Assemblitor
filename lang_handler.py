@@ -35,6 +35,13 @@ class LangHandler:
             raise FileNotFoundError("Couldn't fetch 'shortcuts' window data for '" + key + "' from language pack '" + self.cur_lang + "'.")
         return ele
 
+    def gui(self, key):
+        try:
+            ele = self.cur_lang_data["gui"][key]
+        except:
+            raise FileNotFoundError("Couldn't fetch gui data for '" + key + "' from language pack '" + self.cur_lang + "'.")
+        return ele
+
     def error(self, err, **kwargs):
         try:
             err_tpl = self.cur_lang_data["error"][err]
