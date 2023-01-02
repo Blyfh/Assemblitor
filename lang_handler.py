@@ -14,6 +14,13 @@ class LangHandler:
         except:
             raise FileNotFoundError("Couldn't fetch language pack '" + lang + "'.")
 
+    def demo(self):
+        try:
+            demo = self.cur_lang_data["demo"]
+        except:
+            raise FileNotFoundError("Couldn't fetch demo data from language pack '" + self.cur_lang + "'.")
+        return demo
+
     def error(self, err, **kwargs):
         try:
             err_tpl = self.cur_lang_data["error"][err]

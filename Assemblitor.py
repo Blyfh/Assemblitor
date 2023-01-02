@@ -809,16 +809,7 @@ Save file as"""
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return
-        demo = """; A simple countdown program
-00 JMP 03
-01 5
-02 1
-03 LDA 01
-04 SUB 02
-05 JLE 08
-06 STA 01
-07 JMP 04o
-08 STP"""
+        demo = lh.demo()
         self.inp_SCT.delete("1.0", "end")
         self.init_inp = demo
         self.inp_SCT.insert("insert", demo)
