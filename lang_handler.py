@@ -42,6 +42,27 @@ class LangHandler:
             raise FileNotFoundError("Couldn't fetch gui data for '" + key + "' from language pack '" + self.cur_lang + "'.")
         return ele
 
+    def asm_win(self, key):
+        try:
+            ele = self.cur_lang_data["asm_win"][key]
+        except:
+            raise FileNotFoundError("Couldn't fetch 'Assembly' window data for '" + key + "' from language pack '" + self.cur_lang + "'.")
+        if key == "text":
+            text_code_pairs = []
+            blocks = ele.split("}")
+            if len(blocks) == 1:
+                text_code_pairs = [(blocks[0], "")]
+            else:
+                for i in range(len(blocks) - 1):
+                    text_code_pair = blocks[i].split("{", maxsplit = 1)
+                    if len(text_code_pair) == 1:
+                        raise SyntaxError("Unmatched '}' in 'Assembly' window data for 'text' from language pack '" + self.cur_lang + "'.")
+                    else:
+                        text_code_pairs.append(text_code_pair)
+                text_code_pairs.append((blocks[len(blocks) - 1], ""))
+            return text_code_pairs
+        return ele
+
     def error(self, err, **kwargs):
         try:
             err_tpl = self.cur_lang_data["error"][err]

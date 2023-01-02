@@ -86,23 +86,19 @@ The program orients itself to the architecture of a Von-Neumann processor. This 
 
 
 A simple program may look like this:
-{
-    00 LDA 04 ; load the value of the 4th memory cell into the ACC
+{    00 LDA 04 ; load the value of the 4th memory cell into the ACC
     01 STA 05 ; store the value of the ACC into the 5th memory cell
     02 STP    ; stop the program
     04 42     ; a stored value
 }
-
 This would be the result after executing the program:
-{
-    00 LDA 04
+{    00 LDA 04
     01 STA 05
     02 STP
     03        ; <--- Notice how the formerly hidden 3rd memory cell is now displayed
     04 42
     05 42
 }
-
 
 A list of all accepted commands:
     {STP    } - stops the program

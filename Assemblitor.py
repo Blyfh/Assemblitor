@@ -718,9 +718,10 @@ A list of all accepted commands:
     JLE n   - jumps to memory cell n by setting the PC to n if the value of the ACC is less or equal to zero"""
 
         self.assembly_WIN = tk.Toplevel(self.root)
-        self.assembly_WIN.minsize(710, 200)
+        minsize = lh.asm_win("minsize")
+        self.assembly_WIN.minsize(minsize[0], minsize[1])
         self.assembly_WIN.config(bg = "black")
-        self.assembly_WIN.title("Assembly")
+        self.assembly_WIN.title(lh.asm_win("title"))
 
         assembly_FRM = ttk.Frame(self.assembly_WIN, style = "TFrame")
         text_SCB = tk.Scrollbar(assembly_FRM)
@@ -730,13 +731,10 @@ A list of all accepted commands:
         text_SCB.pack(side = "right", fill = "y")
         text_TXT.tag_config("asm_code", font = self.code_font)
 
-        for block in text1.split("</code>\n"):
-            code_text_pair = self.bisect(block, "<code>\n")
-            text_TXT.insert("end", code_text_pair[0])
-            text_TXT.insert("end", code_text_pair[1], "asm_code")
-        for line in text2.split("\n"):
-            text_TXT.insert("end", line.split(" -")[0], "asm_code")
-            text_TXT.insert("end", line.split(" -")[1] + "\n")
+        text_code_pairs = lh.asm_win("text")
+        for text_code_pair in text_code_pairs:
+            text_TXT.insert("end", text_code_pair[0])
+            text_TXT.insert("end", text_code_pair[1], "asm_code")
         text_SCB.config(command = text_TXT.yview)
         text_TXT.config(state = "disabled")
         self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.assembly_WIN"))
