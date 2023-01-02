@@ -780,18 +780,12 @@ Save file as"""
             return
         self.is_about_win_open = True
         title = "Assemblitor"
-        text  = """    A simple emulator and editor for Assembly
-    Version: 0.1 Alpha
-    Made by Blyfh in 2022
-    
-    Found a bug? Tell me on
-    https://github.com/Blyfh/assemblitor/issues/new
-        """
+        text  = lh.abt_win("text")
         self.about_WIN = tk.Toplevel(self.root)
-        self.about_WIN.geometry("310x140")
+        self.about_WIN.geometry(lh.abt_win("geometry"))
         self.about_WIN.resizable(False, False)
         self.about_WIN.config(bg = "black")
-        self.about_WIN.title("About")
+        self.about_WIN.title(lh.abt_win("title"))
 
         about_FRM = ttk.Frame(self.about_WIN, style = "text.TFrame")
         title_LBL = ttk.Label(about_FRM, style = "TLabel", text = title, anchor = "center", justify = "left", font = ("Segoe", 15, "bold"))
