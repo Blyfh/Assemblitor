@@ -749,23 +749,13 @@ A list of all accepted commands:
     def open_shortcuts_win(self):
         if self.shortcuts_WIN:
             return
-        combos = """Ctrl + Enter
-Shift + Enter
-Ctrl + O
-F5
-Ctrl + S
-Ctrl + Shift + S"""
-        actions = """Run program
-Line break without new address
-Open file
-Reload file
-Save file
-Save file as"""
+        combos = lh.shc_win("combos")
+        actions = lh.shc_win("actions")
         self.shortcuts_WIN = tk.Toplevel(self.root)
-        self.shortcuts_WIN.geometry("272x110")
+        self.shortcuts_WIN.geometry(lh.shc_win("geometry"))
         self.shortcuts_WIN.resizable(False, False)
         self.shortcuts_WIN.config(bg = "black")
-        self.shortcuts_WIN.title("Shortcuts")
+        self.shortcuts_WIN.title(lh.shc_win("title"))
 
         shortcuts_FRM = ttk.Frame(self.shortcuts_WIN, style = "text.TFrame")
         combos_LBL    = ttk.Label(shortcuts_FRM, style = "TLabel", text = combos,  justify = "left")

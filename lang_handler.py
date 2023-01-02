@@ -28,6 +28,13 @@ class LangHandler:
             raise FileNotFoundError("Couldn't fetch 'about' window data for '" + key + "' from language pack '" + self.cur_lang + "'.")
         return ele
 
+    def shc_win(self, key):
+        try:
+            ele = self.cur_lang_data["shc_win"][key]
+        except:
+            raise FileNotFoundError("Couldn't fetch 'shortcuts' window data for '" + key + "' from language pack '" + self.cur_lang + "'.")
+        return ele
+
     def error(self, err, **kwargs):
         try:
             err_tpl = self.cur_lang_data["error"][err]
