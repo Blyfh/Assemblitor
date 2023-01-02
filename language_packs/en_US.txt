@@ -47,7 +47,7 @@
     },
     "gui": {
         "title": "Assemblitor",
-        "minsize": (637, 500)
+        "minsize": (637, 500),
 
         "File":     "File",
         "Open":     "Open",
