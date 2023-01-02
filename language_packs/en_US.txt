@@ -34,10 +34,10 @@
         "IndOprIsNegative":     ("ValueError",    "Expected an operand in memory cell {adr}, not '{opr}'. Address nested into brackets has to be nonnegative."),
         "UnknownOperand":       ("TypeError",     "Expected an operand in memory cell {adr}, not '{opr}'. An operand has to be an address (format '<nonnegative int>' or '(<nonnegative int>)') or an absolute value (format '#<int>').")
     },
-    "file": {
-        "DocumentsDir":   "Documents",
-        "AssemblerFiles": "Assembler files",
-        "TextFiles":      "Text files",
+    "file_mng": {
+        "DocumentsDir": "Documents",
+        "AsmFiles":     "Assembler files",
+        "TxtFiles":     "Text files",
 
         "UnsavedChanges": "Unsaved Changes",
         "Save?":          "Save program before exiting?",

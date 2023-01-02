@@ -42,6 +42,13 @@ class LangHandler:
             raise FileNotFoundError("Couldn't fetch gui data for '" + key + "' from language pack '" + self.cur_lang + "'.")
         return ele
 
+    def file_mng(self, key):
+        try:
+            ele = self.cur_lang_data["file_mng"][key]
+        except:
+            raise FileNotFoundError("Couldn't fetch file_mng data for '" + key + "' from language pack '" + self.cur_lang + "'.")
+        return ele
+
     def asm_win(self, key):
         try:
             ele = self.cur_lang_data["asm_win"][key]

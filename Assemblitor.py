@@ -455,8 +455,8 @@ class Editor:
         self.init_inp   = ""
         self.dirty_flag = False
         self.file_path  = None
-        self.last_dir   = os.path.join(os.path.expanduser('~'), "Documents")
-        self.file_types = (("Assembler files", "*.asm"), ("Text files", "*.txt"))
+        self.last_dir   = os.path.join(os.path.expanduser('~'), lh.file_mng("DocumentsDir"))
+        self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
         self.code_font  = ("Courier New", 10)
         self.emu        = Emulator()
         self.is_new_pro = False
@@ -571,7 +571,7 @@ class Editor:
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
     def wants_to_save(self):
-        is_saving = mb.askyesnocancel("Unsaved Changes", "Save program before exiting?") # returns None when clicking 'Cancel'
+        is_saving = mb.askyesnocancel(lh.file_mng("UnsavedChanges"), lh.file_mng("Save?")) # returns None when clicking 'Cancel'
         if is_saving:
             self.save_file()
             return not self.dirty_flag # checks if user clicked cancel in save_file_as()
@@ -647,7 +647,7 @@ class Editor:
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return
-        self.file_path = fd.askopenfilename(title = "Open File", initialdir = self.last_dir, filetypes = self.file_types)
+        self.file_path = fd.askopenfilename(title = lh.file_mng("OpenFile"), initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
             self.root.title(self.file_path + " – " + lh.gui("title"))
             file_name = os.path.basename(self.file_path)
@@ -665,7 +665,7 @@ class Editor:
             self.save_file_as()
 
     def save_file_as(self, event = None):
-        self.file_path = self.file_path = fd.asksaveasfilename(title = "Save File", initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
+        self.file_path = self.file_path = fd.asksaveasfilename(title = lh.file_mng("SaveFile"), initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
         if self.file_path:
             self.save_file()
             self.root.title(self.file_path + " – " + lh.gui("title"))
