@@ -7,7 +7,9 @@ import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
+import lang_handler         as lh
 
+lh = lh.LangHandler()
 
 class Emulator:
 
@@ -489,7 +491,7 @@ class Editor:
         self.style.configure("TButton", relief = "flat", borderwidth = 1)
         self.style.configure("TFrame",            background = "#222222")
         self.style.configure("info.TFrame",       background = "#FFFFFF")
-        self.style.configure("text.TFrame",            background = "#333333")
+        self.style.configure("text.TFrame",       background = "#333333")
         self.style.configure("TLabel",            background = "#333333", foreground = "#FFFFFF")
         self.style.configure("info_title.TLabel", background = "#EEEEEE", foreground = "#000000", anchor = "center")
         self.style.configure("info_value.TLabel", background = "#DDDDDD", foreground = "#000000", anchor = "center", font = self.code_font)
@@ -854,7 +856,6 @@ Save file as"""
 # bei Adressverschiebung alle Adressen anpassen
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
-# styles von child_WINs
 # SETTINGS:
 #   Exception optional in Konsole ausgeben
 #   Anzahl Vornullen (Editor.insert_address())
@@ -865,7 +866,6 @@ Save file as"""
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
-# darkmode nicht für Fenster
 # run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
 
 min_version = (3, 10)
@@ -876,6 +876,5 @@ if cur_version >= min_version:
 else:
     root = tk.Tk()
     root.withdraw()
-    mb.showerror("Error", "Your version of Python is not supported. Please use Python " + str(min_version[0]) + "." + str(min_version[1]) + " or higher.")
-
-#UNFERTG (on_modified)
+    title_text_pair = lh.error("PythonVer", min_ver = str(min_version[0]) + "." + str(min_version[1]))
+    mb.showerror(title_text_pair[0], title_text_pair[1])
