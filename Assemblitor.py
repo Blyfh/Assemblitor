@@ -755,6 +755,8 @@ class Editor:
         self.inp_SCT.delete("1.0", "end")
         self.init_inp = demo
         self.inp_SCT.insert("insert", demo)
+        self.root.title(lh.gui("title"))
+        self.set_dirty_flag(False)
 
     def key_enter(self, event):
         self.insert_address()
