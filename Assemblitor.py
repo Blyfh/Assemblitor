@@ -803,6 +803,8 @@ class Editor:
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
 # wenn man beim öffnen der Demo seine Änderungen des alten Programms speichert, wird der Speicherort nicht zurückgesetzt
+# edit() braucht nichtnegative Werte, aber eine Speicherzelle akzeptiert alle Ganzzahlen. Was ist richtig?
+# Kommentare, die eine ganze Zahlen besetzen, werden im StepMode mit dem Bafehl drüber mitmarkiert
 
 min_version = (3, 10)
 cur_version = sys.version_info

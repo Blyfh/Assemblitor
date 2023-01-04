@@ -54,7 +54,7 @@
         "Open":     "Öffnen",
         "Reload":   "Neuladen",
         "Save":     "Speichern",
-        "SaveAs":   "Speichern Unter",
+        "SaveAs":   "Speichern unter",
         "Settings": "Einstellungen",
         "Exit":     "Beenden",
 
@@ -76,47 +76,47 @@
     },
     "asm_win": {
         "title": "Assembly",
-        "minsize": (710, 200),
+        "minsize": (850, 200),
 
-        "text":  """This Assembly dialect is a very low-level column-oriented programming language that is close to machine code. It is not case sensitive.
+        "text":  """Dieser Assembly-Dialekt ist eine spaltenbasierte Low-Level-Programmiersprache, die sehr nah an Maschinencode ist. Groß-/Kleinschreibung wird nicht beachtet.
 
-It consists of a sequence of 'memory cells' that can store values or commands. Each memory cell starts with its address and ends with a line break. The memory cells have to be in increasing order but empty memory cells don't have to be displayed. A value has to be stored after the address as an integer. An empty memory cell will be interpreted as having a value of 0. A command is also stored after the address. There are many commands and some of them require operands to work.
-Comments can be made with a semicolon. All text between the semicolon and the next line break will be ignored by the computer.
+Die Sprache besteht aus einer Folge von Speicherzellen, welche Befehle oder Zahlenwerte speichern können. Jede Speicherzelle beginnt mit ihrer Adresse und endet mit einem Zeilenumbruch. Die Speicherzellen müssen in aufsteigender Reihenfolge sein, aber leere Zellen müssen nicht angegeben werden. Ein Zahlenwert ist immer eine Ganzzahl und wird nach der Adresse gespeichert. Eine leere Speicherzelle wird als eine Zelle mit einem Zahlenwert von 0 interpretiert. Ein Befehl wird auch nach der Adresse angegeben, wobei manche noch ein Operand benötigen.
+Kommentare können mit einem Semikolon gemacht werden. Jeglicher Text zwischen dem Semikolon und dem nächsten Zeilenumbruch wird ignoriert.
 
-The program orients itself to the architecture of a Von-Neumann processor. This means it takes usage of the program counter (PC), the accumulator (ACC) and the instruction register (IR). The PC is set to 0 by default. If the program is executed, the command at the address stored in the PC will be loaded into the IR. There the command can be executed. After its execution the PC gets increased by one (excluding jumps and stops) and the next command can be loaded.
+Das Programm orientiert sich an der Architektur eines Von-Neumann-Prozessors. Das bedeutet, dass es einen Befehlszähler (BZ), einen Zwischenspeicher (genannt Akkumulator oder kurz AKKU) und ein Befehlsregister (BR) benutzt. Zu Beginn ist der BZ auf 0 gesetzt. Wird das Programm ausgeführt, so wird der Befehl an der im BZ gespeicherten Adresse in das BR geladen. Dort wird der Befehl ausgeführt und der BZ um eins erhöht (außer bei Sprüngen und Stopps), sodass der nächste Befehl geladen werden kann.
 
 
-A simple program may look like this:
-{    00 LDA 04 ; load the value of the 4th memory cell into the ACC
-    01 STA 05 ; store the value of the ACC into the 5th memory cell
-    02 STP    ; stop the program
-    04 42     ; a stored value
+Ein einfaches Programm könnte so aussehen:
+{    00 LDA 04 ; lade den Zahlenwert der vierten Speicherzelle in den AKKU
+    01 STA 05 ; speichere den Zahlenwert des AKKUs in die fünfte Speicherzelle
+    02 STP    ; stoppe das Programm
+    04 42     ; ein gespeicherter Zahlenwert
 }
-This would be the result after executing the program:
+So würde das Programm nach dem Ausführen aussehen:
 {    00 LDA 04
     01 STA 05
     02 STP
-    03        ; <--- Notice how the formerly hidden 3rd memory cell is now displayed
+    03        ; <--- man beachte, dass die vorher verstecke dritte Speicherzelle nun gezeigt wird
     04 42
     05 42
 }
 
-A list of all accepted commands:
-    {STP    } - stops the program
-    {LDA n  } - loads the value at memory cell n into the ACC
-    {LDA #n } - loads the value n into the ACC
-    {LDA (n)} - loads the value of the memory cell that has the address that is stored in memory cell n
-    {STA n  } - stores the value of the ACC into memory cell n
-    {ADD n  } - adds the value at memory cell n to the value of the ACC and stores the result into the ACC
-    {SUB n  } - subtracts the value at memory cell n from the value of the ACC and stores the result into the ACC
-    {MUL n  } - multiplies the value at memory cell n by the value of the ACC and stores the result into the ACC
-    {JMP n  } - jumps to memory cell n by setting the PC to n
-    {JZE n  } - jumps to memory cell n by setting the PC to n if the value of the ACC is equal to zero
-    {JLE n  } - jumps to memory cell n by setting the PC to n if the value of the ACC is less or equal to zero"""
+Eine Liste aller akzeptierten Befehle:
+    {STP    } - stoppt das Programm
+    {LDA n  } - lädt den Zahlenwert der Speicherzelle n in den AKKU
+    {LDA #n } - lädt den Zahlenwert n in den AKKU
+    {LDA (n)} - lädt den Zahlenwert der Speicherzelle, dessen Adresse in Speicherzelle n gespeichert ist, in den AKKU
+    {STA n  } - speichert den im AKKU gespeicherten Zahlenwert in Speicherzelle n
+    {ADD n  } - speichert die Summe der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
+    {SUB n  } - speichert die Differenz der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
+    {MUL n  } - speichert das Produkt der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
+    {JMP n  } - springt zu Speicherzelle n indem der BZ auf n gesetzt wird
+    {JZE n  } - springt zu Speicherzelle n indem der BZ auf n gesetzt wird wenn der im AKKU gespeicherte Zahlenwert 0 ist
+    {JLE n  } - springt zu Speicherzelle n indem der BZ auf n gesetzt wird wenn der im AKKU gespeicherte Zahlenwert kleiner oder gleich 0 ist"""
     },
     "shc_win": {
         "title":    "Tastenkombinationen",
-        "geometry": "247x110",
+        "geometry": "244x110",
 
         "combos": """Strg + Enter
 Shift + Enter
@@ -126,15 +126,15 @@ Strg + S
 Strg + Shift + S""",
 
         "actions": """Programm ausführen
-adressfreier Zeilenumbruch
+adressloser Zeilenumbruch
 Datei öffnen
-Datei neuladen
+Datei neu laden
 Datei speichern
 Datei speichern unter"""
     },
     "abt_win": {
         "title":    "Über",
-        "geometry": "310x140",
+        "geometry": "303x140",
 
         "text": """    Ein einfacher Emulator und Editor für Assembly
     Version: 0.1 Alpha
