@@ -1,39 +1,8 @@
 {
     "info": {
-        "name": "Deutsch (Deutschland)",
+        "name":    "Deutsch (Deutschland)",
         "version": "1.0",
         "authors": ["Blyfh"]
-    },
-    "error": {
-        "PythonVer":            ("Fehler",         "Deine Python-Version wird nicht unterstützt. Bitte nutze Python {min_ver} oder höher."),
-
-        "NeverStopped":         ("SyntaxError",   "Program was never stopped with command 'STP'."),
-        "MaxPrgLength":         ("StopExecution", "Maximum program length exceeded. Can only have up to {max_adrs} memory cells, not {adrs}."),
-        "AdrsNotChronological": ("SyntaxError",   "Address {small_adr} appears after address {big_adr} even though memory cells have to be in chronological order."),
-        "AdrNotUnique":         ("SyntaxError",   "Address {adr} appears more than once even though it has to be unique."),
-        "CmdHasValOpr":         ("SyntaxError",   "Only command 'LDA' supports '#<value>' format like '#{opr}'."),
-        "UnknownOprTyp":        ("ValueError",    "Unknown operand type: '{opr}'. Operand has to be an address (format '<nonnegative int>' or '(<nonnegative int>)') or an absolute value (format '#<int>')."),
-        "MaxIterationDepth":    ("StopIteration", "Maximum iteration depth exceeded. Can only jump up to {max_jmps} times to memory cell {adr}."),
-        "ValNotInt_Load":       ("TypeError",     "Unable to load accumulator value in memory cell {adr}. Value must be a nonnegative integer, not '{val}'."),
-        "CmdStpHasOpr":         ("SyntaxError",   "Command 'STP' does not take operands. Please remove operand in memory cell {adr}."),
-        "MissingOpr":           ("SyntaxError",   "Command {cmd} in memory cell {adr} requires an operand but none was given."),
-        "AdrTokNotInt":         ("TypeError",     "Expected an address, not '{tok}'. Address of a memory cell has to be a nonnegative integer."),
-        "AdrTokIsNegative":     ("ValueError",    "Expected an address, not '{tok}'. Address of a memory cell has to be nonnegative."),
-        "TokNotValOrCmd":       ("TypeError",     "Expected a command or a value in memory cell {adr}, not '{tok}'."),
-        "MaxCelLength":         ("SyntaxError",   "Memory cell {adr} has too many tokens. Can only have up to 3 tokens (excluding comments): 1. address, 2. command/value, 3. operand"),
-        "TokNotVal_Overwrite":  ("TypeError",     "Expected token {tpos} of memory cell {adr} to be a value, not '{tok}' while trying to overwrite it to {new_val}"),
-        "TokNotCmd":            ("TypeError",     "Expected token {tpos} of memory cell {adr} to be a command, not '{tok}'."),
-        "TokNotCmd_EmptyTok":   ("TypeError",     "Expected token {tpos} of memory cell {adr} to be a command, but it is empty."),
-        "TokNotOpr":            ("TypeError",     "Expected token {tpos} of memory cell {adr} to be an operand, not '{tok}'."),
-        "TokNotOpr_EmptyTok":   ("TypeError",     "Expected token {tpos} of memory cell {adr} to be an operand, but it is empty."),
-        "TokNotAdr":            ("TypeError",     "Expected token {tpos} of memory cell {adr} to be an address, not '{tok}'."),
-        "TokNotAdr_EmptyTok":   ("TypeError",     "Expected token {tpos} of memory cell {adr} to be an address, but it is empty."),
-        "OprTokNotStr":         ("TypeError",     "Expected to receive a string, not '{opr_str}' while trying to get an operand."),
-        "ValOprNotInt":         ("TypeError",     "Expected an operand in memory cell {adr}, not '{opr}'. Value after '#' has to be an integer."),
-        "IndOprNotInt":         ("TypeError",     "Expected an operand in memory cell {adr}, not '{opr}'. Address nested into brackets has to be a nonnegative integer."),
-        "IndOprIsNegative":     ("ValueError",    "Expected an operand in memory cell {adr}, not '{opr}'. Address nested into brackets has to be nonnegative."),
-        "UnknownOpr":           ("TypeError",     "Expected an operand in memory cell {adr}, not '{opr}'. Operand has to be an address (format '<nonnegative int>' or '(<nonnegative int>)') or an absolute value (format '#<int>')."),
-        "DirOprIsNegative":     ("ValueError",    "Expected an operand in memory cell {adr}, not '{opr}'. Address has to be nonnegative.")
     },
     "file_mng": {
         "DocumentsDir": "Dokumente",
@@ -70,6 +39,10 @@
         "PC:":  "Befehlszähler:",
         "ACC:": "Akkumulator:",
         "IR:":  "Befehlsregister:"
+    },
+    "ver_win": {
+        "title": "Fehler",
+        "text":  "Deine Python-Version wird nicht unterstützt. Bitte nutze Python {min_ver} oder höher."
     },
     "set_win": {
         "title": "Einstellungen"

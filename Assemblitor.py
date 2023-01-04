@@ -814,5 +814,4 @@ if cur_version >= min_version:
 else:
     root = tk.Tk()
     root.withdraw()
-    title_text_pair = lh.error("PythonVer", min_ver = str(min_version[0]) + "." + str(min_version[1]))
-    mb.showerror(title_text_pair[0], title_text_pair[1])
+    mb.showerror(lh.ver_win("title"), lh.ver_win("text", min_ver = min_version))
