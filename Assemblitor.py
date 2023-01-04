@@ -644,7 +644,7 @@ class Editor:
                 return
         if self.file_path:
             self.inp_SCT.delete("1.0", "end")
-            with open(self.file_path, "r") as file:
+            with open(self.file_path, "r", encoding = "utf-8") as file:
                 self.init_inp = file.read()
             self.inp_SCT.insert("insert", self.init_inp)
             self.set_dirty_flag(False)
@@ -664,7 +664,7 @@ class Editor:
     def save_file(self, event = None):
         if self.file_path:
             self.init_inp = self.inp_SCT.get(1.0, "end-1c")
-            with open(self.file_path, "w") as file:
+            with open(self.file_path, "w", encoding = "utf-8") as file:
                 file.write(self.init_inp)
             self.set_dirty_flag(False)
         else:

@@ -9,7 +9,7 @@ class LangHandler:
 
     def gt_lang_str(self, lang):
         try:
-            with open("language_packs/" + lang + ".txt", "r") as file:
+            with open("language_packs/" + lang + ".txt", "r", encoding = "utf-8") as file:
                 return file.read()
         except:
             raise FileNotFoundError("Couldn't fetch language pack '" + lang + "'.")
