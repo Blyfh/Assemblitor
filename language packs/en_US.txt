@@ -41,7 +41,7 @@
         "IR:":  "Instruction Register:"
     },
     "ver_win": {
-        "title": "Error",
+        "title": "Version Error",
         "text":  "Your version of Python is not supported. Please use Python {min_ver} or higher."
     },
     "set_win": {
