@@ -7,9 +7,7 @@ import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
-import lang_handler         as lh
-
-lh = lh.LangHandler()
+import lang_handler
 
 class Emulator:
 
@@ -809,8 +807,23 @@ class Editor:
 min_version = (3, 10)
 cur_version = sys.version_info
 
+try:
+    lh = lang_handler.LangHandler()
+except:
+    exc_type, exc_desc, tb = sys.exc_info()
+    root = tk.Tk()
+    root.withdraw()
+    mb.showerror("Internal Error", f"{exc_type.__name__}: {exc_desc}")
+    raise
+
 if cur_version >= min_version:
-    ed = Editor(testing = True)
+    try:
+        ed = Editor(testing = True)
+    except:
+        exc_type, exc_desc, tb = sys.exc_info()
+        root = tk.Tk()
+        root.withdraw()
+        mb.showerror("Internal Error", f"{exc_type.__name__}: {exc_desc}")
 else:
     root = tk.Tk()
     root.withdraw()
