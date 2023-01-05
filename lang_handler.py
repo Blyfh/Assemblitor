@@ -1,3 +1,6 @@
+import os
+import glob as gl
+
 class LangHandler:
 
     def __init__(self, cur_lang = "en_US"):
@@ -18,18 +21,33 @@ class LangHandler:
             else:
                 raise FileNotFoundError("Couldn't fetch data pack '" + pack + "'.")
 
+    def get_langs(self):
+        lang_paths = gl.glob("language packs/*.txt")
+        langs = []
+        for lang_path in lang_paths:
+            langs.append(os.path.basename(lang_path).split(".txt")[0])
+        return langs
+
+    def get_lang_name(self, lang):
+        lang_data = self.gt_pack_data(lang)
+        try:
+            lang_name = lang_data["info"]["name"]
+        except:
+            raise FileNotFoundError(f"Couldn't fetch info data for 'name' from language pack '{lang}'.")
+        return lang_name
+
     def demo(self):
         try:
             demo = self.cur_lang_data["demo"]
         except:
-            raise FileNotFoundError("Couldn't fetch demo data from language pack '" + self.cur_lang + "'.")
+            raise FileNotFoundError(f"Couldn't fetch demo data from language pack '{self.cur_lang}'.")
         return demo
 
     def abt_win(self, key):
         try:
             ele = self.cur_lang_data["abt_win"][key]
         except:
-            raise FileNotFoundError("Couldn't fetch 'about' window data for '" + key + "' from language pack '" + self.cur_lang + "'.")
+            raise FileNotFoundError(f"Couldn't fetch 'about' window data for '{key}' from language pack '{self.cur_lang}'.")
         return ele
 
     def shc_win(self, key):
