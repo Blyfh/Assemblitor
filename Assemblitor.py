@@ -7,7 +7,7 @@ import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
-import lang_handler
+import TextHandler
 
 class Emulator:
 
@@ -102,7 +102,7 @@ class Program:
             self.pc += 1
         else:
             self.executing = False
-            raise Exception(lh.error("NeverStopped"))
+            raise Exception(eh.error("NeverStopped"))
 
     def execute_command(self, adr):
         cmd = self.gt_cel(adr).gt_cmd()
@@ -137,7 +137,7 @@ class Program:
 
     def gt_cel(self, adr):
         if adr > self.max_adrs - 1:
-            raise Exception(lh.error("MaxPrgLength", max_adrs = self.max_adrs, adrs = adr + 1))
+            raise Exception(eh.error("MaxPrgLength", max_adrs = self.max_adrs, adrs = adr + 1))
         while adr >= len(self.cells):
             cell = Cell(str(len(self.cells)) + " ")
             self.cells.append(cell)
@@ -148,7 +148,7 @@ class Program:
         while i < len(cells):
             adr = cells[i].gt_adr()
             if adr > self.max_adrs - 1:
-                raise Exception(lh.error("MaxPrgLength", max_adrs = self.max_adrs, adrs = adr + 1))
+                raise Exception(eh.error("MaxPrgLength", max_adrs = self.max_adrs, adrs = adr + 1))
             if i == adr:
                 pass
             elif i < adr:
@@ -156,9 +156,9 @@ class Program:
                 cells.insert(i, cell)
             else:
                 if str(cells[adr].toks[1]) == "":
-                    raise Exception(lh.error("AdrsNotChronological", small_adr = adr, big_adr = str(cells[i - 1].gt_adr())))
+                    raise Exception(eh.error("AdrsNotChronological", small_adr = adr, big_adr = str(cells[i - 1].gt_adr())))
                 else:
-                    raise Exception(lh.error("AdrNotUnique", adr = adr))
+                    raise Exception(eh.error("AdrNotUnique", adr = adr))
             i += 1
         return cells
 
@@ -173,9 +173,9 @@ class Program:
             if is_lda:
                 return str(opr)
             else:
-                raise Exception(lh.error("CmdHasValOpr", opr = opr))
+                raise Exception(eh.error("CmdHasValOpr", opr = opr))
         else:
-            raise Exception(lh.error("UnknownOprTyp", opr = opr))
+            raise Exception(eh.error("UnknownOprTyp", opr = opr))
 
     def gt_jmps_to_adr(self, adr):
         if adr in self.jmps_to_adr:
@@ -205,7 +205,7 @@ class Program:
     def cmd_JMP(self, opr_inf):
         self.pc = self.gt_adr(opr_inf) - 1 # "- 1" because self.pc will increment automatically
         if self.gt_jmps_to_adr(self.gt_adr(opr_inf)) > self.max_jmps:
-            raise Exception(lh.error("MaxIterationDepth", max_jmps = self.max_jmps, adr = self.gt_adr(opr_inf)))
+            raise Exception(eh.error("MaxIterationDepth", max_jmps = self.max_jmps, adr = self.gt_adr(opr_inf)))
         else:
             self.jmps_to_adr[self.gt_adr(opr_inf)] = self.gt_jmps_to_adr(self.gt_adr(opr_inf)) + 1 # increment jmps_to_adr for this address
 
@@ -275,7 +275,7 @@ class Cell:
         if type(new_val) is int and new_val >= 0:
             self.toks[1].edit(new_val)
         else:
-            raise Exception(lh.error("ValNotInt_Load", adr = self.gt_adr(), val = new_val))
+            raise Exception(eh.error("ValNotInt_Load", adr = self.gt_adr(), val = new_val))
 
     def gt_adr(self):
         return self.toks[0].gt_adr()
@@ -292,13 +292,13 @@ class Cell:
     def gt_opr(self):
         if len(self.toks) > 2:
             if self.toks[1].tok == "STP":
-                raise Exception(lh.error("CmdStpHasOpr", adr = self.gt_adr()))
+                raise Exception(eh.error("CmdStpHasOpr", adr = self.gt_adr()))
             else:
                 return self.toks[2].gt_opr()
         elif self.toks[1].tok == "STP":
             return Operand("", self.cpos)
         else:
-            raise Exception(lh.error("MissingOpr", cmd = self.gt_cmd(), adr = self.gt_adr()))
+            raise Exception(eh.error("MissingOpr", cmd = self.gt_cmd(), adr = self.gt_adr()))
 
 
 class Token:
@@ -322,13 +322,13 @@ class Token:
             try:
                 tok_int = int(tok.lstrip()) # allow whitespaces before address
             except:
-                raise Exception(lh.error("AdrTokNotInt", tok = tok))
+                raise Exception(eh.error("AdrTokNotInt", tok = tok))
             if tok_int >= 0:
                 self.type = 0
                 self.cpos = tok_int
                 return tok_int
             else:
-                raise Exception(lh.error("AdrTokIsNegative", tok = tok))
+                raise Exception(eh.error("AdrTokIsNegative", tok = tok))
         elif self.tpos == 1:
             try:
                 tok_int = int(tok)
@@ -340,14 +340,14 @@ class Token:
                     self.type = 1
                     return tok.upper()
                 else:
-                    raise Exception(lh.error("TokNotValOrCmd", adr = self.cpos, tok = tok))
+                    raise Exception(eh.error("TokNotValOrCmd", adr = self.cpos, tok = tok))
             self.type = 2
             return tok_int
         elif self.tpos == 2:
             self.type = 3
             return Operand(tok, self.cpos)
         else:
-            raise Exception(lh.error("MaxCelLength", adr = self.cpos))
+            raise Exception(eh.error("MaxCelLength", adr = self.cpos))
 
     def add_leading_zero(self, tok_str):
         tok_str_stripped = tok_str.strip()
@@ -369,34 +369,34 @@ class Token:
                 i += 1
             self.tok_str = str(self.tok) + self.tok_str[i:]
         else:
-            raise Exception(lh.error("TokNotVal_Overwrite", tpos = self.tpos, adr = self.cpos, tok = self.tok, new_val = new_val))
+            raise Exception(eh.error("TokNotVal_Overwrite", tpos = self.tpos, adr = self.cpos, tok = self.tok, new_val = new_val))
 
     def gt_cmd(self):
         if self.type == 1:
             return self.tok
         else:
             if len(self.tok_str) > 0:
-                raise Exception(lh.error("TokNotCmd", tpos = self.tpos, adr = self.cpos, tok = self.tok))
+                raise Exception(eh.error("TokNotCmd", tpos = self.tpos, adr = self.cpos, tok = self.tok))
             else:
-                raise Exception(lh.error("TokNotCmd_EmptyTok", tpos = self.tpos, adr = self.cpos))
+                raise Exception(eh.error("TokNotCmd_EmptyTok", tpos = self.tpos, adr = self.cpos))
 
     def gt_opr(self):
         if self.type == 3:
             return self.tok
         else:
             if len(self.tok_str) > 0:
-                raise Exception(lh.error("TokNotOpr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
+                raise Exception(eh.error("TokNotOpr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
             else:
-                raise Exception(lh.error("TokNotOpr_EmptyTok", tpos = self.tpos, adr = self.cpos))
+                raise Exception(eh.error("TokNotOpr_EmptyTok", tpos = self.tpos, adr = self.cpos))
 
     def gt_adr(self):
         if self.type == 0:
             return self.tok
         else:
             if len(self.tok_str) > 0:
-                raise Exception(lh.error("TokNotAdr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
+                raise Exception(eh.error("TokNotAdr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
             else:
-                raise Exception(lh.error("TokNotAdr_EmptyTok", tpos = self.tpos, adr = self.cpos))
+                raise Exception(eh.error("TokNotAdr_EmptyTok", tpos = self.tpos, adr = self.cpos))
 
 
 class Operand:
@@ -406,7 +406,7 @@ class Operand:
         if type(opr_str) is str:
             self.opr_str = opr_str
         else:
-            raise Exception(lh.error("OprTokNotStr", opr_str = opr_str))
+            raise Exception(eh.error("OprTokNotStr", opr_str = opr_str))
         self.type = 0 # 0 = direct address, 1 = indirect address, 2 = value
         self.opr = self.create_opr(self.opr_str)
 
@@ -416,29 +416,29 @@ class Operand:
                 try:
                     opr_int = int(opr_str[1:])
                 except:
-                    raise Exception(lh.error("ValOprNotInt", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("ValOprNotInt", adr = self.cpos, opr = opr_str))
                 self.type = 2
                 return opr_int
             elif opr_str[0] == "(" and opr_str[-1] == ")":
                 try:
                     opr_int = int(opr_str[1:-1])
                 except:
-                    raise Exception(lh.error("IndOprNotInt", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("IndOprNotInt", adr = self.cpos, opr = opr_str))
                 if opr_int >= 0:
                     self.type = 1
                     return opr_int
                 else:
-                    raise Exception(lh.error("IndOprIsNegative", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("IndOprIsNegative", adr = self.cpos, opr = opr_str))
             else:
                 try:
                     opr_int = int(opr_str)
                 except:
-                    raise Exception(lh.error("UnknownOpr", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("UnknownOpr", adr = self.cpos, opr = opr_str))
                 if opr_int >= 0:
                     self.type = 0
                     return opr_int
                 else:
-                    raise Exception(lh.error("DirOprIsNegative", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("DirOprIsNegative", adr = self.cpos, opr = opr_str))
         else:
             self.type = None
             return None
@@ -473,10 +473,9 @@ class Editor:
         self.out_SCT.delete("1.0", "end")
         if exc.__name__ == "Exception": #
             self.out_SCT.insert("insert", val)
-        else: # special case for in-code errors
-            self.out_SCT.insert("insert", traceback.format_exception_only(exc, val)[0])
+        else: # special case for internal errors
+            mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
         self.out_SCT.config(state = "disabled")
-        #print("".join(traceback.format_exception(exc, val, tb = tb)))
 
     def tkinter_gui(self):
         self.settings_WIN  = None
@@ -800,7 +799,7 @@ class Editor:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
-# wenn man beim öffnen der Demo seine Änderungen des alten Programms speichert, wird der Speicherort nicht zurückgesetzt
+# wenn man beim Öffnen der Demo seine Änderungen des alten Programms speichert, wird der Speicherort nicht zurückgesetzt
 # edit() braucht nichtnegative Werte, aber eine Speicherzelle akzeptiert alle Ganzzahlen. Was ist richtig?
 # Kommentare, die eine ganze Zahlen besetzen, werden im StepMode mit dem Bafehl drüber mitmarkiert
 
@@ -808,7 +807,8 @@ min_version = (3, 10)
 cur_version = sys.version_info
 
 try:
-    lh = lang_handler.LangHandler()
+    lh = TextHandler.LangHandler()
+    eh = TextHandler.ErrorHandler()
 except:
     exc_type, exc_desc, tb = sys.exc_info()
     root = tk.Tk()

@@ -1,25 +1,23 @@
 import os
 import glob as gl
 
+class PackHandler:
+
+    def gt_pack_data(self, pack, direc):
+        return dict(eval(self.gt_pack_str(pack, direc)))
+
+    def gt_pack_str(self, pack, direc):
+        try:
+            with open(f"{direc}/{pack}.txt", "r", encoding ="utf-8") as file:
+                return file.read()
+        except:
+            raise FileNotFoundError(f"Couldn't fetch pack '{pack}' from directory '{direc}'.")
+
 class LangHandler:
 
     def __init__(self, cur_lang = "en_US"):
         self.cur_lang = cur_lang
-        self.cur_lang_data = self.gt_pack_data(self.cur_lang)
-        self.errors = self.gt_pack_data("errors", "resources")
-
-    def gt_pack_data(self, pack, dir = "language packs"):
-        return dict(eval(self.gt_pack_str(pack, dir)))
-
-    def gt_pack_str(self, pack, dir):
-        try:
-            with open(f"{dir}/{pack}.txt", "r", encoding = "utf-8") as file:
-                return file.read()
-        except:
-            if dir == "language packs":
-                raise FileNotFoundError("Couldn't fetch language pack '" + pack + "'.")
-            else:
-                raise FileNotFoundError("Couldn't fetch data pack '" + pack + "'.")
+        self.cur_lang_data = ph.gt_pack_data(self.cur_lang, "language packs")
 
     def get_langs(self):
         lang_paths = gl.glob("language packs/*.txt")
@@ -29,7 +27,7 @@ class LangHandler:
         return langs
 
     def get_lang_name(self, lang):
-        lang_data = self.gt_pack_data(lang)
+        lang_data = ph.gt_pack_data(lang, "language packs")
         try:
             lang_name = lang_data["info"]["name"]
         except:
@@ -71,7 +69,7 @@ class LangHandler:
                 for i in range(len(blocks) - 1):
                     txt_arg_pair = blocks[i].split("{", maxsplit=1)
                     if len(txt_arg_pair) == 1:
-                        raise SyntaxError(f"Unmatched curly bracket in error data for '{err}'.")
+                        raise SyntaxError(f"Unmatched curly bracket in 'version_error' window data for 'text'.")
                     else:
                         arg = None
                         for kw in kwargs:  # search for matching argument
@@ -119,6 +117,11 @@ class LangHandler:
             return text_code_pairs
         return ele
 
+class ErrorHandler():
+
+    def __init__(self):
+        self.errors = ph.gt_pack_data("errors", "resources")
+
     def error(self, err, **kwargs):
         try:
             err_tpl = self.errors[err]
@@ -144,3 +147,5 @@ class LangHandler:
                     err_desc += txt_arg_pair[0] + str(arg)
             err_desc += blocks[len(blocks) - 1]
         return err_name + ": " + err_desc
+
+ph = PackHandler()
