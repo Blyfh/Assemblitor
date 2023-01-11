@@ -24,7 +24,7 @@
         "Reload":   "Neuladen",
         "Save":     "Speichern",
         "SaveAs":   "Speichern unter",
-        "Settings": "Einstellungen",
+        "Options":  "Einstellungen",
         "Exit":     "Beenden",
 
         "Help":      "Hilfe",

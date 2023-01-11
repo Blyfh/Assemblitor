@@ -458,14 +458,16 @@ class Editor:
         self.file_path  = None
         self.last_dir   = os.path.join(os.path.expanduser('~'), lh.file_mng("DocumentsDir"))
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
-        self.code_font  = ("Courier New", 10)
+        self.code_font     = ("Courier New", 10)
+        self.title_font    = ("Segoe",       15, "bold")
+        self.subtitle_font = ("Segoe",       13)
         self.emu        = Emulator()
         self.is_new_pro = False
         self.already_modified = False
         self.tkinter_gui()
         if testing:
             self.open_demo_pro()
-            #self.run()
+            self.open_options_win()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -478,27 +480,31 @@ class Editor:
         self.out_SCT.config(state = "disabled")
 
     def tkinter_gui(self):
-        self.settings_WIN  = None
-        self.shortcuts_WIN = None
-        self.assembly_WIN  = None
-        self.about_WIN     = False
         self.root = tk.Tk()
         tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
+        self.is_light_theme = tk.IntVar()
+        self.only_one_step  = tk.IntVar()
+        self.options_WIN   = None
+        self.shortcuts_WIN = None
+        self.assembly_WIN  = None
+        self.about_WIN     = None
         minsize = lh.gui("minsize")
         self.root.minsize(minsize[0], minsize[1])
         self.root.config(bg = "black")
         self.root.title(lh.gui("title"))
-        self.only_one_step = tk.IntVar()
     # styles:
         self.style = ttk.Style(self.root)
         self.style.theme_use("winnative")
         self.style.configure("TButton", relief = "flat", borderwidth = 1)
-        self.style.configure("TFrame",            background = "#222222")
-        self.style.configure("info.TFrame",       background = "#FFFFFF")
-        self.style.configure("text.TFrame",       background = "#333333")
-        self.style.configure("TLabel",            background = "#333333", foreground = "#FFFFFF")
-        self.style.configure("info_title.TLabel", background = "#EEEEEE", foreground = "#000000", anchor = "center")
-        self.style.configure("info_value.TLabel", background = "#DDDDDD", foreground = "#000000", anchor = "center", font = self.code_font)
+        self.style.configure("TFrame",                background = "#222222")
+        self.style.configure("info.TFrame",           background = "#FFFFFF")
+        self.style.configure("text.TFrame",           background = "#333333")
+        self.style.configure("TLabel",                background = "#333333", foreground = "#FFFFFF")
+        self.style.configure("info_title.TLabel",     background = "#EEEEEE", foreground = "#000000", anchor = "center")
+        self.style.configure("info_value.TLabel",     background = "#DDDDDD", foreground = "#000000", anchor = "center", font = self.code_font)
+        self.style.configure("subtitle.TLabel",       background = "#333333", foreground = "#FFFFFF", font = self.subtitle_font)
+        self.style.configure("TCheckbutton",          background = "#FFFFFF", foreground = "#000000")#, relief = "flat", borderwidth = 1)
+        self.style.configure("embedded.TCheckbutton", background = "#333333", foreground = "#FFFFFF")  # , relief = "flat", borderwidth = 1)
     # elements
         self.menubar = tk.Menu(self.root)
         self.root.config(menu = self.menubar)
@@ -508,7 +514,7 @@ class Editor:
         self.file_MNU.add_command(label = lh.gui("Reload"),   command = self.reload_file)
         self.file_MNU.add_command(label = lh.gui("Save"),     command = self.save_file)
         self.file_MNU.add_command(label = lh.gui("SaveAs"),   command = self.save_file_as)
-        self.file_MNU.add_command(label = lh.gui("Settings"), command = self.open_settings_win)
+        self.file_MNU.add_command(label = lh.gui("Options"),  command = self.open_options_win)
         self.file_MNU.add_command(label = lh.gui("Exit"),     command = self.destroy)
         self.menubar.add_cascade(label = lh.gui("File"), menu = self.file_MNU, underline = 0)
 
@@ -530,32 +536,32 @@ class Editor:
         self.step_CHB.state(["!alternate"]) # deselect the checkbutton
 
         self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
-        self.ireg_FRM.pack(side = "right", padx = 5, pady = 5)
         self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = lh.gui("IR:"))
         self.ireg_cmd_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
         self.ireg_opr_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
+        self.ireg_FRM.pack(side="right", padx=5, pady=5)
         self.ireg_title_LBL.grid(row = 0, column = 0, columnspan = 2)
         self.ireg_cmd_LBL.grid(row = 1, column = 0, padx = 1)
         self.ireg_opr_LBL.grid(row = 1, column = 1, padx = 1)
 
         self.accu_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
-        self.accu_FRM.pack(side = "right", padx = 5, pady = 5)
         self.accu_title_LBL = ttk.Label(self.accu_FRM, style = "info_title.TLabel", text = lh.gui("ACC:"))
         self.accu_value_LBL = ttk.Label(self.accu_FRM, style = "info_value.TLabel", width = 5)
+        self.accu_FRM.pack(side = "right", padx = 5, pady = 5)
         self.accu_title_LBL.pack(side = "top",    fill = "x")
         self.accu_value_LBL.pack(side = "bottom", fill = "x")
 
         self.proc_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
-        self.proc_FRM.pack(side = "right", padx = 5, pady = 5)
         self.proc_title_LBL = ttk.Label(self.proc_FRM, style = "info_title.TLabel", text = lh.gui("PC:"))
         self.proc_value_LBL = ttk.Label(self.proc_FRM, style = "info_value.TLabel", width = 5)
+        self.proc_FRM.pack(side = "right", padx = 5, pady = 5)
         self.proc_title_LBL.pack(side = "top",    fill = "x")
         self.proc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = ttk.Frame(self.root)
-        self.text_FRM.pack(fill = "both", expand = True)
         self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
         self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word")
+        self.text_FRM.pack(fill = "both", expand = True)
         self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
         self.out_SCT.pack(side = "right", fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
         self.out_SCT.tag_config("pc_is_here", foreground = "#00FF00")
@@ -573,6 +579,12 @@ class Editor:
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
+    def destroy(self):
+        if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
+            self.root.destroy()
+        elif self.wants_to_save() == True: # checks if user didn't abort in wants_to_save()
+            self.root.destroy()
+
     def wants_to_save(self):
         is_saving = mb.askyesnocancel(lh.file_mng("UnsavedChanges"), lh.file_mng("Save?")) # returns None when clicking 'Cancel'
         if is_saving:
@@ -582,12 +594,6 @@ class Editor:
             return "abort"
         else:
             return True
-
-    def destroy(self):
-        if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
-            self.root.destroy()
-        elif self.wants_to_save() == True: # checks if user didn't abort in wants_to_save()
-            self.root.destroy()
 
     def on_modified(self, event):
         if not self.already_modified: # because somehow on_modified always gets called twice
@@ -673,8 +679,27 @@ class Editor:
             self.save_file()
             self.root.title(self.file_path + " – " + lh.gui("title"))
 
-    def open_settings_win(self):
-        pass
+    def open_options_win(self):
+        if self.options_WIN:
+            return
+        self.options_WIN = tk.Toplevel(self.root)
+        self.options_WIN.geometry(lh.opt_win("geometry"))
+        self.options_WIN.resizable(False, False)
+        self.options_WIN.config(bg = "black")
+        self.options_WIN.title(lh.opt_win("title"))
+
+        options_FRM = ttk.Frame(self.options_WIN, style = "text.TFrame")
+        appearance_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"), justify = "left")
+        light_theme_CHB = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme, command = self.on_restart_opt_change, onvalue = True, offvalue = False)
+        options_FRM.pack(fill = "both", expand = True)
+        appearance_subtitle_LBL.pack(fill = "x", expand = False, pady = 5, anchor = "nw", padx = 5,)
+        light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
+        light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
+        self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.options_WIN"))
+
+    def on_restart_opt_change(self):
+        print(self.is_light_theme.get())
+        print("Save this!\nYou have to restart the program in order to properly enable your changes.")
 
     def open_assembly_win(self):
         if self.assembly_WIN:
@@ -733,7 +758,7 @@ class Editor:
         self.about_WIN.title(lh.abt_win("title"))
 
         about_FRM = ttk.Frame(self.about_WIN, style = "text.TFrame")
-        title_LBL = ttk.Label(about_FRM, style = "TLabel", text = title, anchor = "center", justify = "left", font = ("Segoe", 15, "bold"))
+        title_LBL = ttk.Label(about_FRM, style = "TLabel", text = title, anchor = "center", justify = "left", font = self.title_font)
         text_LBL  = ttk.Label(about_FRM, style = "TLabel", text = text,  anchor = "w",      justify = "left")
         about_FRM.pack(fill = "both", expand = True)
         title_LBL.pack(fill = "both", expand = True, padx = 5, pady = (5, 0))
@@ -788,7 +813,7 @@ class Editor:
 # bei Adressverschiebung alle Adressen anpassen
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
-# SETTINGS:
+# OPTIONS:
 #   Exception optional in Konsole ausgeben
 #   Anzahl Vornullen (Editor.insert_address())
 #   asktosave bei Schließen ausstellbar
@@ -802,6 +827,7 @@ class Editor:
 # wenn man beim Öffnen der Demo seine Änderungen des alten Programms speichert, wird der Speicherort nicht zurückgesetzt
 # edit() braucht nichtnegative Werte, aber eine Speicherzelle akzeptiert alle Ganzzahlen. Was ist richtig?
 # Kommentare, die eine ganze Zahlen besetzen, werden im StepMode mit dem Bafehl drüber mitmarkiert
+# Fokus ist nicht auf Subfenster, wenn diese geöffnet werden
 
 min_version = (3, 10)
 cur_version = sys.version_info

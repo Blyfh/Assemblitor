@@ -41,6 +41,13 @@ class LangHandler:
             raise FileNotFoundError(f"Couldn't fetch demo data from language pack '{self.cur_lang}'.")
         return demo
 
+    def opt_win(self, key):
+        try:
+            ele = self.cur_lang_data["opt_win"][key]
+        except:
+            raise FileNotFoundError(f"Couldn't fetch 'options' window data for '{key}' from language pack '{self.cur_lang}'.")
+        return ele
+
     def abt_win(self, key):
         try:
             ele = self.cur_lang_data["abt_win"][key]
