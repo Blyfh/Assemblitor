@@ -272,7 +272,7 @@ class Cell:
         return tok_strs
 
     def edit(self, new_val):
-        if type(new_val) is int and new_val >= 0:
+        if type(new_val) is int:
             self.toks[1].edit(new_val)
         else:
             raise Exception(eh.error("ValNotInt_Load", adr = self.gt_adr(), val = new_val))
@@ -826,7 +826,7 @@ class Editor:
 # run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
 # wenn man beim Öffnen der Demo seine Änderungen des alten Programms speichert, wird der Speicherort nicht zurückgesetzt
 # edit() braucht nichtnegative Werte, aber eine Speicherzelle akzeptiert alle Ganzzahlen. Was ist richtig?
-# Kommentare, die eine ganze Zahlen besetzen, werden im StepMode mit dem Bafehl drüber mitmarkiert
+# Kommentare, die eine ganze Zahlen besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
 # Fokus ist nicht auf Subfenster, wenn diese geöffnet werden
 
 min_version = (3, 10)
