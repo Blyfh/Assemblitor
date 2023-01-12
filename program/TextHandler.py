@@ -1,5 +1,8 @@
 import os
-import glob as gl
+import glob    as gl
+import pathlib as pl
+
+root = pl.Path(__file__).parent.parent.absolute()
 
 class PackHandler:
 
@@ -8,7 +11,7 @@ class PackHandler:
 
     def gt_pack_str(self, pack, direc):
         try:
-            with open(f"{direc}/{pack}.txt", "r", encoding ="utf-8") as file:
+            with open(f"{root}/{direc}/{pack}.txt", "r", encoding ="utf-8") as file:
                 return file.read()
         except:
             raise FileNotFoundError(f"Couldn't fetch pack '{pack}' from directory '{direc}'.")
