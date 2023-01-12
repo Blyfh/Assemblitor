@@ -2,7 +2,7 @@ import sys
 import string
 import tkinter              as tk
 import tkinter.messagebox   as mb
-from program import TextHandler
+from scripts import TextHandler
 
 class Emulator:
 
@@ -15,13 +15,13 @@ class Emulator:
 
     def gt_out(self, pro_str, execute_all = True):
         if pro_str:
-            if self.pro_str != pro_str: # program changed
+            if self.pro_str != pro_str: # scripts changed
                 self.is_new_pro = True
             if self.is_new_pro:
                 self.create_pro(pro_str)
-                if not execute_all:  # display first step of program
+                if not execute_all:  # display first step of scripts
                     return self.pro.gt_pro(), self.pro.pc, self.pro.accu, self.gt_ireg()
-            if len(self.pro.cells) == 0: # program is empty
+            if len(self.pro.cells) == 0: # scripts is empty
                 return
             self.pro.execute(execute_all)
             if self.pro.gt_cel(self.pro.pc).gt_cmd() == "STP":

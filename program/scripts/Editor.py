@@ -6,8 +6,8 @@ import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
-from program import TextHandler
-from program import Emulator
+from scripts import TextHandler
+from scripts import Emulator
 
 class Editor:
 
@@ -258,7 +258,7 @@ class Editor:
 
     def on_restart_opt_change(self):
         print(self.is_light_theme.get())
-        print("Save this!\nYou have to restart the program in order to properly enable your changes.")
+        print("Save this!\nYou have to restart the scripts in order to properly enable your changes.")
 
     def open_assembly_win(self):
         if self.assembly_WIN:
