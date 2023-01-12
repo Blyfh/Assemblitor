@@ -2,7 +2,8 @@ import os
 import glob    as gl
 import pathlib as pl
 
-root = pl.Path(__file__).parent.parent.absolute()
+program_dir = pl.Path(__file__).parent.parent.absolute()
+
 
 class PackHandler:
 
@@ -11,7 +12,7 @@ class PackHandler:
 
     def gt_pack_str(self, pack, direc):
         try:
-            with open(f"{root}/{direc}/{pack}.txt", "r", encoding ="utf-8") as file:
+            with open(f"{program_dir}/{direc}/{pack}.txt", "r", encoding ="utf-8") as file:
                 return file.read()
         except:
             raise FileNotFoundError(f"Couldn't fetch pack '{pack}' from directory '{direc}'.")
@@ -20,17 +21,17 @@ class LangHandler:
 
     def __init__(self, cur_lang = "en_US"):
         self.cur_lang = cur_lang
-        self.cur_lang_data = ph.gt_pack_data(self.cur_lang, "language packs")
+        self.cur_lang_data = ph.gt_pack_data(self.cur_lang, "languages")
 
     def get_langs(self):
-        lang_paths = gl.glob("language packs/*.txt")
+        lang_paths = gl.glob("languages/*.txt")
         langs = []
         for lang_path in lang_paths:
             langs.append(os.path.basename(lang_path).split(".txt")[0])
         return langs
 
     def get_lang_name(self, lang):
-        lang_data = ph.gt_pack_data(lang, "language packs")
+        lang_data = ph.gt_pack_data(lang, "languages")
         try:
             lang_name = lang_data["info"]["name"]
         except:

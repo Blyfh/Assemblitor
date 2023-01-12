@@ -4,6 +4,7 @@ import tkinter              as tk
 import tkinter.messagebox   as mb
 from scripts import TextHandler
 
+
 class Emulator:
 
     def __init__(self, max_jmps = 8192, max_adrs = 8192):

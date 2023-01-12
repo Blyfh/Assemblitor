@@ -6,8 +6,12 @@ import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
+import pathlib as pl
 from scripts import TextHandler
 from scripts import Emulator
+
+root = pl.Path(__file__).parent.parent.parent.absolute()
+
 
 class Editor:
 
@@ -15,7 +19,7 @@ class Editor:
         self.init_inp   = ""
         self.dirty_flag = False
         self.file_path  = None
-        self.last_dir   = os.path.join(os.path.expanduser('~'), lh.file_mng("DocumentsDir"))
+        self.last_dir   = root
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
         self.code_font     = ("Courier New", 10)
         self.title_font    = ("Segoe",       15, "bold")
@@ -215,6 +219,7 @@ class Editor:
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return
+        print("last dir:", self.last_dir)
         self.file_path = fd.askopenfilename(title = lh.file_mng("OpenFile"), initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
             self.root.title(self.file_path + " – " + lh.gui("title"))

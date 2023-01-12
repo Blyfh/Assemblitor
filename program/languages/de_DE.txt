@@ -5,7 +5,6 @@
         "authors": ["Blyfh"]
     },
     "file_mng": {
-        "DocumentsDir": "Dokumente",
         "AsmFiles":     "Assembler-Dateien",
         "TxtFiles":     "Textdateien",
 
