@@ -336,8 +336,8 @@ class Editor:
         self.inp_SCT.delete("1.0", "end")
         self.init_inp = demo
         self.inp_SCT.insert("insert", demo)
-        self.root.title(lh.gui("title"))
         self.set_dirty_flag(False)
+        self.root.title(lh.gui("title"))
 
     def key_enter(self, event):
         self.insert_address()
@@ -383,9 +383,7 @@ class Editor:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
-# wenn man beim Öffnen der Demo seine Änderungen des alten Programms speichert, wird der Speicherort nicht zurückgesetzt
-# edit() braucht nichtnegative Werte, aber eine Speicherzelle akzeptiert alle Ganzzahlen. Was ist richtig?
-# Kommentare, die eine ganze Zahlen besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
+# Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
 # Fokus ist nicht auf Subfenster, wenn diese geöffnet werden
 
 min_version = (3, 10)
