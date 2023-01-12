@@ -34,7 +34,7 @@
         "About":     "Über",
 
         "Run":      "Ausführen",
-        "StepMode": "Schritt-für-Schritt-Modus",
+        "StepMode": "Einzelschrittmodus",
 
         "PC:":  "Befehlszähler:",
         "ACC:": "Akkumulator:",
