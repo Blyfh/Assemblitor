@@ -29,13 +29,13 @@ class Editor:
         self.tkinter_gui()
         if self.testing:
             self.open_demo_pro()
-            self.open_options_win()
+            #self.open_options_win()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
         self.out_SCT.config(state = "normal", fg = self.theme_error_color)
         self.out_SCT.delete("1.0", "end")
-        if exc.__name__ == "Exception": #
+        if exc.__name__ == "Exception": # normal case for Assembly errors caused by user
             self.out_SCT.insert("insert", val)
         else: # special case for internal errors
             if self.testing:
@@ -46,7 +46,7 @@ class Editor:
 
     def tkinter_gui(self):
         self.root = tk.Tk()
-        self.only_one_step = tk.IntVar()
+        self.only_one_step  = tk.IntVar()
         self.is_light_theme = tk.IntVar()
         if ph.is_light_theme():
             self.is_light_theme.set(1)
@@ -424,7 +424,7 @@ class Editor:
 #   Anzahl Vornullen (Editor.insert_address())
 #   asktosave bei Schließen ausstellbar
 #   light mode
-#   Deutsch (auch Errors?)
+#   Sprache
 
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
@@ -456,9 +456,10 @@ if cur_version >= min_version:
         ed = Editor(testing = True)
     except:
         exc_type, exc_desc, tb = sys.exc_info()
-        root = tk.Tk()
-        root.withdraw()
-        mb.showerror("Internal Error", f"{exc_type.__name__}: {exc_desc}")
+        if not exc_type.__name__ == "KeyboardInterrupt":
+            root = tk.Tk()
+            root.withdraw()
+            mb.showerror("Internal Error", f"{exc_type.__name__}: {exc_desc}")
 else:
     root = tk.Tk()
     root.withdraw()
