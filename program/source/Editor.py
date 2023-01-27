@@ -273,7 +273,8 @@ class Editor:
             self.root.title(self.file_path + " – " + lh.gui("title"))
 
     def open_options_win(self):
-        if self.options_WIN:
+        if self.options_WIN: # set focus on already existing window
+            self.set_child_win_focus("self.options_WIN")
             return
         self.options_WIN = tk.Toplevel(self.root)
         self.options_WIN.geometry(lh.opt_win("geometry"))
@@ -289,13 +290,15 @@ class Editor:
         light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
         if not self.is_light_theme.get():
             light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
+        self.set_child_win_focus("self.options_WIN")
         self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.options_WIN"))
 
     def restart_opt_change(self):
         print("Save this!\nYou have to restart the program in order to properly apply your changes.")
 
     def open_assembly_win(self):
-        if self.assembly_WIN:
+        if self.assembly_WIN: # set focus on already existing window
+            self.set_child_win_focus("self.assembly_WIN")
             return
         self.assembly_WIN = tk.Toplevel(self.root)
         minsize = lh.asm_win("minsize")
@@ -317,10 +320,12 @@ class Editor:
             text_TXT.insert("end", text_code_pair[1], "asm_code")
         text_SCB.config(command = text_TXT.yview)
         text_TXT.config(state = "disabled")
+        self.set_child_win_focus("self.assembly_WIN")
         self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.assembly_WIN"))
 
     def open_shortcuts_win(self):
-        if self.shortcuts_WIN:
+        if self.shortcuts_WIN: # set focus on already existing window
+            self.set_child_win_focus("self.shortcuts_WIN")
             return
         combos = lh.shc_win("combos")
         actions = lh.shc_win("actions")
@@ -336,10 +341,12 @@ class Editor:
         shortcuts_FRM.pack(fill = "both", expand = True)
         combos_LBL.pack( side = "left",  fill = "both", expand = True, pady = 5, padx = 5)
         actions_LBL.pack(side = "right", fill = "both", expand = True, pady = 5, padx = (0, 5))
+        self.set_child_win_focus("self.shortcuts_WIN")
         self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.shortcuts_WIN"))
 
     def open_about_win(self):
-        if self.about_WIN:
+        if self.about_WIN: # set focus on already existing window
+            self.set_child_win_focus("self.about_WIN")
             return
         self.is_about_win_open = True
         title = lh.gui("title")
@@ -356,7 +363,13 @@ class Editor:
         about_FRM.pack(fill = "both", expand = True)
         title_LBL.pack(fill = "both", expand = True, padx = 5, pady = (5, 0))
         text_LBL.pack( fill = "both", expand = True, padx = 5, pady = (0, 5))
+        self.set_child_win_focus("self.about_WIN")
         self.about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.about_WIN"))
+
+    def set_child_win_focus(self, win_str):
+        eval(win_str + ".focus_force()")
+        eval(win_str + ".lift()")
+        self.root.update()
 
     def on_child_win_close(self, win_str):
         eval(win_str + ".destroy()")
@@ -416,9 +429,7 @@ class Editor:
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
-# run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
 # Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
-# Fokus ist nicht auf Subfenster, wenn diese geöffnet werden (+ Refokus, wenn doppelt geöffnet)
 
 min_version = (3, 10)
 cur_version = sys.version_info
