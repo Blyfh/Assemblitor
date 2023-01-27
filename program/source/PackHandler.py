@@ -12,26 +12,84 @@ class PackHandler:
 
     def gt_pack_str(self, pack, direc):
         try:
-            with open(f"{program_dir}/{direc}/{pack}.txt", "r", encoding ="utf-8") as file:
+            with open(f"{direc}/{pack}.dict", "r", encoding = "utf-8") as file:
                 return file.read()
         except:
             raise FileNotFoundError(f"Couldn't fetch pack '{pack}' from directory '{direc}'.")
+
+    def st_pack_data(self, pack, direc, new_data):
+        try:
+            with open(f"{direc}/{pack}.dict", "w", encoding = "utf-8") as file:
+                file.write(self.format(new_data))
+        except:
+            raise FileNotFoundError(f"Couldn't update pack '{pack}' from directory '{direc}'.")
+
+    def format(self, dict_data, depth = 1):
+        items_str = ""
+        for key, value in dict_data.items():
+            if type(value) is dict:
+                items_str += "    " * depth + f"\"{key}\": {self.format(value, depth + 1)   },\n"
+            else:
+                items_str += "    " * depth + f"\"{key}\": {self.format_no_dict_value(value)},\n"
+        return "{" + f"\n{items_str[:-2]}\n" + "    " * (depth - 1) + "}"
+
+    def format_no_dict_value(self, value):
+        if type(value) is str:
+            if len(value.split("\n")) > 1:
+                value = f"\"\"\"{value}\"\"\""
+            else:
+                value = f"\"{value}\""
+        elif type(value) is tuple or type(value) is list:
+            elements_str = ""
+            for element in value:
+                if type(element) is str:
+                    elements_str += f"\"{element}\", "
+                else:
+                    elements_str += str(element) + ", "
+            if type(value) is tuple:
+                value = f"({elements_str[:-2]})"
+            else:
+                value = f"[{elements_str[:-2]}]"
+        return value
+
+class ProfileHandler:
+
+    def __init__(self, profile_dir):
+        self.profile_dir = profile_dir
+
+    def save_profile_data(self, key, new_value):
+        profile_data = ph.gt_pack_data("profile", f"{self.profile_dir}")
+        try:
+            profile_data[key] = new_value
+        except:
+            raise FileNotFoundError(f"Couldn't fetch profile data for '{key}'.")
+        ph.st_pack_data("profile", f"{self.profile_dir}", new_data = profile_data)
+
+    def gt_value(self, key):
+        profile_data = ph.gt_pack_data("profile", f"{self.profile_dir}")
+        try:
+            return profile_data[key]
+        except:
+            raise FileNotFoundError(f"Couldn't fetch profile data for '{key}'.")
+
+    def is_light_theme(self):
+        return self.gt_value("is_light_theme")
 
 class LangHandler:
 
     def __init__(self, cur_lang = "en_US"):
         self.cur_lang = cur_lang
-        self.cur_lang_data = ph.gt_pack_data(self.cur_lang, "languages")
+        self.cur_lang_data = ph.gt_pack_data(self.cur_lang, f"{program_dir}/languages")
 
     def get_langs(self):
-        lang_paths = gl.glob("languages/*.txt")
+        lang_paths = gl.glob("languages/*.dict")
         langs = []
         for lang_path in lang_paths:
-            langs.append(os.path.basename(lang_path).split(".txt")[0])
+            langs.append(os.path.basename(lang_path).split(".dict")[0])
         return langs
 
     def get_lang_name(self, lang):
-        lang_data = ph.gt_pack_data(lang, "languages")
+        lang_data = ph.gt_pack_data(lang, f"{program_dir}/languages")
         try:
             lang_name = lang_data["info"]["name"]
         except:
@@ -131,7 +189,7 @@ class LangHandler:
 class ErrorHandler():
 
     def __init__(self):
-        self.errors = ph.gt_pack_data("errors", "resources")
+        self.errors = ph.gt_pack_data("errors", f"{program_dir}/resources")
 
     def error(self, err, **kwargs):
         try:

@@ -1,6 +1,6 @@
 import sys
 
 sys.path.append("program")
-sys.path.append("scripts")
+sys.path.append("source")
 
-from program.scripts import Editor
+from program.source import Editor

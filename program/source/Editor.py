@@ -7,15 +7,14 @@ import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
 import pathlib as pl
-from scripts import TextHandler
-from scripts import Emulator
-
-root = pl.Path(__file__).parent.parent.parent.absolute()
+from source import PackHandler
+from source import Emulator
 
 
 class Editor:
 
     def __init__(self, testing = False):
+        self.testing    = testing
         self.init_inp   = ""
         self.dirty_flag = False
         self.file_path  = None
@@ -28,46 +27,52 @@ class Editor:
         self.is_new_pro = False
         self.already_modified = False
         self.tkinter_gui()
-        if testing:
+        if self.testing:
             self.open_demo_pro()
             self.open_options_win()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
-        self.out_SCT.config(state = "normal", fg = "#FF5555")
+        self.out_SCT.config(state = "normal", fg = self.theme_error_color)
         self.out_SCT.delete("1.0", "end")
         if exc.__name__ == "Exception": #
             self.out_SCT.insert("insert", val)
         else: # special case for internal errors
-            mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
+            if self.testing:
+                traceback.print_exception(val)
+            else:
+                mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
         self.out_SCT.config(state = "disabled")
 
     def tkinter_gui(self):
         self.root = tk.Tk()
-        tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
+        self.only_one_step = tk.IntVar()
         self.is_light_theme = tk.IntVar()
-        self.only_one_step  = tk.IntVar()
+        if ph.is_light_theme():
+            self.is_light_theme.set(1)
+        self.set_theme(init = True)
+        tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
         self.options_WIN   = None
         self.shortcuts_WIN = None
         self.assembly_WIN  = None
         self.about_WIN     = None
         minsize = lh.gui("minsize")
         self.root.minsize(minsize[0], minsize[1])
-        self.root.config(bg = "black")
+        self.root.config(bg = self.theme_base_bg)
         self.root.title(lh.gui("title"))
-    # styles:
+    # style
         self.style = ttk.Style(self.root)
         self.style.theme_use("winnative")
         self.style.configure("TButton", relief = "flat", borderwidth = 1)
-        self.style.configure("TFrame",                background = "#222222")
-        self.style.configure("info.TFrame",           background = "#FFFFFF")
-        self.style.configure("text.TFrame",           background = "#333333")
-        self.style.configure("TLabel",                background = "#333333", foreground = "#FFFFFF")
-        self.style.configure("info_title.TLabel",     background = "#EEEEEE", foreground = "#000000", anchor = "center")
-        self.style.configure("info_value.TLabel",     background = "#DDDDDD", foreground = "#000000", anchor = "center", font = self.code_font)
-        self.style.configure("subtitle.TLabel",       background = "#333333", foreground = "#FFFFFF", font = self.subtitle_font)
-        self.style.configure("TCheckbutton",          background = "#FFFFFF", foreground = "#000000")#, relief = "flat", borderwidth = 1)
-        self.style.configure("embedded.TCheckbutton", background = "#333333", foreground = "#FFFFFF")  # , relief = "flat", borderwidth = 1)
+        self.style.configure("TFrame",                background = self.theme_base_bg)
+        self.style.configure("info.TFrame",           background = self.theme_highlight_base_bg)
+        self.style.configure("text.TFrame",           background = self.theme_text_bg)
+        self.style.configure("TLabel",                background = self.theme_text_bg,           foreground = self.theme_text_fg)
+        self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
+        self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.code_font)
+        self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
+        self.style.configure("TCheckbutton",          background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg)  # , relief = "flat", borderwidth = 1)
+        self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)            # , relief = "flat", borderwidth = 1)
     # elements
         self.menubar = tk.Menu(self.root)
         self.root.config(menu = self.menubar)
@@ -122,12 +127,12 @@ class Editor:
         self.proc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = ttk.Frame(self.root)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word", insertbackground = "#AAAAAA", font = self.code_font)
-        self.out_SCT = st.ScrolledText(self.text_FRM, bg = "#333333", fg = "white", bd = 0, width = 10, wrap = "word")
+        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", insertbackground = self.theme_cursor_color, font = self.code_font)
+        self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word")
         self.text_FRM.pack(fill = "both", expand = True)
         self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
         self.out_SCT.pack(side = "right", fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
-        self.out_SCT.tag_config("pc_is_here", foreground = "#00FF00")
+        self.out_SCT.tag_config("pc_is_here", foreground = self.theme_accent_color)
         self.out_SCT.config(state = "disabled")
     # events
         self.root.bind(sequence = "<Control-o>",            func = self.open_file)
@@ -138,9 +143,34 @@ class Editor:
         self.inp_SCT.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
         self.inp_SCT.bind(sequence = "<Control-Return>",    func = self.key_ctrl_enter)
         self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
-        self.inp_SCT.bind(sequence = "<<Modified>>",        func = self.on_modified)
+        self.inp_SCT.bind(sequence = "<<Modified>>", func = self.on_inp_modified)
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
+
+    def set_theme(self, init = False):
+        if self.is_light_theme.get():
+            self.theme_base_bg = "#DDDDDD"
+            self.theme_text_bg = "#FFFFFF"
+            self.theme_text_fg = "#000000"
+            self.theme_cursor_color = "#222222"
+            self.theme_error_color  = "#FF2222"
+            self.theme_accent_color = "#00CC00"
+            self.theme_highlight_base_bg = "#BBBBFF"
+            self.theme_highlight_text_bg = "#CCCCFF"
+            self.theme_highlight_text_fg = "#000000"
+        else:
+            self.theme_base_bg = "#222222"
+            self.theme_text_bg = "#333333"
+            self.theme_text_fg = "#FFFFFF"
+            self.theme_cursor_color = "#AAAAAA"
+            self.theme_error_color  = "#FF5555"
+            self.theme_accent_color = "#00FF00"
+            self.theme_highlight_base_bg = "#EEEEEE"
+            self.theme_highlight_text_bg = "#DDDDDD"
+            self.theme_highlight_text_fg = "#000000"
+        if not init:
+            ph.save_profile_data(key = "is_light_theme", new_value = bool(self.is_light_theme.get()))
+            self.restart_opt_change()
 
     def destroy(self):
         if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
@@ -158,7 +188,7 @@ class Editor:
         else:
             return True
 
-    def on_modified(self, event):
+    def on_inp_modified(self, event):
         if not self.already_modified: # because somehow on_modified always gets called twice
             self.inp_SCT.edit_modified(False)
             if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless wants_to_save()-ing)
@@ -185,22 +215,21 @@ class Editor:
         self.accu_value_LBL.config(text = "")
         self.ireg_cmd_LBL.config(text   = "")
         self.ireg_opr_LBL.config(text   = "")
-        is_only_one_step = self.only_one_step.get()
         inp = self.inp_SCT.get(1.0, "end-1c")
-        out = self.emu.gt_out(inp, not is_only_one_step)
+        out = self.emu.gt_out(inp, not self.only_one_step.get())
         if out:
             self.proc_value_LBL.config(text = str(out[1]))
             self.accu_value_LBL.config(text = str(out[2]))
             self.ireg_cmd_LBL.config(text   = out[3][0])
             self.ireg_opr_LBL.config(text   = out[3][1])
-            self.out_SCT.config(state = "normal", fg = "#FFFFFF")
+            self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", out[0][0])
             self.out_SCT.insert("insert", out[0][1], "pc_is_here")
             self.out_SCT.insert("insert", out[0][2])
             self.out_SCT.config(state = "disabled")
         else:
-            self.out_SCT.config(state = "normal", fg = "#FFFFFF")
+            self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.config(state = "disabled")
 
@@ -249,21 +278,21 @@ class Editor:
         self.options_WIN = tk.Toplevel(self.root)
         self.options_WIN.geometry(lh.opt_win("geometry"))
         self.options_WIN.resizable(False, False)
-        self.options_WIN.config(bg = "black")
+        self.options_WIN.config(bg = self.theme_base_bg)
         self.options_WIN.title(lh.opt_win("title"))
 
         options_FRM = ttk.Frame(self.options_WIN, style = "text.TFrame")
         appearance_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"), justify = "left")
-        light_theme_CHB = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme, command = self.on_restart_opt_change, onvalue = True, offvalue = False)
+        light_theme_CHB = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme, command = self.set_theme, onvalue = True, offvalue = False)
         options_FRM.pack(fill = "both", expand = True)
         appearance_subtitle_LBL.pack(fill = "x", expand = False, pady = 5, anchor = "nw", padx = 5,)
         light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
-        light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
+        if not self.is_light_theme.get():
+            light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
         self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.options_WIN"))
 
-    def on_restart_opt_change(self):
-        print(self.is_light_theme.get())
-        print("Save this!\nYou have to restart the scripts in order to properly enable your changes.")
+    def restart_opt_change(self):
+        print("Save this!\nYou have to restart the program in order to properly apply your changes.")
 
     def open_assembly_win(self):
         if self.assembly_WIN:
@@ -271,12 +300,12 @@ class Editor:
         self.assembly_WIN = tk.Toplevel(self.root)
         minsize = lh.asm_win("minsize")
         self.assembly_WIN.minsize(minsize[0], minsize[1])
-        self.assembly_WIN.config(bg = "black")
+        self.assembly_WIN.config(bg = self.theme_base_bg)
         self.assembly_WIN.title(lh.asm_win("title"))
 
         assembly_FRM = ttk.Frame(self.assembly_WIN, style = "TFrame")
         text_SCB = tk.Scrollbar(assembly_FRM)
-        text_TXT = tk.Text(assembly_FRM, bg = "#333333", fg = "white", bd = 5, relief = "flat", wrap = "word", font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
+        text_TXT = tk.Text(assembly_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 5, relief = "flat", wrap = "word", font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
         assembly_FRM.pack(fill = "both", expand = True)
         text_TXT.pack(side = "left",  fill = "both", expand = True)
         text_SCB.pack(side = "right", fill = "y")
@@ -298,7 +327,7 @@ class Editor:
         self.shortcuts_WIN = tk.Toplevel(self.root)
         self.shortcuts_WIN.geometry(lh.shc_win("geometry"))
         self.shortcuts_WIN.resizable(False, False)
-        self.shortcuts_WIN.config(bg = "black")
+        self.shortcuts_WIN.config(bg = self.theme_base_bg)
         self.shortcuts_WIN.title(lh.shc_win("title"))
 
         shortcuts_FRM = ttk.Frame(self.shortcuts_WIN, style = "text.TFrame")
@@ -318,7 +347,7 @@ class Editor:
         self.about_WIN = tk.Toplevel(self.root)
         self.about_WIN.geometry(lh.abt_win("geometry"))
         self.about_WIN.resizable(False, False)
-        self.about_WIN.config(bg = "black")
+        self.about_WIN.config(bg = self.theme_base_bg)
         self.about_WIN.title(lh.abt_win("title"))
 
         about_FRM = ttk.Frame(self.about_WIN, style = "text.TFrame")
@@ -389,14 +418,21 @@ class Editor:
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # run() spuckt verschiedene Fehler beim 1. und 2. Mal aus
 # Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
-# Fokus ist nicht auf Subfenster, wenn diese geöffnet werden
+# Fokus ist nicht auf Subfenster, wenn diese geöffnet werden (+ Refokus, wenn doppelt geöffnet)
 
 min_version = (3, 10)
 cur_version = sys.version_info
+is_portable = True
+root = pl.Path(__file__).parent.parent.parent.absolute()
+if is_portable:
+    profile_dir = os.path.join(root, "profile")
+else:
+    profile_dir = ".../AppData/Assemblitor/profile"  # unfinished
 
 try:
-    lh = TextHandler.LangHandler()
-    eh = TextHandler.ErrorHandler()
+    ph = PackHandler.ProfileHandler(profile_dir)
+    lh = PackHandler.LangHandler()
+    eh = PackHandler.ErrorHandler()
 except:
     exc_type, exc_desc, tb = sys.exc_info()
     root = tk.Tk()

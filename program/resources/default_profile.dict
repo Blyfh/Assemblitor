@@ -1,11 +1,11 @@
 {
-    "light theme": False,
+    "is_light_theme": False,
     "language": "en_US",
     "code_font":  ("Courier New", 10),
     "min_adr_len": 2,
     "max_cels": 8192,
     "max_jmps": 8192,
     "last_dir": "",
-    "ask_to_save_before_closing": True
+    "ask_to_save_before_closing": True,
     "show_full_tb": False
 }
