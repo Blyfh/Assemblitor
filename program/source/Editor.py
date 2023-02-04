@@ -36,7 +36,7 @@ class Editor:
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", val)
             self.out_SCT.config(state = "disabled")
-        else: # special case for internal errors # TO-DO gets overwritten by try-catch for initialisation
+        else: # special case for internal errors
             if self.testing:
                 traceback.print_exception(val)
             else:
