@@ -6,6 +6,7 @@ import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
+import tkinter.font         as fn
 import pathlib as pl
 from source import PackHandler
 from source import Emulator
@@ -20,38 +21,38 @@ class Editor:
         self.file_path  = None
         self.last_dir   = root
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
-        self.code_font     = ("Courier New", 10)
-        self.title_font    = ("Segoe",       15, "bold")
-        self.subtitle_font = ("Segoe",       13)
         self.emu        = Emulator.Emulator()
         self.is_new_pro = False
         self.already_modified = False
         self.tkinter_gui()
         if self.testing:
             self.open_demo_pro()
-            #self.open_options_win()
+            self.open_options_win()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
-        self.out_SCT.config(state = "normal", fg = self.theme_error_color)
-        self.out_SCT.delete("1.0", "end")
         if exc.__name__ == "Exception": # normal case for Assembly errors caused by user
+            self.out_SCT.config(state = "normal", fg = self.theme_error_color)
+            self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", val)
-        else: # special case for internal errors
+            self.out_SCT.config(state = "disabled")
+        else: # special case for internal errors # TO-DO gets overwritten by try-catch for initialisation
             if self.testing:
                 traceback.print_exception(val)
             else:
                 mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
-        self.out_SCT.config(state = "disabled")
 
     def tkinter_gui(self):
         self.root = tk.Tk()
-        self.only_one_step  = tk.IntVar()
-        self.is_light_theme = tk.IntVar()
-        if ph.is_light_theme():
-            self.is_light_theme.set(1)
+        tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errors
+        self.only_one_step_VAR  = tk.IntVar()
+        self.is_light_theme_VAR = tk.IntVar(   value = int(ph.is_light_theme()))
+        self.language_name_VAR  = tk.StringVar(value = lh.gt_lang_name(lh.cur_lang))
+        self.code_font_name_VAR = tk.StringVar(value = ph.code_font()[0])
+        self.code_font_size_VAR = tk.IntVar(   value = ph.code_font()[1])
+        self.title_font = ("Segoe", 15, "bold")
+        self.subtitle_font = ("Segoe", 13)
         self.set_theme(init = True)
-        tk.Tk.report_callback_exception = self.report_callback_exception # overwrite standard Tk method for reporting errors
         self.options_WIN   = None
         self.shortcuts_WIN = None
         self.assembly_WIN  = None
@@ -69,7 +70,7 @@ class Editor:
         self.style.configure("text.TFrame",           background = self.theme_text_bg)
         self.style.configure("TLabel",                background = self.theme_text_bg,           foreground = self.theme_text_fg)
         self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
-        self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.code_font)
+        self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.gt_code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
         self.style.configure("TCheckbutton",          background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg)  # , relief = "flat", borderwidth = 1)
         self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)            # , relief = "flat", borderwidth = 1)
@@ -99,7 +100,7 @@ class Editor:
         self.run_BTN = ttk.Button(self.taskbar_FRM, style = "TButton", text = lh.gui("Run"), command = self.run, width = 5)
         self.run_BTN.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
 
-        self.step_CHB = ttk.Checkbutton(self.taskbar_FRM, text = lh.gui("StepMode"), variable = self.only_one_step, command = self.reset_pro, onvalue = True, offvalue = False)
+        self.step_CHB = ttk.Checkbutton(self.taskbar_FRM, text = lh.gui("StepMode"), variable = self.only_one_step_VAR, command = self.reset_pro, onvalue = True, offvalue = False)
         self.step_CHB.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
         self.step_CHB.state(["!alternate"]) # deselect the checkbutton
 
@@ -127,8 +128,8 @@ class Editor:
         self.proc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = ttk.Frame(self.root)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", insertbackground = self.theme_cursor_color, font = self.code_font)
-        self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word")
+        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = self.gt_code_font(), insertbackground = self.theme_cursor_color)
+        self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = self.gt_code_font())
         self.text_FRM.pack(fill = "both", expand = True)
         self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
         self.out_SCT.pack(side = "right", fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
@@ -148,7 +149,7 @@ class Editor:
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
     def set_theme(self, init = False):
-        if self.is_light_theme.get():
+        if self.is_light_theme_VAR.get():
             self.theme_base_bg = "#DDDDDD"
             self.theme_text_bg = "#FFFFFF"
             self.theme_text_fg = "#000000"
@@ -169,8 +170,28 @@ class Editor:
             self.theme_highlight_text_bg = "#DDDDDD"
             self.theme_highlight_text_fg = "#000000"
         if not init:
-            ph.save_profile_data(key = "is_light_theme", new_value = bool(self.is_light_theme.get()))
+            ph.save_profile_data(key = "is_light_theme", new_value = bool(self.is_light_theme_VAR.get()))
             self.restart_opt_change()
+
+    def set_language(self, new_language_name):
+        language = lh.gt_lang(new_language_name)
+        ph.save_profile_data(key = "language", new_value = language)
+        self.restart_opt_change()
+
+    def set_code_font_name(self, new_code_font_name):
+        ph.save_profile_data(key = "code_font", new_value = (new_code_font_name, self.code_font_size_VAR.get()))
+        self.inp_SCT.config(       font = self.gt_code_font())
+        self.out_SCT.config(       font = self.gt_code_font())
+        self.ireg_cmd_LBL.config(  font = self.gt_code_font())
+        self.ireg_opr_LBL.config(  font = self.gt_code_font())
+        self.accu_value_LBL.config(font = self.gt_code_font())
+        self.proc_value_LBL.config(font = self.gt_code_font())
+        if self.assembly_WIN: # restart necessary because can't access local widget variable text_TXT
+            self.close_child_win("self.assembly_WIN")
+            self.open_assembly_win()
+
+    def gt_code_font(self):
+        return self.code_font_name_VAR.get(), self.code_font_size_VAR.get()
 
     def destroy(self):
         if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
@@ -213,15 +234,15 @@ class Editor:
     def run(self):
         self.proc_value_LBL.config(text = "")
         self.accu_value_LBL.config(text = "")
-        self.ireg_cmd_LBL.config(text   = "")
-        self.ireg_opr_LBL.config(text   = "")
+        self.ireg_cmd_LBL.config(  text = "")
+        self.ireg_opr_LBL.config(  text = "")
         inp = self.inp_SCT.get(1.0, "end-1c")
-        out = self.emu.gt_out(inp, not self.only_one_step.get())
+        out = self.emu.gt_out(inp, not self.only_one_step_VAR.get())
         if out:
             self.proc_value_LBL.config(text = str(out[1]))
             self.accu_value_LBL.config(text = str(out[2]))
-            self.ireg_cmd_LBL.config(text   = out[3][0])
-            self.ireg_opr_LBL.config(text   = out[3][1])
+            self.ireg_cmd_LBL.config(  text = out[3][0])
+            self.ireg_opr_LBL.config(  text = out[3][1])
             self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", out[0][0])
@@ -283,18 +304,29 @@ class Editor:
         self.options_WIN.title(lh.opt_win("title"))
 
         options_FRM = ttk.Frame(self.options_WIN, style = "text.TFrame")
+    # appearance
         appearance_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"), justify = "left")
-        light_theme_CHB = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme, command = self.set_theme, onvalue = True, offvalue = False)
+        light_theme_CHB = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = self.set_theme, onvalue = True, offvalue = False)
         options_FRM.pack(fill = "both", expand = True)
-        appearance_subtitle_LBL.pack(fill = "x", expand = False, pady = 5, anchor = "nw", padx = 5,)
-        light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
-        if not self.is_light_theme.get():
+        if not self.is_light_theme_VAR.get():
             light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
+        language_MNU  = ttk.OptionMenu(options_FRM, self.language_name_VAR, self.language_name_VAR.get(), *lh.gt_lang_names(), style = "TMenubutton", command = self.set_language)
+        code_font_MNU = ttk.OptionMenu(options_FRM, self.code_font_name_VAR, self.code_font_name_VAR.get(), *self.gt_fonts(), style ="TMenubutton", command = self.set_code_font_name)
+        appearance_subtitle_LBL.pack(fill = "x", expand = False, pady = 5, anchor = "nw", padx = 5)
+        light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
+        language_MNU.pack(           fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
+        code_font_MNU.pack(          fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
+
         self.set_child_win_focus("self.options_WIN")
-        self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.options_WIN"))
+        self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.options_WIN"))
 
     def restart_opt_change(self):
         print("Save this!\nYou have to restart the program in order to properly apply your changes.")
+
+    def gt_fonts(self):
+        fonts = list(fn.families())
+        fonts.sort()
+        return fonts
 
     def open_assembly_win(self):
         if self.assembly_WIN: # set focus on already existing window
@@ -312,7 +344,7 @@ class Editor:
         assembly_FRM.pack(fill = "both", expand = True)
         text_TXT.pack(side = "left",  fill = "both", expand = True)
         text_SCB.pack(side = "right", fill = "y")
-        text_TXT.tag_config("asm_code", font = self.code_font)
+        text_TXT.tag_config("asm_code", font = self.gt_code_font())
 
         text_code_pairs = lh.asm_win("text")
         for text_code_pair in text_code_pairs:
@@ -321,7 +353,7 @@ class Editor:
         text_SCB.config(command = text_TXT.yview)
         text_TXT.config(state = "disabled")
         self.set_child_win_focus("self.assembly_WIN")
-        self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.assembly_WIN"))
+        self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.assembly_WIN"))
 
     def open_shortcuts_win(self):
         if self.shortcuts_WIN: # set focus on already existing window
@@ -342,7 +374,7 @@ class Editor:
         combos_LBL.pack( side = "left",  fill = "both", expand = True, pady = 5, padx = 5)
         actions_LBL.pack(side = "right", fill = "both", expand = True, pady = 5, padx = (0, 5))
         self.set_child_win_focus("self.shortcuts_WIN")
-        self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.shortcuts_WIN"))
+        self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.shortcuts_WIN"))
 
     def open_about_win(self):
         if self.about_WIN: # set focus on already existing window
@@ -364,14 +396,14 @@ class Editor:
         title_LBL.pack(fill = "both", expand = True, padx = 5, pady = (5, 0))
         text_LBL.pack( fill = "both", expand = True, padx = 5, pady = (0, 5))
         self.set_child_win_focus("self.about_WIN")
-        self.about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.on_child_win_close("self.about_WIN"))
+        self.about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.about_WIN"))
 
     def set_child_win_focus(self, win_str):
         eval(win_str + ".focus_force()")
         eval(win_str + ".lift()")
         self.root.update()
 
-    def on_child_win_close(self, win_str):
+    def close_child_win(self, win_str):
         eval(win_str + ".destroy()")
         exec(win_str + " = None")
 
@@ -419,6 +451,8 @@ class Editor:
 # bei Adressverschiebung alle Adressen anpassen
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
+# turn IntVars into BoolVars if necessary
+# don't restart whole assembly_WIN on font change
 # OPTIONS:
 #   Exception optional in Konsole ausgeben
 #   Anzahl Vornullen (Editor.insert_address())
@@ -433,6 +467,7 @@ class Editor:
 
 min_version = (3, 10)
 cur_version = sys.version_info
+testing = True
 is_portable = True
 root = pl.Path(__file__).parent.parent.parent.absolute()
 if is_portable:
@@ -442,7 +477,7 @@ else:
 
 try:
     ph = PackHandler.ProfileHandler(profile_dir)
-    lh = PackHandler.LangHandler()
+    lh = PackHandler.LangHandler(ph.language())
     eh = PackHandler.ErrorHandler()
 except:
     exc_type, exc_desc, tb = sys.exc_info()
@@ -453,13 +488,15 @@ except:
 
 if cur_version >= min_version:
     try:
-        ed = Editor(testing = True)
+        ed = Editor(testing = testing)
     except:
         exc_type, exc_desc, tb = sys.exc_info()
-        if not exc_type.__name__ == "KeyboardInterrupt":
+        if not exc_type.__name__ == "KeyboardInterrupt" and not testing:
             root = tk.Tk()
             root.withdraw()
             mb.showerror("Internal Error", f"{exc_type.__name__}: {exc_desc}")
+        else:
+            raise
 else:
     root = tk.Tk()
     root.withdraw()

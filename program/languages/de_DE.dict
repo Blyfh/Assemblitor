@@ -43,8 +43,12 @@
         "title": "Fehler",
         "text":  "Deine Python-Version wird nicht unterstützt. Bitte nutze Python {min_ver} oder höher."
     },
-    "set_win": {
-        "title": "Einstellungen"
+    "opt_win": {
+        "title": "Einstellungen",
+        "geometry": "400x500",
+
+        "Appearance": "Erscheinungsbild",
+        "LightTheme": "Helles Thema"
     },
     "asm_win": {
         "title": "Assembly",

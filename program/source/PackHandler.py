@@ -75,26 +75,46 @@ class ProfileHandler:
     def is_light_theme(self):
         return self.gt_value("is_light_theme")
 
+    def language(self):
+        return self.gt_value("language")
+
+    def code_font(self):
+        return self.gt_value("code_font")
+
+
 class LangHandler:
 
     def __init__(self, cur_lang = "en_US"):
         self.cur_lang = cur_lang
         self.cur_lang_data = ph.gt_pack_data(self.cur_lang, f"{program_dir}/languages")
 
-    def get_langs(self):
-        lang_paths = gl.glob("languages/*.dict")
+    def gt_langs(self):
+        lang_paths = gl.glob(os.path.join(program_dir, "languages/*.dict"))
         langs = []
         for lang_path in lang_paths:
             langs.append(os.path.basename(lang_path).split(".dict")[0])
         return langs
 
-    def get_lang_name(self, lang):
+    def gt_lang(self, lang_name):
+        langs = self.gt_langs()
+        for lang in langs:
+            if self.gt_lang_name(lang) == lang_name:
+                return lang
+        raise FileNotFoundError(f"Couldn't fetch language ID for '{lang_name}'.")
+
+    def gt_lang_name(self, lang):
         lang_data = ph.gt_pack_data(lang, f"{program_dir}/languages")
         try:
             lang_name = lang_data["info"]["name"]
         except:
             raise FileNotFoundError(f"Couldn't fetch info data for 'name' from language pack '{lang}'.")
         return lang_name
+
+    def gt_lang_names(self):
+        lang_names = []
+        for lang in self.gt_langs():
+            lang_names.append(self.gt_lang_name(lang))
+        return lang_names
 
     def demo(self):
         try:
