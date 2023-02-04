@@ -50,7 +50,7 @@ class Editor:
         self.language_name_VAR  = tk.StringVar(value = lh.gt_lang_name(lh.cur_lang))
         self.code_font_name_VAR = tk.StringVar(value = ph.code_font()[0])
         self.code_font_size_VAR = tk.IntVar(   value = ph.code_font()[1])
-        self.title_font = ("Segoe", 15, "bold")
+        self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
         self.set_theme(init = True)
         self.options_WIN   = None
@@ -63,8 +63,8 @@ class Editor:
         self.root.title(lh.gui("title"))
     # style
         self.style = ttk.Style(self.root)
-        self.style.theme_use("winnative")
-        self.style.configure("TButton", relief = "flat", borderwidth = 1)
+        #self.style.theme_use("winnative")
+        self.style.configure("TButton")
         self.style.configure("TFrame",                background = self.theme_base_bg)
         self.style.configure("info.TFrame",           background = self.theme_highlight_base_bg)
         self.style.configure("text.TFrame",           background = self.theme_text_bg)
@@ -178,15 +178,17 @@ class Editor:
         ph.save_profile_data(key = "language", new_value = language)
         self.restart_opt_change()
 
-    def set_code_font_name(self, new_code_font_name):
-        ph.save_profile_data(key = "code_font", new_value = (new_code_font_name, self.code_font_size_VAR.get()))
+    def update_code_font(self, win = None):
+        if win: # remove focus from code_font_size_SBX
+            win.focus()
+        ph.save_profile_data(key = "code_font", new_value = (self.code_font_name_VAR.get(), self.code_font_size_VAR.get()))
         self.inp_SCT.config(       font = self.gt_code_font())
         self.out_SCT.config(       font = self.gt_code_font())
         self.ireg_cmd_LBL.config(  font = self.gt_code_font())
         self.ireg_opr_LBL.config(  font = self.gt_code_font())
         self.accu_value_LBL.config(font = self.gt_code_font())
         self.proc_value_LBL.config(font = self.gt_code_font())
-        if self.assembly_WIN: # restart necessary because can't access local widget variable text_TXT
+        if self.assembly_WIN:  # restart necessary because unable to access local widget variable text_TXT
             self.close_child_win("self.assembly_WIN")
             self.open_assembly_win()
 
@@ -310,18 +312,28 @@ class Editor:
         options_FRM.pack(fill = "both", expand = True)
         if not self.is_light_theme_VAR.get():
             light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
-        language_MNU  = ttk.OptionMenu(options_FRM, self.language_name_VAR, self.language_name_VAR.get(), *lh.gt_lang_names(), style = "TMenubutton", command = self.set_language)
-        code_font_MNU = ttk.OptionMenu(options_FRM, self.code_font_name_VAR, self.code_font_name_VAR.get(), *self.gt_fonts(), style ="TMenubutton", command = self.set_code_font_name)
+        language_MNU       = ttk.OptionMenu(options_FRM, self.language_name_VAR,  self.language_name_VAR.get(),  *lh.gt_lang_names(), command = self.set_language,     style = "TMenubutton")
+        code_font_name_MNU = ttk.OptionMenu(options_FRM, self.code_font_name_VAR, self.code_font_name_VAR.get(), *self.gt_fonts(),    command = self.update_code_font, style = "TMenubutton")
+        vcmd = (options_FRM.register(self.entry_input_is_digit))
+        code_font_size_SBX = ttk.Spinbox(options_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_code_font, style = "TSpinbox")
         appearance_subtitle_LBL.pack(fill = "x", expand = False, pady = 5, anchor = "nw", padx = 5)
         light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
         language_MNU.pack(           fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
-        code_font_MNU.pack(          fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
+        code_font_name_MNU.pack(     fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
+        code_font_size_SBX.pack()
 
+        code_font_size_SBX.bind(sequence = "<Return>", func = lambda win: self.update_code_font(self.options_WIN))
         self.set_child_win_focus("self.options_WIN")
         self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.options_WIN"))
 
     def restart_opt_change(self):
         print("Save this!\nYou have to restart the program in order to properly apply your changes.")
+
+    def entry_input_is_digit(self, P): # used for code_font_size_SBX to only allow entered digits
+        if str.isdigit(P) or P == "":
+            return True
+        else:
+            return False
 
     def gt_fonts(self):
         fonts = list(fn.families())
