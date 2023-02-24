@@ -2,7 +2,7 @@ import sys
 import string
 import tkinter              as tk
 import tkinter.messagebox   as mb
-from source import PackHandler
+from program.source import PackHandler
 
 
 class Emulator:

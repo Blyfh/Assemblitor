@@ -1,20 +1,28 @@
-import sys
 import os
 import traceback
 import tkinter              as tk
 import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
-import tkinter.messagebox   as mb
 import tkinter.font         as fn
-import pathlib as pl
-from source import PackHandler
-from source import Emulator
+import tkinter.messagebox   as mb
+from program.source import PackHandler
+from program.source import Emulator
+
+
+def startup(profile_dir, root, testing = False):
+    global ph
+    global lh
+    global eh
+    ph = PackHandler.ProfileHandler(profile_dir)
+    lh = PackHandler.LangHandler(ph.language())
+    eh = PackHandler.ErrorHandler()
+    ed = Editor(root, testing)
 
 
 class Editor:
 
-    def __init__(self, testing = False):
+    def __init__(self, root, testing = False):
         self.testing    = testing
         self.init_inp   = ""
         self.dirty_flag = False
@@ -476,40 +484,3 @@ class Editor:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
-
-min_version = (3, 10)
-cur_version = sys.version_info
-testing = True
-is_portable = True
-root = pl.Path(__file__).parent.parent.parent.absolute()
-if is_portable:
-    profile_dir = os.path.join(root, "profile")
-else:
-    profile_dir = ".../AppData/Assemblitor/profile"  # unfinished
-
-try:
-    ph = PackHandler.ProfileHandler(profile_dir)
-    lh = PackHandler.LangHandler(ph.language())
-    eh = PackHandler.ErrorHandler()
-except:
-    exc_type, exc_desc, tb = sys.exc_info()
-    root = tk.Tk()
-    root.withdraw()
-    mb.showerror("Internal Error", f"{exc_type.__name__}: {exc_desc}")
-    raise
-
-if cur_version >= min_version:
-    try:
-        ed = Editor(testing = testing)
-    except:
-        exc_type, exc_desc, tb = sys.exc_info()
-        if not exc_type.__name__ == "KeyboardInterrupt" and not testing:
-            root = tk.Tk()
-            root.withdraw()
-            mb.showerror("Internal Error", f"{exc_type.__name__}: {exc_desc}")
-        else:
-            raise
-else:
-    root = tk.Tk()
-    root.withdraw()
-    mb.showerror(lh.ver_win("title"), lh.ver_win("text", min_ver = min_version))
