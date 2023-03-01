@@ -2,6 +2,7 @@ import os
 import glob    as gl
 import pathlib as pl
 
+
 program_dir = pl.Path(__file__).parent.parent.absolute()
 
 
@@ -80,6 +81,15 @@ class ProfileHandler:
 
     def code_font(self):
         return self.gt_value("code_font")
+
+    def max_jmps(self):
+        return self.gt_value("max_jmps")
+
+    def max_cels(self):
+        return self.gt_value("max_cels")
+
+    def min_adr_len(self):
+        return self.gt_value("min_adr_len")
 
 
 class LangHandler:
@@ -236,5 +246,6 @@ class ErrorHandler():
                     err_desc += txt_arg_pair[0] + str(arg)
             err_desc += blocks[len(blocks) - 1]
         return err_name + ": " + err_desc
+
 
 ph = PackHandler()

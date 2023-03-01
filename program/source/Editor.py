@@ -17,7 +17,8 @@ def startup(profile_dir, root, testing = False):
     ph = PackHandler.ProfileHandler(profile_dir)
     lh = PackHandler.LangHandler(ph.language())
     eh = PackHandler.ErrorHandler()
-    ed = Editor(root, testing)
+    Emulator.startup(profile_handler = ph, error_handler = eh)
+    ed = Editor(root = root, testing = testing)
 
 
 class Editor:
@@ -58,6 +59,7 @@ class Editor:
         self.language_name_VAR  = tk.StringVar(value = lh.gt_lang_name(lh.cur_lang))
         self.code_font_name_VAR = tk.StringVar(value = ph.code_font()[0])
         self.code_font_size_VAR = tk.IntVar(   value = ph.code_font()[1])
+        self.min_adr_len_VAR    = tk.IntVar(   value = ph.min_adr_len())
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
         self.set_theme(init = True)
@@ -116,7 +118,7 @@ class Editor:
         self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = lh.gui("IR:"))
         self.ireg_cmd_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
         self.ireg_opr_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
-        self.ireg_FRM.pack(side="right", padx=5, pady=5)
+        self.ireg_FRM.pack(side = "right", padx = 5, pady = 5)
         self.ireg_title_LBL.grid(row = 0, column = 0, columnspan = 2)
         self.ireg_cmd_LBL.grid(row = 1, column = 0, padx = 1)
         self.ireg_opr_LBL.grid(row = 1, column = 1, padx = 1)
@@ -202,6 +204,12 @@ class Editor:
 
     def gt_code_font(self):
         return self.code_font_name_VAR.get(), self.code_font_size_VAR.get()
+
+    def update_min_adr_len(self, win = None):
+        if win: # remove focus from code_font_size_SBX
+            win.focus()
+        ph.save_profile_data(key = "min_adr_len", new_value = self.min_adr_len_VAR.get())
+        Emulator.update_properties()
 
     def destroy(self):
         if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
@@ -322,22 +330,25 @@ class Editor:
             light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
         language_MNU       = ttk.OptionMenu(options_FRM, self.language_name_VAR,  self.language_name_VAR.get(),  *lh.gt_lang_names(), command = self.set_language,     style = "TMenubutton")
         code_font_name_MNU = ttk.OptionMenu(options_FRM, self.code_font_name_VAR, self.code_font_name_VAR.get(), *self.gt_fonts(),    command = self.update_code_font, style = "TMenubutton")
-        vcmd = (options_FRM.register(self.entry_input_is_digit))
-        code_font_size_SBX = ttk.Spinbox(options_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_code_font, style = "TSpinbox")
+        vcmd = (options_FRM.register(self.sbx_input_is_digit))
+        code_font_size_SBX = ttk.Spinbox(options_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_code_font,   style = "TSpinbox")
+        min_adr_len_SBX    = ttk.Spinbox(options_FRM, textvariable = self.min_adr_len_VAR,    from_ = 1, to = 10, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_min_adr_len, style = "TSpinbox")
         appearance_subtitle_LBL.pack(fill = "x", expand = False, pady = 5, anchor = "nw", padx = 5)
         light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
         language_MNU.pack(           fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
         code_font_name_MNU.pack(     fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
         code_font_size_SBX.pack()
+        min_adr_len_SBX.pack()
 
         code_font_size_SBX.bind(sequence = "<Return>", func = lambda win: self.update_code_font(self.options_WIN))
+        min_adr_len_SBX.bind(   sequence = "<Return>", func = lambda win: self.update_min_adr_len(self.options_WIN))
         self.set_child_win_focus("self.options_WIN")
         self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.options_WIN"))
 
     def restart_opt_change(self):
         print("Save this!\nYou have to restart the program in order to properly apply your changes.")
 
-    def entry_input_is_digit(self, P): # used for code_font_size_SBX to only allow entered digits
+    def sbx_input_is_digit(self, P): # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
         if str.isdigit(P) or P == "":
             return True
         else:
@@ -463,8 +474,8 @@ class Editor:
             return
         whitespace_wrapping = last_line.split(last_line_stripped)[0]
         new_adr  = str(last_adr + 1)
-        if len(new_adr) == 1: # add leading zero
-            new_adr = "0" + new_adr
+        if len(new_adr) < Emulator.MIN_ADR_LEN: # add leading zeros
+            new_adr = (Emulator.MIN_ADR_LEN - len(new_adr)) * "0" + new_adr
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
 
 # TO-DO:

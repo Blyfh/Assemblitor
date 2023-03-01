@@ -1,18 +1,33 @@
-import sys
 import string
-import tkinter              as tk
-import tkinter.messagebox   as mb
-from program.source import PackHandler
+
+
+CMDS        = ["LDA", "ADD", "STP", "SUB", "JMP", "JLE", "JZE", "MUL", "STA"]
+MIN_ADR_LEN = 0
+MAX_JMPS    = 0
+MAX_CELS    = 0
+
+def startup(profile_handler, error_handler):
+    global ph
+    global eh
+    ph = profile_handler
+    eh = error_handler
+    update_properties()
+
+def update_properties():
+    global MIN_ADR_LEN
+    global MAX_JMPS
+    global MAX_CELS
+    MIN_ADR_LEN = ph.min_adr_len()
+    MAX_JMPS    = ph.max_jmps()
+    MAX_CELS    = ph.max_cels()
 
 
 class Emulator:
 
-    def __init__(self, max_jmps = 8192, max_adrs = 8192):
-        self.max_jmps   = max_jmps
-        self.max_adrs   = max_adrs
-        self.pro_str    = ""
-        self.pro        = None
-        self.is_new_pro = True
+    def __init__(self):
+        self.pro_str     = ""
+        self.pro         = None
+        self.is_new_pro  = True
 
     def gt_out(self, pro_str, execute_all = True):
         if pro_str:
@@ -38,14 +53,12 @@ class Emulator:
     def create_pro(self, pro_str):
         self.is_new_pro = False
         self.pro_str = pro_str
-        self.pro = Program(pro_str, self.max_jmps, self.max_adrs)
+        self.pro = Program(pro_str)
 
 
 class Program:
 
-    def __init__(self, pro_str, max_jmps, max_adrs):
-        self.max_adrs = max_adrs
-        self.max_jmps = max_jmps
+    def __init__(self, pro_str):
         self.jmps_to_adr = {}  # each element logs how many times the pointer jumped to its cell
         self.top_cmt     = ""
         self.cells       = self.gt_cells(pro_str)
@@ -132,8 +145,8 @@ class Program:
         return cells
 
     def gt_cel(self, adr):
-        if adr > self.max_adrs - 1:
-            raise Exception(eh.error("MaxPrgLength", max_adrs = self.max_adrs, adrs = adr + 1))
+        if adr > MAX_CELS - 1:
+            raise Exception(eh.error("MaxPrgLength", max_adrs = MAX_CELS, adrs =adr + 1))
         while adr >= len(self.cells):
             cell = Cell(str(len(self.cells)) + " ")
             self.cells.append(cell)
@@ -143,8 +156,8 @@ class Program:
         i = 0
         while i < len(cells):
             adr = cells[i].gt_adr()
-            if adr > self.max_adrs - 1:
-                raise Exception(eh.error("MaxPrgLength", max_adrs = self.max_adrs, adrs = adr + 1))
+            if adr > MAX_CELS - 1:
+                raise Exception(eh.error("MaxPrgLength", max_adrs = MAX_CELS, adrs =adr + 1))
             if i == adr:
                 pass
             elif i < adr:
@@ -200,8 +213,8 @@ class Program:
 
     def cmd_JMP(self, opr_inf):
         self.pc = self.gt_adr(opr_inf) - 1 # "- 1" because self.pc will increment automatically
-        if self.gt_jmps_to_adr(self.gt_adr(opr_inf)) > self.max_jmps:
-            raise Exception(eh.error("MaxIterationDepth", max_jmps = self.max_jmps, adr = self.gt_adr(opr_inf)))
+        if self.gt_jmps_to_adr(self.gt_adr(opr_inf)) > MAX_JMPS:
+            raise Exception(eh.error("MaxIterationDepth", max_jmps = MAX_JMPS, adr = self.gt_adr(opr_inf)))
         else:
             self.jmps_to_adr[self.gt_adr(opr_inf)] = self.gt_jmps_to_adr(self.gt_adr(opr_inf)) + 1 # increment jmps_to_adr for this address
 
@@ -300,7 +313,6 @@ class Cell:
 class Token:
 
     def __init__(self, tok_str, tpos, cpos = "NaN"):
-        self.cmds    = ["LDA", "ADD", "STP", "SUB", "JMP", "JLE", "JZE", "MUL", "STA"]
         self.tpos    = tpos
         self.cpos    = cpos
         self.tok_str = tok_str
@@ -310,7 +322,7 @@ class Token:
     def __str__(self):
         if len(self.tok_str) > 0 and self.tok_str[-1] != " ":
             self.tok_str += " "
-        return self.add_leading_zero(self.tok_str)
+        return self.add_leading_zeros(self.tok_str)
 
     def create_tok(self, tok_str):
         tok = tok_str.rstrip()
@@ -332,7 +344,7 @@ class Token:
                 if tok == "":
                     self.type = 2
                     return 0
-                elif tok.upper() in self.cmds:
+                elif tok.upper() in CMDS:
                     self.type = 1
                     return tok.upper()
                 else:
@@ -345,16 +357,16 @@ class Token:
         else:
             raise Exception(eh.error("MaxCelLength", adr = self.cpos))
 
-    def add_leading_zero(self, tok_str):
+    def add_leading_zeros(self, tok_str):
         tok_str_stripped = tok_str.strip()
-        if self.type == 0 and len(tok_str_stripped) == 1:
+        if self.type == 0 and len(tok_str_stripped) < MIN_ADR_LEN:
             whitespace_wrapping = tok_str.split(tok_str_stripped)
-            tok_str = whitespace_wrapping[0] + "0" + tok_str_stripped + whitespace_wrapping[1]
+            tok_str = whitespace_wrapping[0] + (MIN_ADR_LEN - len(tok_str_stripped)) * "0" + tok_str_stripped + whitespace_wrapping[1]
         elif self.type == 3:
-            if self.tok.type == 0 and len(tok_str_stripped) == 1: # direct operand (e.g. 00 LDA 5)
-                tok_str = "0" + tok_str
-            elif self.tok.type == 1 and len(tok_str_stripped) == 3: # indirect operand (e.g. 00 LDA (5))
-                tok_str = "(0" + tok_str[1:]                
+            if self.tok.type == 0 and len(tok_str_stripped) < MIN_ADR_LEN: # direct operand (e.g. 00 LDA 5)
+                tok_str = (MIN_ADR_LEN - len(tok_str_stripped)) * "0" + tok_str
+            elif self.tok.type == 1 and len(tok_str_stripped) < MIN_ADR_LEN + 2: # indirect operand (e.g. 00 LDA (5))
+                tok_str = "(" + (MIN_ADR_LEN - len(tok_str_stripped)) * "0" + tok_str[1:]
         return tok_str
 
     def edit(self, new_val):
@@ -444,14 +456,3 @@ class Operand:
             return ""
         else:
             return "(" + str(self.type) + ", " + str(self.opr) + ")"
-
-
-try:
-    lh = PackHandler.LangHandler()
-    eh = PackHandler.ErrorHandler()
-except:
-    exc_type, exc_desc, tb = sys.exc_info()
-    root = tk.Tk()
-    root.withdraw()
-    mb.showerror("Internal Error (Emulator)", f"{exc_type.__name__}: {exc_desc}")
-    raise
