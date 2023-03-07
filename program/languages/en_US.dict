@@ -44,7 +44,17 @@
         "geometry": "400x500",
 
         "Appearance": "Appearance",
-        "LightTheme": "Light theme"
+        "LightTheme": "Light theme",
+        "Language": "Language",
+        "EditorFont": "Editor font",
+
+        "Assembler": "Assembler",
+        "MinAdrLen": "Minimum number of digits",
+        "MaxPrgLen": "Maximum program length",
+        "MaxIteDep": "Maximum iteration depth",
+
+        "DeveloperOptions": "Developer Options",
+        "FullTb": "Complete error traceback"
     },
     "asm_win": {
         "title": "Assembly",

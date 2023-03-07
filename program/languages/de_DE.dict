@@ -44,7 +44,17 @@
         "geometry": "400x500",
 
         "Appearance": "Erscheinungsbild",
-        "LightTheme": "Helles Thema"
+        "LightTheme": "Helles Thema",
+        "Language": "Sprache",
+        "EditorFont": "Editor-Schriftart",
+
+        "Assembler": "Assembler",
+        "MinAdrLen": "Mindestanzahl an Ziffern",
+        "MaxPrgLen": "Maximale Programmlänge",
+        "MaxIteDep": "Maximale Iterationstiefe",
+
+        "DeveloperOptions": "Entwicklereinstellungen",
+        "FullTb": "Kompletter Fehler-Traceback"
     },
     "asm_win": {
         "title": "Assembly",
