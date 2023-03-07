@@ -9,12 +9,6 @@ import tkinter.messagebox   as mb
 from program.source import PackHandler
 from program.source import Emulator
 
-
-ph = None
-lh = None
-eh = None
-
-
 def startup(profile_dir, root, testing = False):
     global ph
     global lh
@@ -193,7 +187,7 @@ class Editor:
         ph.save_profile_data(key = "language", new_value = language)
         self.restart_opt_change()
 
-    def update_code_font(self, win = None):
+    def update_code_font(self, event = None, win = None):
         if win: # remove focus from code_font_size_SBX
             win.focus()
         ph.save_profile_data(key = "code_font", new_value = (self.code_font_name_VAR.get(), self.code_font_size_VAR.get()))
@@ -327,25 +321,40 @@ class Editor:
         self.options_WIN.title(lh.opt_win("title"))
 
         options_FRM = ttk.Frame(self.options_WIN, style = "text.TFrame")
+        options_FRM.pack(fill="both", expand=True)
+        vcmd = (options_FRM.register(self.sbx_input_is_digit)) # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
     # appearance
-        appearance_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"), justify = "left")
-        light_theme_CHB = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = self.set_theme, onvalue = True, offvalue = False)
-        options_FRM.pack(fill = "both", expand = True)
+        appearance_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"))
+        light_theme_CHB    = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = self.set_theme, onvalue = True, offvalue = False)
         if not self.is_light_theme_VAR.get():
             light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
-        language_MNU       = ttk.OptionMenu(options_FRM, self.language_name_VAR,  self.language_name_VAR.get(),  *lh.gt_lang_names(), command = self.set_language,     style = "TMenubutton")
-        code_font_name_MNU = ttk.OptionMenu(options_FRM, self.code_font_name_VAR, self.code_font_name_VAR.get(), *self.gt_fonts(),    command = self.update_code_font, style = "TMenubutton")
-        vcmd = (options_FRM.register(self.sbx_input_is_digit))
-        code_font_size_SBX = ttk.Spinbox(options_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_code_font,   style = "TSpinbox")
-        min_adr_len_SBX    = ttk.Spinbox(options_FRM, textvariable = self.min_adr_len_VAR,    from_ = 1, to = 10, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_min_adr_len, style = "TSpinbox")
-        appearance_subtitle_LBL.pack(fill = "x", expand = False, pady = 5, anchor = "nw", padx = 5)
-        light_theme_CHB.pack(        fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
-        language_MNU.pack(           fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
-        code_font_name_MNU.pack(     fill = "x", expand = False, pady = 5, anchor = "nw", padx = (20, 5))
-        code_font_size_SBX.pack()
-        min_adr_len_SBX.pack()
+        language_FRM       = ttk.Frame(options_FRM, style = "text.TFrame")
+        language_LBL       = ttk.Label(language_FRM, style = "TLabel", text = lh.opt_win("Language"))
+        language_MNU       = ttk.OptionMenu(language_FRM, self.language_name_VAR, self.language_name_VAR.get(), *lh.gt_lang_names(), command = self.set_language, style = "TMenubutton")
+        code_font_FRM      = ttk.Frame(options_FRM, style = "text.TFrame")
+        code_font_LBL      = ttk.Label(code_font_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
+        code_font_size_SBX = ttk.Spinbox(code_font_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_code_font, width = 3, style = "TSpinbox")
+        code_font_face_MNU = ttk.OptionMenu(code_font_FRM, self.code_font_name_VAR, self.code_font_name_VAR.get(), *self.gt_fonts(), command = self.update_code_font, style = "TMenubutton")
+        appearance_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        light_theme_CHB.pack(   fill = "x",     pady = 5, padx = (20, 5))
+        language_FRM.pack(      fill = "x",               padx = (20, 5))
+        language_LBL.pack(      side = "left",  pady = 5, padx = (0, 15))
+        language_MNU.pack(      side = "right", pady = 5, padx = 5)
+        code_font_FRM.pack(     fill = "x",               padx = (20, 5))
+        code_font_LBL.pack(     side = "left",  pady = 5, padx = (0, 15))
+        code_font_size_SBX.pack(side = "right", pady = 5, padx = 5)
+        code_font_face_MNU.pack(side = "right", pady = 5, padx = 5)
+    # Assembler
+        assembler_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Assembler"))
+        min_adr_len_FRM = ttk.Frame(options_FRM, style = "text.TFrame")
+        min_adr_len_LBL = ttk.Label(min_adr_len_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
+        min_adr_len_SBX = ttk.Spinbox(min_adr_len_FRM, textvariable = self.min_adr_len_VAR, from_ = 1, to = 10, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_min_adr_len, width = 3, style = "TSpinbox")
+        assembler_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        min_adr_len_FRM.pack(fill = "x",               padx = (20, 5))
+        min_adr_len_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
+        min_adr_len_SBX.pack(side = "right", pady = 5, padx = 5)
 
-        code_font_size_SBX.bind(sequence = "<Return>", func = lambda win: self.update_code_font(self.options_WIN))
+        code_font_size_SBX.bind(sequence = "<Return>", func = lambda win: self.update_code_font(win = self.options_WIN))
         min_adr_len_SBX.bind(   sequence = "<Return>", func = lambda win: self.update_min_adr_len(self.options_WIN))
         self.set_child_win_focus("self.options_WIN")
         self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.options_WIN"))
