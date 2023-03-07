@@ -10,6 +10,11 @@ from program.source import PackHandler
 from program.source import Emulator
 
 
+ph = None
+lh = None
+eh = None
+
+
 def startup(profile_dir, root, testing = False):
     global ph
     global lh

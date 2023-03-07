@@ -34,4 +34,4 @@ if cur_version >= min_version:
 else:
     win = tk.Tk()
     win.withdraw()
-    mb.showerror(lh.ver_win("title"), lh.ver_win("text", min_ver = min_version))
+    mb.showerror("Version Error", f"Your version of Python is not supported. Please use Python {min_version[0]}.{min_version[1]} or higher.")

@@ -154,33 +154,6 @@ class LangHandler:
             raise FileNotFoundError(f"Couldn't fetch 'shortcuts' window data for '{key}' from language pack '{self.cur_lang}'.")
         return ele
 
-    def ver_win(self, key, **kwargs):
-        try:
-            ele = self.cur_lang_data["ver_win"][key]
-        except:
-            raise FileNotFoundError(f"Couldn't fetch 'version_error' window data for '{key}' from language pack '{self.cur_lang}'.")
-        if key == "text":
-            text = ""
-            blocks = ele.split("}")
-            if len(blocks) == 1:
-                text = blocks[0]
-            else:
-                for i in range(len(blocks) - 1):
-                    txt_arg_pair = blocks[i].split("{", maxsplit=1)
-                    if len(txt_arg_pair) == 1:
-                        raise SyntaxError(f"Unmatched curly bracket in 'version_error' window data for 'text'.")
-                    else:
-                        arg = None
-                        for kw in kwargs:  # search for matching argument
-                            if kw == txt_arg_pair[1]:
-                                arg = kwargs[kw]
-                        if arg == None:
-                            raise TypeError(f"LangHandler.ver_win() missing required keyword argument '{txt_arg_pair[1]}' in 'version_error' window data for '{key}' from language pack '{self.cur_lang}'.")
-                        text += txt_arg_pair[0] + str(arg[0]) + "." + str(arg[1])
-                text += blocks[len(blocks) - 1]
-            return text
-        return ele
-
     def gui(self, key):
         try:
             ele = self.cur_lang_data["gui"][key]
@@ -216,7 +189,7 @@ class LangHandler:
             return text_code_pairs
         return ele
 
-class ErrorHandler():
+class ErrorHandler:
 
     def __init__(self):
         self.errors = ph.gt_pack_data("errors", f"{program_dir}/resources")

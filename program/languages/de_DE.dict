@@ -39,10 +39,6 @@
         "ACC:": "Akkumulator:",
         "IR:":  "Befehlsregister:"
     },
-    "ver_win": {
-        "title": "Fehler",
-        "text":  "Deine Python-Version wird nicht unterstützt. Bitte nutze Python {min_ver} oder höher."
-    },
     "opt_win": {
         "title": "Einstellungen",
         "geometry": "400x500",
