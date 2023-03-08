@@ -32,7 +32,7 @@
         "DemoPrg":   "Demo-Programm",
         "About":     "Über",
 
-        "Run":      "Ausführen",
+        "RunPrg":   "Programm ausführen",
         "StepMode": "Einzelschrittmodus",
 
         "PC:":  "Befehlszähler:",

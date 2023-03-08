@@ -32,7 +32,7 @@
         "DemoPrg":   "Demo Program",
         "About":     "About",
 
-        "Run":      "Run",
+        "RunPrg":   "Run program",
         "StepMode": "Step-By-Step Mode",
 
         "PC:":  "Program Counter:",

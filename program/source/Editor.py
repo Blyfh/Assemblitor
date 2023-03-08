@@ -6,6 +6,7 @@ import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.font         as fn
 import tkinter.messagebox   as mb
+from program.source import CustomGUI as gui
 from program.source import PackHandler
 from program.source import Emulator
 
@@ -13,9 +14,11 @@ def startup(profile_dir, root, testing = False):
     global ph
     global lh
     global eh
+    global sh
     ph = PackHandler.ProfileHandler(profile_dir)
     lh = PackHandler.LangHandler(ph.language())
     eh = PackHandler.ErrorHandler()
+    sh = PackHandler.SpriteHandler()
     Emulator.startup(profile_handler = ph, error_handler = eh)
     ed = Editor(root = root, testing = testing)
 
@@ -78,6 +81,7 @@ class Editor:
         self.style.configure("info.TFrame",           background = self.theme_highlight_base_bg)
         self.style.configure("text.TFrame",           background = self.theme_text_bg)
         self.style.configure("TLabel",                background = self.theme_text_bg,           foreground = self.theme_text_fg)
+        self.style.configure("img.TLabel",            background = self.theme_base_bg) # for gui.Button that inherits from ttk.Label
         self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
         self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.gt_code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
@@ -106,8 +110,9 @@ class Editor:
         self.taskbar_FRM = ttk.Frame(self.root)
         self.taskbar_FRM.pack(fill = "x")
 
-        self.run_BTN = ttk.Button(self.taskbar_FRM, style = "TButton", text = lh.gui("Run"), command = self.run, width = 5)
-        self.run_BTN.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
+        self.run_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
+        self.run_BTN.pack(side = "left", anchor = "nw", padx = 5, pady = 5)
+        self.run_TIP = gui.Tooltip(self.run_BTN, text = lh.gui("RunPrg"), waittime = 600)
 
         self.step_CHB = ttk.Checkbutton(self.taskbar_FRM, text = lh.gui("StepMode"), variable = self.only_one_step_VAR, command = self.reset_pro, onvalue = True, offvalue = False)
         self.step_CHB.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
@@ -154,6 +159,7 @@ class Editor:
         self.inp_SCT.bind(sequence = "<Control-Return>",    func = self.key_ctrl_enter)
         self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
         self.inp_SCT.bind(sequence = "<<Modified>>", func = self.on_inp_modified)
+        #self.run_BTN.bind(sequence = "<Enter>", func = lambda _: print("outer enter"))
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
@@ -509,3 +515,4 @@ class Editor:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
+# clicking and holding down on run_BTN, then moving mouse out of button triggers img_clicked but not actually runs the program
