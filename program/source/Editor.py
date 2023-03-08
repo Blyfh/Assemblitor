@@ -503,16 +503,12 @@ class Editor:
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # turn IntVars into BoolVars if necessary
-# don't restart whole assembly_WIN on font change
+# light mode run_BTN sprites
 # OPTIONS:
 #   Exception optional in Konsole ausgeben
-#   Anzahl Vornullen (Editor.insert_address())
 #   asktosave bei Schließen ausstellbar
-#   light mode
-#   Sprache
 
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
-# clicking and holding down on run_BTN, then moving mouse out of button triggers img_clicked but not actually runs the program

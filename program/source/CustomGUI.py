@@ -3,7 +3,7 @@ import tkinter.ttk as ttk
 
 class Button(ttk.Label):
 
-    def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 150, *args, **kwargs):
+    def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 30, *args, **kwargs):
         ttk.Label.__init__(self, root, *args, **kwargs)
         self.root = root
         self.command = command
@@ -23,7 +23,8 @@ class Button(ttk.Label):
                 self.img_clicked = self.img_default
             self.bind(sequence = "<Enter>", func = self.on_enter)
             self.bind(sequence = "<Leave>", func = self.on_leave)
-            self.bind(sequence = "<ButtonRelease-1>", func = self.on_clicked)
+            self.bind(sequence = "<ButtonPress-1>",   func = self.on_pressed)
+            self.bind(sequence = "<ButtonRelease-1>", func = self.on_released)
 
     def on_enter(self, event = None):
         self.hovering = True
@@ -33,10 +34,12 @@ class Button(ttk.Label):
         self.hovering = False
         self.config(image = self.img_default)
 
-    def on_clicked(self, event = None):
+    def on_pressed(self, event = None):
         self.config(image = self.img_clicked)
-        self.command()
+
+    def on_released(self, event = None):
         if self.hovering:
+            self.command()
             self.root.after(self.click_display_time, self.on_enter)
         else:
             self.root.after(self.click_display_time, self.on_leave)
