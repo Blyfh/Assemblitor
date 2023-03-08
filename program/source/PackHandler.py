@@ -1,6 +1,7 @@
 import os
 import glob    as gl
 import pathlib as pl
+from PIL import ImageTk, Image
 
 
 program_dir = pl.Path(__file__).parent.parent.absolute()
@@ -219,6 +220,17 @@ class ErrorHandler:
                     err_desc += txt_arg_pair[0] + str(arg)
             err_desc += blocks[len(blocks) - 1]
         return err_name + ": " + err_desc
+
+
+class SpriteHandler:
+
+    def gt_sprite(self, file, x = 40, y = 40):
+        try:
+            img = Image.open(f"{program_dir}/sprites/{file}.png")
+        except:
+            raise FileNotFoundError(f"Couldn't fetch sprite '{file}'.")
+        img = img.resize((x, y))
+        return ImageTk.PhotoImage(img)
 
 
 ph = PackHandler()
