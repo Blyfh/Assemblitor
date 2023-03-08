@@ -18,7 +18,7 @@ def startup(profile_dir, root, testing = False):
     ph = PackHandler.ProfileHandler(profile_dir)
     lh = PackHandler.LangHandler(ph.language())
     eh = PackHandler.ErrorHandler()
-    sh = PackHandler.SpriteHandler()
+    sh = PackHandler.SpriteHandler(ph.is_light_theme())
     Emulator.startup(profile_handler = ph, error_handler = eh)
     ed = Editor(root = root, testing = testing)
 
@@ -159,12 +159,12 @@ class Editor:
         self.inp_SCT.bind(sequence = "<Control-Return>",    func = self.key_ctrl_enter)
         self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
         self.inp_SCT.bind(sequence = "<<Modified>>", func = self.on_inp_modified)
-        #self.run_BTN.bind(sequence = "<Enter>", func = lambda _: print("outer enter"))
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
     def set_theme(self, init = False):
         if self.is_light_theme_VAR.get():
+            sh.set_theme(is_light_theme = True)
             self.theme_base_bg = "#DDDDDD"
             self.theme_text_bg = "#FFFFFF"
             self.theme_text_fg = "#000000"
@@ -175,6 +175,7 @@ class Editor:
             self.theme_highlight_text_bg = "#CCCCFF"
             self.theme_highlight_text_fg = "#000000"
         else:
+            sh.set_theme(is_light_theme = False)
             self.theme_base_bg = "#222222"
             self.theme_text_bg = "#333333"
             self.theme_text_fg = "#FFFFFF"

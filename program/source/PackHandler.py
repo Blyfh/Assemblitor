@@ -224,13 +224,23 @@ class ErrorHandler:
 
 class SpriteHandler:
 
+    def __init__(self, is_light_theme):
+        self.theme = None
+        self.set_theme(is_light_theme)
+
     def gt_sprite(self, file, x = 40, y = 40):
         try:
-            img = Image.open(f"{program_dir}/sprites/{file}.png")
+            img = Image.open(f"{program_dir}/sprites/{self.theme}/{file}.png")
         except:
-            raise FileNotFoundError(f"Couldn't fetch sprite '{file}'.")
+            raise FileNotFoundError(f"Couldn't fetch sprite '{file}' for '{self.theme}'.")
         img = img.resize((x, y))
         return ImageTk.PhotoImage(img)
+
+    def set_theme(self, is_light_theme):
+        if is_light_theme:
+            self.theme = "light_theme"
+        else:
+            self.theme = "dark_theme"
 
 
 ph = PackHandler()
