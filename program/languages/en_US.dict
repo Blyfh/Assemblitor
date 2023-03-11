@@ -98,16 +98,18 @@ A list of all accepted commands:
     },
     "shc_win": {
         "title":    "Shortcuts",
-        "geometry": "272x110",
+        "geometry": "272x120",
 
-        "combos": """Ctrl + Enter
+        "combos": """F5
+Shift + F5
 Shift + Enter
-Ctrl + O
-F5
-Ctrl + S
-Ctrl + Shift + S""",
+Strg + O
+Strg + R
+Strg + S
+Strg + Shift + S""",
 
         "actions": """Run program
+Run single step
 Line break without new address
 Open file
 Reload file

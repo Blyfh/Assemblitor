@@ -151,12 +151,13 @@ class Editor:
         self.out_SCT.config(state = "disabled")
     # events
         self.root.bind(sequence = "<Control-o>",            func = self.open_file)
-        self.root.bind(sequence = "<F5>",                   func = self.reload_file)
+        self.root.bind(sequence = "<F5>",                   func = self.run_all)
+        self.root.bind(sequence = "<Shift-F5>",             func = self.run_step)
+        self.root.bind(sequence = "<Control-r>",            func = self.reload_file)
         self.root.bind(sequence = "<Control-s>",            func = self.save_file)
         self.root.bind(sequence = "<Control-S>",            func = self.save_file_as)
         self.inp_SCT.bind(sequence = "<Return>",            func = self.key_enter)
         self.inp_SCT.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
-        self.inp_SCT.bind(sequence = "<Control-Return>",    func = self.key_ctrl_enter)
         self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
         self.inp_SCT.bind(sequence = "<<Modified>>", func = self.on_inp_modified)
     # protocols
@@ -478,10 +479,6 @@ class Editor:
     def key_shift_enter(self, event):
         pass # overwrites self.key_enter()
 
-    def key_ctrl_enter(self, event):
-        self.run()
-        return "break" # overwrites the line break printing
-
     def key_ctrl_backspace(self, event):
         self.inp_SCT.delete("insert-1c wordstart", "insert wordend")
 
@@ -504,12 +501,13 @@ class Editor:
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # turn IntVars into BoolVars if necessary
-# light mode run_BTN sprites
 # OPTIONS:
-#   Exception optional in Konsole ausgeben
+#   reset options (= reset profile)
+#   show full error traceback
 #   asktosave bei Schließen ausstellbar
 
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
 # ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
+# hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked

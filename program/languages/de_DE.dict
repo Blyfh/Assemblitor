@@ -98,16 +98,18 @@ Eine Liste aller akzeptierten Befehle:
     },
     "shc_win": {
         "title":    "Tastenkombinationen",
-        "geometry": "244x110",
+        "geometry": "244x120",
 
-        "combos": """Strg + Enter
+        "combos": """F5
+Shift + F5
 Shift + Enter
 Strg + O
-F5
+Strg + R
 Strg + S
 Strg + Shift + S""",
 
         "actions": """Programm ausführen
+Einzelnen Schritt ausführen
 adressloser Zeilenumbruch
 Datei öffnen
 Datei neu laden
