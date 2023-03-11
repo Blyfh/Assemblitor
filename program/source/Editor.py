@@ -118,7 +118,7 @@ class Editor:
         self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
         self.step_TIP = gui.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
-        self.incr_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", text = "INCR", command = self.change_selected_text)
+        self.incr_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", text = "INCR", command = self.change_selected_inp_text)
         self.incr_BTN.pack(side = "left", anchor = "sw", padx = (5, 0), pady = 5)
         self.run_TIP = gui.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
 
@@ -223,9 +223,7 @@ class Editor:
         Emulator.update_properties()
 
     def destroy(self):
-        if not self.dirty_flag or self.inp_SCT.get(1.0, "end-1c").strip() == "":
-            self.root.destroy()
-        elif self.wants_to_save() == True: # checks if user didn't abort in wants_to_save()
+        if not self.dirty_flag or self.wants_to_save() == True or self.testing: # "== True" checks if user didn't abort in wants_to_save()
             self.root.destroy()
 
     def wants_to_save(self):
@@ -498,59 +496,87 @@ class Editor:
             self.inp_SCT.insert("insert", "\n")
             return
         whitespace_wrapping = last_line.split(last_line_stripped)[0]
-        new_adr  = str(last_adr + 1)
-        if len(new_adr) < Emulator.MIN_ADR_LEN: # add leading zeros
-            new_adr = (Emulator.MIN_ADR_LEN - len(new_adr)) * "0" + new_adr
+        new_adr = self.add_leading_zeros(last_adr + 1)
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
 
-    def change_selected_text(self, change_adrs = True, change_oprs = True, change = 1):
-        ranges    = self.inp_SCT.tag_ranges("sel")
+    def add_leading_zeros(self, adr):
+        adr_str = str(adr)
+        if len(adr_str) < Emulator.MIN_ADR_LEN:
+            adr_str = (Emulator.MIN_ADR_LEN - len(adr_str)) * "0" + adr_str
+        return adr_str
+
+    def change_selected_inp_text(self, change_adrs = True, change_oprs = True, change = 1):
+        ranges = self.inp_SCT.tag_ranges("sel")
         if ranges:
             pos_start = self.inp_SCT.index("sel.first")
             pos_end   = self.inp_SCT.index("sel.last")
             text      = self.inp_SCT.get(*ranges)
-            lines     = text.split("\n")
-            new_text  = ""
-            for line in lines:
-                cell_comment_pair = line.split(";", maxsplit = 1)
-                if len(cell_comment_pair) > 1:
-                    comment = ";" + cell_comment_pair[1]
-                else:
-                    comment = ""
-                cell = cell_comment_pair[0]
-                if change_adrs:
-                    adr_str = cell.split(maxsplit = 1)[0]
-                    i = 0
-                    j = 0
-                    while i < len(adr_str) and adr_str[i] in string.whitespace:
-                        i += 1
-                        j += 1
-                    while j < len(adr_str) and adr_str[j] in "0123456789":
-                        j += 1
-                    adr = int(adr_str[i:j])
-                    adr += change
-                    cell = adr_str[:i] + str(adr) + cell[j:]
-                if change_oprs:
-                    opr_str = cell.split()[-1]
-                    print("opr_str", opr_str)
-                    i = len(opr_str) - 1
-                    j = len(opr_str) - 1
-                    while i >= 0 and opr_str[i] in string.whitespace + ")":
-                        i -= 1
-                        j -= 1
-                    while j >= 0 and opr_str[j] in "0123456789":
-                        print("j", j)
-                        j -= 1
-                    if j - 1 != 0 and opr_str[j - 1] != "#":
-                        print("i,j", i, j)
-                        if len(opr_str[j+1:i+1]):
-                            opr = int(opr_str[j:i+1])
-                            print(opr)
-                            opr += change
-                            cell = cell[:j+len(cell)-len(opr_str)+1] + str(opr) + opr_str[i:]
-                new_text += cell + comment
+            new_text  = self.change_text(text, change_adrs, change_oprs, change)
             self.inp_SCT.delete(pos_start, pos_end)
             self.inp_SCT.insert(pos_start, new_text)
+
+
+    def change_text(self, text, change_adrs = True, change_oprs = True, change = 1):
+        lines     = text.split("\n")
+        new_text  = ""
+        for line in lines:
+            cell_comment_pair = line.split(";", maxsplit = 1)
+            if len(cell_comment_pair) > 1:
+                comment = ";" + cell_comment_pair[1]
+            else:
+                comment = ""
+            cell = cell_comment_pair[0]
+            if len(cell):
+                if change_adrs:
+                    cell = self.change_adr(cell, change)
+                if change_oprs:
+                    cell = self.change_opr(cell, change)
+            new_text += cell + comment + "\n"
+        return new_text[0:-1] # 0:-1 to remove line break from last line
+
+    def change_adr(self, cell, change):
+        adr_rest_pair = cell.split(maxsplit = 1)
+        if len(adr_rest_pair) > 1:
+            cell_rest = adr_rest_pair[1]
+        else:
+            cell_rest = ""
+        adr_str = adr_rest_pair[0]
+        i = 0
+        j = 0
+        while i < len(adr_str) and adr_str[i] in string.whitespace:
+            i += 1
+            j += 1
+        while j < len(adr_str) and adr_str[j] in "0123456789":
+            j += 1
+        old_adr = adr_str[i:j]
+        new_adr = int(old_adr) + change
+        whitespace_wrapping = adr_str.split(old_adr)
+        cell = whitespace_wrapping[0] + self.add_leading_zeros(new_adr) + whitespace_wrapping[1] + " " + cell_rest
+        return cell
+
+    def change_opr(self, cell, change):
+        toks = cell.split()
+        if len(toks) == 3:
+            opr_str = toks[2]
+            cell_rest = toks[0] + " " + toks[1]
+        else:
+            return cell
+        i = len(opr_str) - 1
+        j = len(opr_str) - 1
+        while i >= 0 and opr_str[i] in string.whitespace + ")":
+            i -= 1
+            j -= 1
+        while j >= 0 and opr_str[j] in "0123456789":
+            j -= 1
+        j += 1
+        if j - 1 >= 0 and opr_str[j-1] == "#":
+            return cell
+        if len(opr_str[j:i + 1]):
+            old_opr = opr_str[j:i + 1]
+            new_opr = int(old_opr) + change
+            wrapping = opr_str.split(old_opr)
+            cell = cell_rest + " " + wrapping[0] + self.add_leading_zeros(new_opr) + wrapping[1]
+        return cell
 
 # TO-DO:
 # bei Adressverschiebung alle Adressen anpassen
@@ -562,8 +588,12 @@ class Editor:
 #   show full error traceback
 #   asktosave bei Schließen ausstellbar
 
+# TO-TEST:
+# what happens if you only select half of a cell when incrementing operands?
+
 # BUGS:
 # error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
-# ctrl + enter is printing \n if code has an error (because error occurs before "break "return"" can be executed)
 # Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
 # hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
+# ctrl + del on "09 " deletes "9 "
+# change_selected_text() ignores and removes additional whitespaces
