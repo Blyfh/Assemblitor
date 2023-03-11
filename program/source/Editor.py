@@ -1,4 +1,5 @@
 import os
+import string
 import traceback
 import tkinter              as tk
 import tkinter.ttk          as ttk
@@ -56,7 +57,6 @@ class Editor:
     def tkinter_gui(self):
         self.root = tk.Tk()
         tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errors
-        self.only_one_step_VAR  = tk.IntVar()
         self.is_light_theme_VAR = tk.IntVar(   value = int(ph.is_light_theme()))
         self.language_name_VAR  = tk.StringVar(value = lh.gt_lang_name(lh.cur_lang))
         self.code_font_name_VAR = tk.StringVar(value = ph.code_font()[0])
@@ -85,7 +85,7 @@ class Editor:
         self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
         self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.gt_code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
-        self.style.configure("TCheckbutton",          background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg)  # , relief = "flat", borderwidth = 1)
+        self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
         self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)            # , relief = "flat", borderwidth = 1)
     # elements
         self.menubar = tk.Menu(self.root)
@@ -110,19 +110,23 @@ class Editor:
         self.taskbar_FRM = ttk.Frame(self.root)
         self.taskbar_FRM.pack(fill = "x")
 
-        self.run_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
-        self.run_BTN.pack(side = "left", anchor = "nw", padx = 5, pady = 5)
-        self.run_TIP = gui.Tooltip(self.run_BTN, text = lh.gui("RunPrg"), waittime = 600)
+        self.run_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
+        self.run_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.run_TIP = gui.Tooltip(self.run_BTN, text = lh.gui("RunPrg"))
 
-        self.step_CHB = ttk.Checkbutton(self.taskbar_FRM, text = lh.gui("StepMode"), variable = self.only_one_step_VAR, command = self.reset_pro, onvalue = True, offvalue = False)
-        self.step_CHB.pack(side = "left", fill = "y", anchor = "center", padx = 5, pady = 5)
-        self.step_CHB.state(["!alternate"]) # deselect the checkbutton
+        self.step_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_step, img_default = sh.gt_sprite("BTN_run_once_default"), img_hovering= sh.gt_sprite("BTN_run_once_hovering"), img_clicked = sh.gt_sprite("BTN_run_once_clicked"))
+        self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.step_TIP = gui.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
+
+        self.incr_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", text = "INCR", command = self.change_selected_text)
+        self.incr_BTN.pack(side = "left", anchor = "sw", padx = (5, 0), pady = 5)
+        self.run_TIP = gui.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
 
         self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = lh.gui("IR:"))
         self.ireg_cmd_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
         self.ireg_opr_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
-        self.ireg_FRM.pack(side = "right", padx = 5, pady = 5)
+        self.ireg_FRM.pack(side = "right", padx = (5, 0), pady = 5)
         self.ireg_title_LBL.grid(row = 0, column = 0, columnspan = 2)
         self.ireg_cmd_LBL.grid(row = 1, column = 0, padx = 1)
         self.ireg_opr_LBL.grid(row = 1, column = 1, padx = 1)
@@ -130,14 +134,14 @@ class Editor:
         self.accu_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.accu_title_LBL = ttk.Label(self.accu_FRM, style = "info_title.TLabel", text = lh.gui("ACC:"))
         self.accu_value_LBL = ttk.Label(self.accu_FRM, style = "info_value.TLabel", width = 5)
-        self.accu_FRM.pack(side = "right", padx = 5, pady = 5)
+        self.accu_FRM.pack(side = "right", padx = (5, 0), pady = 5)
         self.accu_title_LBL.pack(side = "top",    fill = "x")
         self.accu_value_LBL.pack(side = "bottom", fill = "x")
 
         self.proc_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.proc_title_LBL = ttk.Label(self.proc_FRM, style = "info_title.TLabel", text = lh.gui("PC:"))
         self.proc_value_LBL = ttk.Label(self.proc_FRM, style = "info_value.TLabel", width = 5)
-        self.proc_FRM.pack(side = "right", padx = 5, pady = 5)
+        self.proc_FRM.pack(side = "right", padx = (5, 0), pady = 5)
         self.proc_title_LBL.pack(side = "top",    fill = "x")
         self.proc_value_LBL.pack(side = "bottom", fill = "x")
 
@@ -253,16 +257,13 @@ class Editor:
             else:
                 self.root.title(self.root.title()[1:])
 
-    def reset_pro(self):
-        self.emu.is_new_pro = True
-
-    def run(self):
+    def run(self, execute_all):
         self.proc_value_LBL.config(text = "")
         self.accu_value_LBL.config(text = "")
         self.ireg_cmd_LBL.config(  text = "")
         self.ireg_opr_LBL.config(  text = "")
         inp = self.inp_SCT.get(1.0, "end-1c")
-        out = self.emu.gt_out(inp, not self.only_one_step_VAR.get())
+        out = self.emu.gt_out(inp, execute_all)
         if out:
             self.proc_value_LBL.config(text = str(out[1]))
             self.accu_value_LBL.config(text = str(out[2]))
@@ -278,6 +279,12 @@ class Editor:
             self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.config(state = "disabled")
+
+    def run_all(self, event = None):
+        self.run(execute_all = True)
+
+    def run_step(self, event = None):
+        self.run(execute_all = False)
 
     def reload_file(self, event = None):
         if self.dirty_flag:
@@ -495,6 +502,55 @@ class Editor:
         if len(new_adr) < Emulator.MIN_ADR_LEN: # add leading zeros
             new_adr = (Emulator.MIN_ADR_LEN - len(new_adr)) * "0" + new_adr
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
+
+    def change_selected_text(self, change_adrs = True, change_oprs = True, change = 1):
+        ranges    = self.inp_SCT.tag_ranges("sel")
+        if ranges:
+            pos_start = self.inp_SCT.index("sel.first")
+            pos_end   = self.inp_SCT.index("sel.last")
+            text      = self.inp_SCT.get(*ranges)
+            lines     = text.split("\n")
+            new_text  = ""
+            for line in lines:
+                cell_comment_pair = line.split(";", maxsplit = 1)
+                if len(cell_comment_pair) > 1:
+                    comment = ";" + cell_comment_pair[1]
+                else:
+                    comment = ""
+                cell = cell_comment_pair[0]
+                if change_adrs:
+                    adr_str = cell.split(maxsplit = 1)[0]
+                    i = 0
+                    j = 0
+                    while i < len(adr_str) and adr_str[i] in string.whitespace:
+                        i += 1
+                        j += 1
+                    while j < len(adr_str) and adr_str[j] in "0123456789":
+                        j += 1
+                    adr = int(adr_str[i:j])
+                    adr += change
+                    cell = adr_str[:i] + str(adr) + cell[j:]
+                if change_oprs:
+                    opr_str = cell.split()[-1]
+                    print("opr_str", opr_str)
+                    i = len(opr_str) - 1
+                    j = len(opr_str) - 1
+                    while i >= 0 and opr_str[i] in string.whitespace + ")":
+                        i -= 1
+                        j -= 1
+                    while j >= 0 and opr_str[j] in "0123456789":
+                        print("j", j)
+                        j -= 1
+                    if j - 1 != 0 and opr_str[j - 1] != "#":
+                        print("i,j", i, j)
+                        if len(opr_str[j+1:i+1]):
+                            opr = int(opr_str[j:i+1])
+                            print(opr)
+                            opr += change
+                            cell = cell[:j+len(cell)-len(opr_str)+1] + str(opr) + opr_str[i:]
+                new_text += cell + comment
+            self.inp_SCT.delete(pos_start, pos_end)
+            self.inp_SCT.insert(pos_start, new_text)
 
 # TO-DO:
 # bei Adressverschiebung alle Adressen anpassen

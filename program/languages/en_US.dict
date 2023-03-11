@@ -33,7 +33,9 @@
         "About":     "About",
 
         "RunPrg":   "Run program",
-        "StepMode": "Step-By-Step Mode",
+        "RunStep":  "Run single step",
+        "IncrAdrs": "Increment selected addresses",
+        "DecrAdrs": "Decrement selected addresses",
 
         "PC:":  "Program Counter:",
         "ACC:": "Accumulator:",

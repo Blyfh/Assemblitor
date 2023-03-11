@@ -9,8 +9,12 @@ class Button(ttk.Label):
         self.command = command
         self.hovering = False
         self.click_display_time = click_display_time
+        self.img_default  = None
+        self.img_hovering = None
+        self.img_clicked  = None
 
         if img_default:
+            self.image_flag = True
             self.img_default = img_default
             self.on_leave()
             if img_hovering:
@@ -21,21 +25,28 @@ class Button(ttk.Label):
                 self.img_clicked = img_clicked
             else:
                 self.img_clicked = self.img_default
-            self.bind(sequence = "<Enter>", func = self.on_enter)
-            self.bind(sequence = "<Leave>", func = self.on_leave)
-            self.bind(sequence = "<ButtonPress-1>",   func = self.on_pressed)
-            self.bind(sequence = "<ButtonRelease-1>", func = self.on_released)
+        else:
+            self.image_flag = False
+
+        self.bind(sequence = "<Enter>", func = self.on_enter)
+        self.bind(sequence = "<Leave>", func = self.on_leave)
+        self.bind(sequence = "<ButtonPress-1>",   func = self.on_pressed)
+        self.bind(sequence = "<ButtonRelease-1>", func = self.on_released)
+
+    def set_img(self, img):
+        if self.image_flag:
+            self.config(image = img)
 
     def on_enter(self, event = None):
         self.hovering = True
-        self.config(image = self.img_hovering)
+        self.set_img(self.img_hovering)
 
     def on_leave(self, event = None):
         self.hovering = False
-        self.config(image = self.img_default)
+        self.set_img(self.img_default)
 
     def on_pressed(self, event = None):
-        self.config(image = self.img_clicked)
+        self.set_img(self.img_clicked)
 
     def on_released(self, event = None):
         if self.hovering:
@@ -46,7 +57,7 @@ class Button(ttk.Label):
 
 
 class Tooltip:
-    '''
+    """
     It creates a tooltip for a given widget as the mouse goes on it.
 
     see:
@@ -74,14 +85,14 @@ class Tooltip:
       Tested on Ubuntu 16.04/16.10, running Python 3.5.2
 
     To-Do: themes styles support
-    '''
+    """
 
     def __init__(self, widget,
                  *,
                  bg='#FFFFEA',
                  pad=(5, 3, 5, 3),
                  text='widget info',
-                 waittime=400,
+                 waittime=600,
                  wraplength=250):
 
         self.waittime = waittime  # in miliseconds, originally 500

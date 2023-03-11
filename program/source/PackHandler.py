@@ -228,7 +228,7 @@ class SpriteHandler:
         self.theme = None
         self.set_theme(is_light_theme)
 
-    def gt_sprite(self, file, x = 40, y = 40):
+    def gt_sprite(self, file, x = 35, y = 35):
         try:
             img = Image.open(f"{program_dir}/sprites/{self.theme}/{file}.png")
         except:

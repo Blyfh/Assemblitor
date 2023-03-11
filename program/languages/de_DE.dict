@@ -33,7 +33,9 @@
         "About":     "Über",
 
         "RunPrg":   "Programm ausführen",
-        "StepMode": "Einzelschrittmodus",
+        "RunStep":  "Einzelnen Schritt ausführen",
+        "IncrAdrs": "Markierte Adressen erhöhen",
+        "DecrAdrs": "Markierte Adressen vermindern",
 
         "PC:":  "Befehlszähler:",
         "ACC:": "Akkumulator:",
