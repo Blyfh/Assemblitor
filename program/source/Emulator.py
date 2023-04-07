@@ -30,16 +30,16 @@ class Emulator:
         self.is_new_prg  = True
 
     def gt_out(self, prg_str, execute_all = True):
-        if self.prg_str != prg_str: # source changed
+        if self.prg_str != prg_str: # program changed
             self.is_new_prg = True
         if self.is_new_prg:
             self.create_prg(prg_str)
-            if not execute_all:  # display first step of source
+            if not execute_all:  # display first step of program
                 return self.prg.gt_prg(), str(self.prg.pc), str(self.prg.accu), self.gt_ireg()
-        if len(self.prg.cells) == 0: # source is empty
-            return "", "", "", ""
+        if len(self.prg.cells) == 0: # program is empty (can include comments though)
+            return self.prg.gt_prg(), 0, 0, ("", "")
         self.prg.execute(execute_all)
-        if not execute_all and self.cur_cmd() == "STP": # program reset when reaching end of single-step executing
+        if self.cur_cmd() == "STP": # program reset when reaching end of single-step executing
             self.is_new_prg = True
         return self.prg.gt_prg(execute_all), str(self.prg.pc), str(self.prg.accu), self.gt_ireg()
 

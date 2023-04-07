@@ -595,4 +595,3 @@ class Editor:
 # hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
 # ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces
-# empty Prg with comment doesn't display comment when executed
