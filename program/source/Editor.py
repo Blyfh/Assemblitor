@@ -594,3 +594,4 @@ class Editor:
 # hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
 # ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces
+# "0 stp \n 01 stp 5" is allowed (+ whole finding-errors-while-executing approach)

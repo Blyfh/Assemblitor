@@ -83,9 +83,9 @@ class Program:
         prg_str2 = ""
         if not execute_all:
             for cell in self.cells:
-                if cell.cpos < self.pc:
+                if cell.gt_adr() < self.pc:
                     prg_str1 += str(cell) + "\n"
-                elif cell.cpos > self.pc:
+                elif cell.gt_adr() > self.pc:
                     prg_str2 += str(cell) + "\n"
                 else:
                     cell_that_is_currently_executed = str(cell) + "\n"
@@ -251,9 +251,9 @@ class Cell:
 
     def __init__(self, cel_str = "", cmt = ""):
         tok_strs  = self.split_cel_str(cel_str)
-        self.cpos = None
         self.cmt  = cmt
-        self.toks = self.gt_toks(tok_strs)
+        self.toks = []
+        self.create_toks(tok_strs)
 
     def __str__(self):
         cel_str = ""
@@ -261,19 +261,18 @@ class Cell:
             cel_str += str(tok)
         return cel_str + self.cmt
 
-    def gt_toks(self, tok_strs):
-        toks = []
+    def create_toks(self, tok_strs):
         for tpos in range(len(tok_strs)):
-            if len(tok_strs[tpos]) == 0 and tpos > 1: # ignore empty operands
+            if len(tok_strs[tpos]) == 0 and tpos == 2: # ignore empty operands
                 pass
             elif tpos == 0:
                 tok = Token(tok_strs[tpos], tpos)
-                self.cpos = tok.gt_adr()
-                toks.append(tok)
+                self.toks.append(tok)
+            elif tpos != 1 and self.toks[1].type == 2:
+                raise Exception(eh.error("MaxCelLength_ValCell", adr = self.gt_adr()))
             else:
-                tok = Token(tok_strs[tpos], tpos, self.cpos)
-                toks.append(tok)
-        return toks
+                tok = Token(tok_strs[tpos], tpos, self.gt_adr())
+                self.toks.append(tok)
 
     def split_cel_str(self, cel_str):
         tok_strs = []
@@ -317,7 +316,7 @@ class Cell:
             else:
                 return self.toks[2].gt_opr()
         elif self.toks[1].tok == "STP":
-            return Operand("", self.cpos)
+            return Operand("", self.gt_adr())
         else:
             raise Exception(eh.error("MissingOpr", cmd = self.gt_cmd(), adr = self.gt_adr()))
 

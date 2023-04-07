@@ -6,6 +6,7 @@
     "CmdHasValOpr":         ("SyntaxError",   "Only commands 'ADD', 'SUB', 'MUL' and 'LDA' support absolute values like '{opr_str}'."),
     "UnknownOprTyp":        ("ValueError",    "Unknown operand type: '{opr_str}'.\n\nOperands have to be addresses (format: '<nonnegative int>' or '(<nonnegative int>)') or an absolute values (format: '#<int>')."),
     "MaxIterationDepth":    ("StopIteration", "Maximum iteration depth exceeded.\n\nCan only jump up to {max_jmps} times to memory cell {adr}."),
+    "MaxCelLength_ValCell": ("SyntaxError",   "Memory cell {adr} has too many tokens.\n\nCan only have up to 2 tokens when storing a value (excluding comments): 1. address, 2. value."),
     "ValNotInt_Load":       ("TypeError",     "Unable to load accumulator value in memory cell {adr}.\n\nValues must be nonnegative integers, not '{val}'."),
     "CmdStpHasOpr":         ("SyntaxError",   "Command 'STP' does not support operands. Please remove operand in memory cell {adr}."),
     "MissingOpr":           ("SyntaxError",   "Command {cmd} in memory cell {adr} requires an operand but none was given."),
