@@ -38,7 +38,7 @@ class Editor:
         self.already_modified = False
         self.tkinter_gui()
         if self.testing:
-            self.open_demo_pro()
+            self.open_demo_prg()
             self.open_options_win()
         self.root.mainloop()
 
@@ -103,7 +103,7 @@ class Editor:
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
         self.help_MNU.add_command(label = lh.gui("Assembly"),  command = self.open_assembly_win)
         self.help_MNU.add_command(label = lh.gui("Shortcuts"), command = self.open_shortcuts_win)
-        self.help_MNU.add_command(label = lh.gui("DemoPrg"),   command = self.open_demo_pro)
+        self.help_MNU.add_command(label = lh.gui("DemoPrg"), command = self.open_demo_prg)
         self.help_MNU.add_command(label = lh.gui("About"),     command = self.open_about_win)
         self.menubar.add_cascade(label = lh.gui("Help"), menu = self.help_MNU, underline = 0)
 
@@ -138,12 +138,12 @@ class Editor:
         self.accu_title_LBL.pack(side = "top",    fill = "x")
         self.accu_value_LBL.pack(side = "bottom", fill = "x")
 
-        self.proc_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
-        self.proc_title_LBL = ttk.Label(self.proc_FRM, style = "info_title.TLabel", text = lh.gui("PC:"))
-        self.proc_value_LBL = ttk.Label(self.proc_FRM, style = "info_value.TLabel", width = 5)
-        self.proc_FRM.pack(side = "right", padx = (5, 0), pady = 5)
-        self.proc_title_LBL.pack(side = "top",    fill = "x")
-        self.proc_value_LBL.pack(side = "bottom", fill = "x")
+        self.prgc_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
+        self.prgc_title_LBL = ttk.Label(self.prgc_FRM, style = "info_title.TLabel", text = lh.gui("PC:"))
+        self.prgc_value_LBL = ttk.Label(self.prgc_FRM, style ="info_value.TLabel", width = 5)
+        self.prgc_FRM.pack(side = "right", padx = (5, 0), pady = 5)
+        self.prgc_title_LBL.pack(side = "top",    fill = "x")
+        self.prgc_value_LBL.pack(side ="bottom", fill ="x")
 
         self.text_FRM = ttk.Frame(self.root)
         self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = self.gt_code_font(), insertbackground = self.theme_cursor_color)
@@ -208,7 +208,7 @@ class Editor:
         self.ireg_cmd_LBL.config(  font = self.gt_code_font())
         self.ireg_opr_LBL.config(  font = self.gt_code_font())
         self.accu_value_LBL.config(font = self.gt_code_font())
-        self.proc_value_LBL.config(font = self.gt_code_font())
+        self.prgc_value_LBL.config(font = self.gt_code_font())
         if self.assembly_WIN:  # restart necessary because unable to access local widget variable text_TXT
             self.close_child_win("self.assembly_WIN")
             self.open_assembly_win()
@@ -223,7 +223,7 @@ class Editor:
         Emulator.update_properties()
 
     def destroy(self):
-        if not self.dirty_flag or self.wants_to_save() == True or self.testing: # "== True" checks if user didn't abort in wants_to_save()
+        if not self.dirty_flag or self.testing or self.wants_to_save() == True: # "== True" checks if user didn't abort in wants_to_save()
             self.root.destroy()
 
     def wants_to_save(self):
@@ -256,15 +256,15 @@ class Editor:
                 self.root.title(self.root.title()[1:])
 
     def run(self, execute_all):
-        self.proc_value_LBL.config(text = "")
+        self.prgc_value_LBL.config(text ="")
         self.accu_value_LBL.config(text = "")
         self.ireg_cmd_LBL.config(  text = "")
         self.ireg_opr_LBL.config(  text = "")
         inp = self.inp_SCT.get(1.0, "end-1c")
-        out = self.emu.gt_out(inp, execute_all)
-        if out:
-            self.proc_value_LBL.config(text = str(out[1]))
-            self.accu_value_LBL.config(text = str(out[2]))
+        if inp:
+            out = self.emu.gt_out(inp, execute_all)
+            self.prgc_value_LBL.config(text = out[1])
+            self.accu_value_LBL.config(text = out[2])
             self.ireg_cmd_LBL.config(  text = out[3][0])
             self.ireg_opr_LBL.config(  text = out[3][1])
             self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
@@ -299,7 +299,6 @@ class Editor:
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return
-        print("last dir:", self.last_dir)
         self.file_path = fd.askopenfilename(title = lh.file_mng("OpenFile"), initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
             self.root.title(self.file_path + " – " + lh.gui("title"))
@@ -465,7 +464,7 @@ class Editor:
         eval(win_str + ".destroy()")
         exec(win_str + " = None")
 
-    def open_demo_pro(self):
+    def open_demo_prg(self):
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return
@@ -478,7 +477,6 @@ class Editor:
 
     def key_enter(self, event):
         self.insert_address()
-        print(self.inp_SCT.get("end-1c", "end"))
         return "break" # overwrites the line break printing
 
     def key_shift_enter(self, event):
@@ -597,3 +595,4 @@ class Editor:
 # hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
 # ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces
+# empty Prg with comment doesn't display comment when executed

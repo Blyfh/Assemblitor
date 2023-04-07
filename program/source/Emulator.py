@@ -25,66 +25,71 @@ def update_properties():
 class Emulator:
 
     def __init__(self):
-        self.pro_str     = ""
-        self.pro         = None
-        self.is_new_pro  = True
+        self.prg_str     = ""
+        self.prg         = None
+        self.is_new_prg  = True
 
-    def gt_out(self, pro_str, execute_all = True):
-        if pro_str:
-            if self.pro_str != pro_str: # source changed
-                self.is_new_pro = True
-            if self.is_new_pro:
-                self.create_pro(pro_str)
-                if not execute_all:  # display first step of source
-                    return self.pro.gt_pro(), self.pro.pc, self.pro.accu, self.gt_ireg()
-            if len(self.pro.cells) == 0: # source is empty
-                return
-            self.pro.execute(execute_all)
-            if self.pro.gt_cel(self.pro.pc).gt_cmd() == "STP":
-                self.is_new_pro = True
-            return self.pro.gt_pro(execute_all), self.pro.pc, self.pro.accu, self.gt_ireg()
-        else:
-            return
+    def gt_out(self, prg_str, execute_all = True):
+        if self.prg_str != prg_str: # source changed
+            self.is_new_prg = True
+        if self.is_new_prg:
+            self.create_prg(prg_str)
+            if not execute_all:  # display first step of source
+                return self.prg.gt_prg(), str(self.prg.pc), str(self.prg.accu), self.gt_ireg()
+        if len(self.prg.cells) == 0: # source is empty
+            return "", "", "", ""
+        self.prg.execute(execute_all)
+        if not execute_all and self.cur_cmd() == "STP": # program reset when reaching end of single-step executing
+            self.is_new_prg = True
+        return self.prg.gt_prg(execute_all), str(self.prg.pc), str(self.prg.accu), self.gt_ireg()
 
     def gt_ireg(self): # current command in instruction register
-        cell = self.pro.gt_cel(self.pro.pc)
-        return str(cell.gt_cmd()), str(cell.gt_opr().opr_str)
+        return self.cur_cmd(), self.cur_opr_str()
 
-    def create_pro(self, pro_str):
-        self.is_new_pro = False
-        self.pro_str = pro_str
-        self.pro = Program(pro_str)
+    def cur_cell(self): # current cell
+        return self.prg.gt_cel(self.prg.pc)
+
+    def cur_cmd(self):
+        return self.cur_cell().gt_cmd()
+
+    def cur_opr_str(self):
+        return self.cur_cell().gt_opr().opr_str
+
+    def create_prg(self, prg_str):
+        self.prg_str = prg_str
+        self.prg = Program(prg_str)
+        self.is_new_prg = False
 
 
 class Program:
 
-    def __init__(self, pro_str):
+    def __init__(self, prg_str):
         self.jmps_to_adr = {}  # each element logs how many times the pointer jumped to its cell
         self.top_cmt     = ""
-        self.cells       = self.gt_cells(pro_str)
+        self.cells       = self.gt_cells(prg_str)
         self.accu        = 0
         self.pc          = 0
         self.executing   = False
 
     def __str__(self):
-        pro_str = self.top_cmt
+        prg_str = self.top_cmt
         for cell in self.cells:
-            pro_str += str(cell) + "\n"
-        return pro_str
+            prg_str += str(cell) + "\n"
+        return prg_str
 
-    def gt_pro(self, execute_all = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
-        pro_str1 = self.top_cmt
+    def gt_prg(self, execute_all = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
+        prg_str1 = self.top_cmt
         cell_that_is_currently_executed = ""
-        pro_str2 = ""
+        prg_str2 = ""
         if not execute_all:
             for cell in self.cells:
                 if cell.cpos < self.pc:
-                    pro_str1 += str(cell) + "\n"
+                    prg_str1 += str(cell) + "\n"
                 elif cell.cpos > self.pc:
-                    pro_str2 += str(cell) + "\n"
+                    prg_str2 += str(cell) + "\n"
                 else:
                     cell_that_is_currently_executed = str(cell) + "\n"
-            return pro_str1, cell_that_is_currently_executed, pro_str2
+            return prg_str1, cell_that_is_currently_executed, prg_str2
         else:
             return str(self), "", ""
 
@@ -118,10 +123,10 @@ class Program:
         opr = self.gt_cel(adr).gt_opr()
         eval("self.cmd_" + cmd + "(" + str(opr) + ")")
 
-    def gt_cells(self, pro_str):
-        if not pro_str:
+    def gt_cells(self, prg_str):
+        if not prg_str:
             return []
-        lines = pro_str.split("\n")
+        lines = prg_str.split("\n")
         cells  = []
         for i in range(len(lines)):
             line = lines[i].split(";")

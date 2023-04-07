@@ -52,8 +52,6 @@ class Button(ttk.Label):
         if self.hovering:
             self.command()
             self.root.after(self.click_display_time, self.on_enter)
-        else:
-            self.root.after(self.click_display_time, self.on_leave)
 
 
 class Tooltip:
