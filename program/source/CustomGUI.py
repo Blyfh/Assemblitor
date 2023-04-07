@@ -50,8 +50,8 @@ class Button(ttk.Label):
 
     def on_released(self, event = None):
         if self.hovering:
-            self.command()
             self.root.after(self.click_display_time, self.on_enter)
+            self.command()
 
 
 class Tooltip:
