@@ -1,7 +1,7 @@
 import string
 
 
-CMDS        = ["LDA", "ADD", "STP", "SUB", "JMP", "JLE", "JZE", "MUL", "STA"]
+CMDS        = ["STP", "ADD", "SUB", "MUL", "LDA", "STA", "JMP", "JLE", "JZE"]
 MIN_ADR_LEN = 0
 MAX_JMPS    = 0
 MAX_CELS    = 0
@@ -176,20 +176,33 @@ class Program:
             i += 1
         return cells
 
-    def gt_adr(self, opr_inf, is_lda = False): # opr_inf = (opr.type, opr.opr)
-        typ = opr_inf[0]
-        opr = opr_inf[1]
+    def gt_final_value(self, opr_info): # interprets final result of operand pointer as a value (for commands like ADD, SUB, MUL, LDA)
+        typ = opr_info[0] # opr_info = (opr.typ, opr.opr, opr.opr_str)
+        opr = opr_info[1]
         if typ == 0: # normal address
-            return opr
+            adr = opr
+            return self.gt_cel(adr).gt_val()
         elif typ == 1: # nested address (e.g. 00 LDA (5))
-            return int(self.gt_cel(opr).gt_val())
+            adr = int(self.gt_cel(opr).gt_val())
+            return self.gt_cel(adr).gt_val()
         elif typ == 2: # value (e.g. 00 LDA #5)
-            if is_lda:
-                return str(opr)
-            else:
-                raise Exception(eh.error("CmdHasValOpr", opr = opr))
+            return opr
         else:
-            raise Exception(eh.error("UnknownOprTyp", opr = opr))
+            raise Exception(eh.error("UnknownOprTyp", opr_str = opr_info[2]))
+
+    def gt_final_adr(self, opr_info): # interprets final result of operand pointer as an address (for commands like STA, JMP, JLE, JZE)
+        typ = opr_info[0] # opr_info = (opr.typ, opr.opr, opr.opr_str)
+        opr = opr_info[1]
+        if typ == 0: # normal address
+            adr = opr
+            return adr
+        elif typ == 1: # nested address (e.g. 00 LDA (5))
+            adr = int(self.gt_cel(opr).gt_val())
+            return adr
+        elif typ == 2: # value (e.g. 00 LDA #5)
+            raise Exception(eh.error("CmdHasValOpr", opr_str = opr_info[2]))
+        else:
+            raise Exception(eh.error("UnknownOprTyp", opr_str = opr_info[2]))
 
     def gt_jmps_to_adr(self, adr):
         if adr in self.jmps_to_adr:
@@ -197,31 +210,33 @@ class Program:
         else:
             return 0
 
-    def cmd_LDA(self, opr_inf):
-        adr = self.gt_adr(opr_inf, True)
-        if type(adr) is str: # value (e.g. 00 LDA #5)
-            self.accu = int(adr)
-        else: # address (e.g. 00 LDA 05)
-            self.accu = self.gt_cel(adr).gt_val()
-
-    def cmd_ADD(self, opr_inf):
-        adr = self.gt_adr(opr_inf)
-        self.accu += self.gt_cel(adr).gt_val()
-
     def cmd_STP(self):
         self.pc -= 1
         self.executing = False
 
+    def cmd_ADD(self, opr_inf):
+        self.accu += self.gt_final_value(opr_inf)
+
     def cmd_SUB(self, opr_inf):
-        adr = self.gt_adr(opr_inf)
-        self.accu -= self.gt_cel(adr).gt_val()
+        self.accu -= self.gt_final_value(opr_inf)
+
+    def cmd_MUL(self, opr_inf):
+        self.accu *= self.gt_final_value(opr_inf)
+
+    def cmd_LDA(self, opr_inf):
+        self.accu = self.gt_final_value(opr_inf)
+
+    def cmd_STA(self, opr_inf):
+        adr = self.gt_final_adr(opr_inf)
+        self.gt_cel(adr).edit(self.accu)
 
     def cmd_JMP(self, opr_inf):
-        self.pc = self.gt_adr(opr_inf) - 1 # "- 1" because self.pc will increment automatically
-        if self.gt_jmps_to_adr(self.gt_adr(opr_inf)) > MAX_JMPS:
-            raise Exception(eh.error("MaxIterationDepth", max_jmps = MAX_JMPS, adr = self.gt_adr(opr_inf)))
+        adr = self.gt_final_adr(opr_inf)
+        self.pc = adr - 1 # "- 1" because self.pc will increment automatically
+        if self.gt_jmps_to_adr(adr) > MAX_JMPS:
+            raise Exception(eh.error("MaxIterationDepth", max_jmps = MAX_JMPS, adr = adr))
         else:
-            self.jmps_to_adr[self.gt_adr(opr_inf)] = self.gt_jmps_to_adr(self.gt_adr(opr_inf)) + 1 # increment jmps_to_adr for this address
+            self.jmps_to_adr[adr] = self.gt_jmps_to_adr(adr) + 1 # increment jmps_to_adr for this address
 
     def cmd_JLE(self, opr_inf):
         if self.accu <= 0:
@@ -230,14 +245,6 @@ class Program:
     def cmd_JZE(self, opr_inf):
         if self.accu == 0:
             self.cmd_JMP(opr_inf)
-
-    def cmd_MUL(self, opr_inf):
-        adr = self.gt_adr(opr_inf)
-        self.accu *= self.gt_cel(adr).gt_val()
-
-    def cmd_STA(self, opr_inf):
-        adr = self.gt_adr(opr_inf)
-        self.gt_cel(adr).edit(self.accu)
 
 
 class Cell:
@@ -429,29 +436,29 @@ class Operand:
                 try:
                     opr_int = int(opr_str[1:])
                 except:
-                    raise Exception(eh.error("ValOprNotInt", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("ValOprNotInt", adr = self.cpos, opr_str = opr_str))
                 self.type = 2
                 return opr_int
             elif opr_str[0] == "(" and opr_str[-1] == ")":
                 try:
                     opr_int = int(opr_str[1:-1])
                 except:
-                    raise Exception(eh.error("IndOprNotInt", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("IndOprNotInt", adr = self.cpos, opr_str = opr_str))
                 if opr_int >= 0:
                     self.type = 1
                     return opr_int
                 else:
-                    raise Exception(eh.error("IndOprIsNegative", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("IndOprIsNegative", adr = self.cpos, opr_str = opr_str))
             else:
                 try:
                     opr_int = int(opr_str)
                 except:
-                    raise Exception(eh.error("UnknownOpr", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("UnknownOpr", adr = self.cpos, opr_str = opr_str))
                 if opr_int >= 0:
                     self.type = 0
                     return opr_int
                 else:
-                    raise Exception(eh.error("DirOprIsNegative", adr = self.cpos, opr = opr_str))
+                    raise Exception(eh.error("DirOprIsNegative", adr = self.cpos, opr_str = opr_str))
         else:
             self.type = None
             return None
@@ -460,4 +467,4 @@ class Operand:
         if self.type is None:
             return ""
         else:
-            return "(" + str(self.type) + ", " + str(self.opr) + ")"
+            return f"({self.type}, {self.opr}, '{self.opr_str}')"

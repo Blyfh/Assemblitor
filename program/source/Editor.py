@@ -577,7 +577,6 @@ class Editor:
         return cell
 
 # TO-DO:
-# bei Adressverschiebung alle Adressen anpassen
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # turn IntVars into BoolVars if necessary
