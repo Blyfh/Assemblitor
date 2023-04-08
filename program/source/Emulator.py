@@ -2,6 +2,7 @@ import string
 
 
 CMDS        = ["STP", "ADD", "SUB", "MUL", "LDA", "STA", "JMP", "JLE", "JZE"]
+CMDS_no_val_opr = ["STA", "JMP", "JLE", "JZE"]
 MIN_ADR_LEN = 0
 MAX_JMPS    = 0
 MAX_CELS    = 0
@@ -191,7 +192,7 @@ class Program:
             raise Exception(eh.error("UnknownOprTyp", opr_str = opr_info[2]))
 
     def gt_final_adr(self, opr_info): # interprets final result of operand pointer as an address (for commands like STA, JMP, JLE, JZE)
-        typ = opr_info[0] # opr_info = (opr.typ, opr.opr, opr.opr_str)
+        typ = opr_info[0] # opr_info = (opr.typ, opr.opr, opr.opr_str, opr.cpos)
         opr = opr_info[1]
         if typ == 0: # normal address
             adr = opr
@@ -200,7 +201,7 @@ class Program:
             adr = int(self.gt_cel(opr).gt_val())
             return adr
         elif typ == 2: # value (e.g. 00 LDA #5)
-            raise Exception(eh.error("CmdHasValOpr", opr_str = opr_info[2]))
+            raise Exception(eh.error("CmdHasValOpr", opr_str = opr_info[2], adr = opr_info[3]))
         else:
             raise Exception(eh.error("UnknownOprTyp", opr_str = opr_info[2]))
 
@@ -268,10 +269,14 @@ class Cell:
             elif tpos == 0:
                 tok = Token(tok_strs[tpos], tpos)
                 self.toks.append(tok)
-            elif tpos != 1 and self.toks[1].type == 2:
+            elif tpos != 1 and self.toks[1].type == 2: # operand after a value
                 raise Exception(eh.error("MaxCelLength_ValCell", adr = self.gt_adr()))
+            elif tpos != 1 and self.toks[1].tok == "STP": # operand after STP
+                raise Exception(eh.error("MaxCelLength_StpCell", adr = self.gt_adr()))
             else:
                 tok = Token(tok_strs[tpos], tpos, self.gt_adr())
+                if tok.type == 3 and tok.tok.type == 2 and self.toks[1].tok in CMDS_no_val_opr: # operand with absolute value (e.g. #5) for an unsupported command
+                    raise Exception(eh.error("CmdHasValOpr", opr_str = tok.tok_str, adr = self.gt_adr()))
                 self.toks.append(tok)
 
     def split_cel_str(self, cel_str):
@@ -466,4 +471,4 @@ class Operand:
         if self.type is None:
             return ""
         else:
-            return f"({self.type}, {self.opr}, '{self.opr_str}')"
+            return f"({self.type}, {self.opr}, '{self.opr_str}', {self.cpos})"
