@@ -73,6 +73,7 @@ class Editor:
         self.root.minsize(minsize[0], minsize[1])
         self.root.config(bg = self.theme_base_bg)
         self.root.title(lh.gui("title"))
+
     # style
         self.style = ttk.Style(self.root)
         #self.style.theme_use("winnative")
@@ -87,6 +88,7 @@ class Editor:
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
         self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
         self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)            # , relief = "flat", borderwidth = 1)
+
     # elements
         self.menubar = tk.Menu(self.root)
         self.root.config(menu = self.menubar)
@@ -118,9 +120,14 @@ class Editor:
         self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
         self.step_TIP = gui.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
-        self.incr_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", text = "INCR", command = self.change_selected_inp_text)
-        self.incr_BTN.pack(side = "left", anchor = "sw", padx = (5, 0), pady = 5)
-        self.run_TIP = gui.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
+        self.chng_FRM = ttk.Frame(self.taskbar_FRM)
+        self.incr_BTN = gui.Button(self.chng_FRM, style = "img.TLabel", command = self.increment_selected_inp_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
+        self.decr_BTN = gui.Button(self.chng_FRM, style = "img.TLabel", command = self.decrement_selected_inp_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
+        self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.incr_BTN.pack()
+        self.decr_BTN.pack()
+        self.incr_TIP = gui.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
+        self.decr_TIP = gui.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
 
         self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = lh.gui("IR:"))
@@ -153,6 +160,7 @@ class Editor:
         self.out_SCT.pack(side = "right", fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
         self.out_SCT.tag_config("pc_is_here", foreground = self.theme_accent_color)
         self.out_SCT.config(state = "disabled")
+
     # events
         self.root.bind(sequence = "<Control-o>",            func = self.open_file)
         self.root.bind(sequence = "<F5>",                   func = self.run_all)
@@ -164,6 +172,7 @@ class Editor:
         self.inp_SCT.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
         self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
         self.inp_SCT.bind(sequence = "<<Modified>>", func = self.on_inp_modified)
+
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
@@ -503,16 +512,25 @@ class Editor:
             adr_str = (Emulator.MIN_ADR_LEN - len(adr_str)) * "0" + adr_str
         return adr_str
 
-    def change_selected_inp_text(self, change_adrs = True, change_oprs = True, change = 1):
-        ranges = self.inp_SCT.tag_ranges("sel")
-        if ranges:
-            pos_start = self.inp_SCT.index("sel.first")
-            pos_end   = self.inp_SCT.index("sel.last")
-            text      = self.inp_SCT.get(*ranges)
-            new_text  = self.change_text(text, change_adrs, change_oprs, change)
-            self.inp_SCT.delete(pos_start, pos_end)
-            self.inp_SCT.insert(pos_start, new_text)
+    def increment_selected_inp_text(self):
+        self.change_selected_inp_text(change = +1)
 
+    def decrement_selected_inp_text(self):
+        self.change_selected_inp_text(change = -1)
+
+    def change_selected_inp_text(self, change):
+        change_adrs = True
+        change_oprs = True
+        sel_range = self.inp_SCT.tag_ranges("sel")
+        if sel_range:
+            text      = self.inp_SCT.get(*sel_range)
+            new_text  = self.change_text(text, change_adrs, change_oprs, change)
+            self.inp_SCT.delete(*sel_range)
+            self.inp_SCT.insert(sel_range[0], new_text)
+            self.select_text(self.inp_SCT, sel_range[0], new_text)
+
+    def select_text(self, text_widget, pos, text):
+        text_widget.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
 
     def change_text(self, text, change_adrs = True, change_oprs = True, change = 1):
         lines     = text.split("\n")
@@ -584,6 +602,8 @@ class Editor:
 #   reset options (= reset profile)
 #   show full error traceback
 #   asktosave bei Schließen ausstellbar
+# checkboxes for in-/excluding adresses/operands in Editor.change_selected_text()
+#   updating Tooltips on change
 
 # TO-TEST:
 # what happens if you only select half of a cell when incrementing operands?

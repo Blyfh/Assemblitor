@@ -163,7 +163,7 @@ class Program:
         while i < len(cells):
             adr = cells[i].gt_adr()
             if adr > MAX_CELS - 1:
-                raise Exception(eh.error("MaxPrgLength", max_adrs = MAX_CELS, adrs =adr + 1))
+                raise Exception(eh.error("MaxPrgLength", max_adrs = MAX_CELS, adrs = adr + 1))
             if i == adr:
                 pass
             elif i < adr:
