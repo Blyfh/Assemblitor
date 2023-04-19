@@ -62,6 +62,8 @@ class Editor:
         self.code_font_name_VAR = tk.StringVar(value = ph.code_font()[0])
         self.code_font_size_VAR = tk.IntVar(   value = ph.code_font()[1])
         self.min_adr_len_VAR    = tk.IntVar(   value = ph.min_adr_len())
+        self.change_amount_VAR  = tk.StringVar(value = "1")
+        self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language-dependent; use self.chng_opt_OMN.current_optiont()
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
         self.set_theme(init = True)
@@ -128,6 +130,14 @@ class Editor:
         self.decr_BTN.pack()
         self.incr_TIP = gui.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
         self.decr_TIP = gui.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
+
+        self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
+        vcmd = self.chng_adjust_FRM.register(self.str_is_digits)
+        self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 3)
+        self.chng_opt_OMN = gui.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
+        self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.chng_ETR.pack(anchor = "nw")
+        self.chng_opt_OMN.pack()
 
         self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = lh.gui("IR:"))
@@ -230,6 +240,19 @@ class Editor:
             win.focus()
         ph.save_profile_data(key = "min_adr_len", new_value = self.min_adr_len_VAR.get())
         Emulator.update_properties()
+
+    def update_incr_decr_tooltips(self, event = None):
+        option = self.chng_opt_OMN.current_option()  # either "adr", "adr_opr", "opr"
+        if option == "adr":
+            self.incr_TIP.update_text(lh.gui("IncrAdrs"))
+            self.decr_TIP.update_text(lh.gui("DecrAdrs"))
+        elif option == "adr_opr":
+            self.incr_TIP.update_text(lh.gui("IncrAdrsOprs"))
+            self.decr_TIP.update_text(lh.gui("DecrAdrsOprs"))
+        elif option == "opr":
+            self.incr_TIP.update_text(lh.gui("IncrOprs"))
+            self.decr_TIP.update_text(lh.gui("DecrOprs"))
+
 
     def destroy(self):
         if not self.dirty_flag or self.testing or self.wants_to_save() == True: # "== True" checks if user didn't abort in wants_to_save()
@@ -343,7 +366,7 @@ class Editor:
 
         options_FRM = ttk.Frame(self.options_WIN, style = "text.TFrame")
         options_FRM.pack(fill="both", expand=True)
-        vcmd = (options_FRM.register(self.sbx_input_is_digit)) # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
+        vcmd = options_FRM.register(self.str_is_digits) # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
     # appearance
         appearance_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"))
         light_theme_CHB    = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = self.set_theme, onvalue = True, offvalue = False)
@@ -383,11 +406,9 @@ class Editor:
     def restart_opt_change(self):
         print("Save this!\nYou have to restart the program in order to properly apply your changes.")
 
-    def sbx_input_is_digit(self, P): # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
-        if str.isdigit(P) or P == "":
-            return True
-        else:
-            return False
+    def str_is_digits(self, text): # used for code_font_size_SBX, min_adr_len_SBX and Editor.chng_ETR to only allow entered digits
+        print(text)
+        return str.isdigit(text) or text == ""
 
     def gt_fonts(self):
         fonts = list(fn.families())
@@ -513,14 +534,21 @@ class Editor:
         return adr_str
 
     def increment_selected_inp_text(self):
-        self.change_selected_inp_text(change = +1)
+        self.change_selected_inp_text(change = +int(self.change_amount_VAR.get()))
 
     def decrement_selected_inp_text(self):
-        self.change_selected_inp_text(change = -1)
+        self.change_selected_inp_text(change = -int(self.change_amount_VAR.get()))
 
     def change_selected_inp_text(self, change):
-        change_adrs = True
-        change_oprs = True
+        option = self.chng_opt_OMN.current_option() # either "adr", "adr_opr", "opr"
+        if "adr" in option:
+            change_adrs = True
+        else:
+            change_adrs = False
+        if "opr" in option:
+            change_oprs = True
+        else:
+            change_oprs = False
         sel_range = self.inp_SCT.tag_ranges("sel")
         if sel_range:
             text      = self.inp_SCT.get(*sel_range)
@@ -562,9 +590,15 @@ class Editor:
         while i < len(adr_str) and adr_str[i] in string.whitespace:
             i += 1
             j += 1
+        if adr_str[j] == "-":
+            old_adr = "-"
+            i += 1
+            j += 1
+        else:
+            old_adr = ""
         while j < len(adr_str) and adr_str[j] in "0123456789":
             j += 1
-        old_adr = adr_str[i:j]
+        old_adr += adr_str[i:j]
         new_adr = int(old_adr) + change
         whitespace_wrapping = adr_str.split(old_adr)
         cell = whitespace_wrapping[0] + self.add_leading_zeros(new_adr) + whitespace_wrapping[1] + " " + cell_rest
@@ -602,8 +636,6 @@ class Editor:
 #   reset options (= reset profile)
 #   show full error traceback
 #   asktosave bei Schließen ausstellbar
-# checkboxes for in-/excluding adresses/operands in Editor.change_selected_text()
-#   updating Tooltips on change
 
 # TO-TEST:
 # what happens if you only select half of a cell when incrementing operands?
@@ -614,4 +646,5 @@ class Editor:
 # hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
 # ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces
-# "0 stp \n 01 stp 5" is allowed (+ whole finding-errors-while-executing approach)
+# "0 stp \n 01 stp 5" is allowed
+# decrementing negative operands keeps adding minus sign

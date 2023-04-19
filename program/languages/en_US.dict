@@ -5,8 +5,8 @@
         "authors": ["Blyfh"]
     },
     "file_mng": {
-        "AsmFiles":     "Assembler files",
-        "TxtFiles":     "Text files",
+        "AsmFiles": "Assembler files",
+        "TxtFiles": "Text files",
 
         "UnsavedChanges": "Unsaved Changes",
         "Save?":          "Save program before exiting?",
@@ -15,7 +15,7 @@
         "SaveFile": "Save File"
     },
     "gui": {
-        "title": "Assemblitor",
+        "title":   "Assemblitor",
         "minsize": (637, 500),
 
         "File":     "File",
@@ -32,10 +32,15 @@
         "DemoPrg":   "Demo Program",
         "About":     "About",
 
-        "RunPrg":   "Run program",
-        "RunStep":  "Run single step",
-        "IncrAdrs": "Increment selected addresses",
-        "DecrAdrs": "Decrement selected addresses",
+        "RunPrg":       "Run program",
+        "RunStep":      "Run single step",
+        "IncrAdrs":     "Increment selected addresses",
+        "DecrAdrs":     "Decrement selected addresses",
+        "IncrAdrsOprs": "Increment selected addresses and operands",
+        "DecrAdrsOprs": "Decrement selected addresses and operands",
+        "IncrOprs":     "Increment selected operands",
+        "DecrOprs":     "Decrement selected operands",
+        "ChngOptions":  {"adr": "Addresses", "adr_opr": "Addresses & operands", "opr": "Operands"},
 
         "PC:":  "Program Counter:",
         "ACC:": "Accumulator:",

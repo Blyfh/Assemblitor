@@ -15,7 +15,7 @@
         "SaveFile": "Datei Speichern"
     },
     "gui": {
-        "title": "Assemblitor",
+        "title":   "Assemblitor",
         "minsize": (637, 500),
 
         "File":     "Datei",
@@ -32,10 +32,15 @@
         "DemoPrg":   "Demo-Programm",
         "About":     "Über",
 
-        "RunPrg":   "Programm ausführen",
-        "RunStep":  "Einzelnen Schritt ausführen",
-        "IncrAdrs": "Markierte Adressen erhöhen",
-        "DecrAdrs": "Markierte Adressen vermindern",
+        "RunPrg":       "Programm ausführen",
+        "RunStep":      "Einzelnen Schritt ausführen",
+        "IncrAdrs":     "Markierte Adressen erhöhen",
+        "DecrAdrs":     "Markierte Adressen vermindern",
+        "IncrAdrsOprs": "Markierte Adressen und Operanden erhöhen",
+        "DecrAdrsOprs": "Markierte Adressen und Operanden vermindern",
+        "IncrOprs":     "Markierte Operanden erhöhen",
+        "DecrOprs":     "Markierte Operanden vermindern",
+        "ChngOptions":  {"adr": "Adressen", "adr_opr": "Adressen & Operanden", "opr": "Operanden"},
 
         "PC:":  "Befehlszähler:",
         "ACC:": "Akkumulator:",
