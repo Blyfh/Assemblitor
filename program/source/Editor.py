@@ -512,7 +512,11 @@ class Editor:
         pass # overwrites self.key_enter()
 
     def key_ctrl_backspace(self, event):
-        self.inp_SCT.delete("insert-1c wordstart", "insert wordend")
+        if self.inp_SCT.index("insert") != "1.0":
+            if self.inp_SCT.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
+                self.inp_SCT.delete("insert-1c", "insert") # delete potential space before word
+            self.inp_SCT.delete("insert-1c wordstart", "insert-1c wordend") # delete word
+            return "break"
 
     def insert_address(self):
         last_line = self.inp_SCT.get("insert linestart", "insert")
@@ -638,5 +642,4 @@ class Editor:
 #   asktosave bei Schließen ausstellbar
 
 # BUGS:
-# ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces
