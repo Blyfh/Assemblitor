@@ -79,18 +79,18 @@ class Program:
         return prg_str
 
     def gt_prg(self, execute_all = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
-        prg_str1 = self.top_cmt
-        cell_that_is_currently_executed = ""
-        prg_str2 = ""
         if not execute_all:
+            prg_str1 = self.top_cmt
+            cell_that_is_currently_executed = ""
+            prg_str2 = ""
             for cell in self.cells:
                 if cell.gt_adr() < self.pc:
                     prg_str1 += str(cell) + "\n"
                 elif cell.gt_adr() > self.pc:
                     prg_str2 += str(cell) + "\n"
                 else:
-                    cell_that_is_currently_executed = str(cell) + "\n"
-            return prg_str1, cell_that_is_currently_executed, prg_str2
+                    cell_that_is_currently_executed = cell
+            return prg_str1, cell_that_is_currently_executed.gt_cell(), cell_that_is_currently_executed.gt_comment() + "\n" + prg_str2
         else:
             return str(self), "", ""
 
@@ -257,10 +257,16 @@ class Cell:
         self.create_toks(tok_strs)
 
     def __str__(self):
+        return self.gt_cell() + self.gt_comment()
+
+    def gt_cell(self): # cell without comment
         cel_str = ""
         for tok in self.toks:
             cel_str += str(tok)
-        return cel_str + self.cmt
+        return cel_str
+
+    def gt_comment(self):
+        return self.cmt
 
     def create_toks(self, tok_strs):
         for tpos in range(len(tok_strs)):

@@ -638,12 +638,7 @@ class Editor:
 #   show full error traceback
 #   asktosave bei Schließen ausstellbar
 
-# TO-TEST:
-# what happens if you only select half of a cell when incrementing operands?
-
 # BUGS:
-# error for "05 23 stp" speaks of operands but instead should be talking of allowed number of tokens for value cells
-# Kommentare, die eine ganze Zeile besetzen, werden im StepMode mit dem Befehl darüber mitmarkiert
 # hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
 # ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces
