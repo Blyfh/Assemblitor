@@ -618,7 +618,8 @@ class Editor:
             j -= 1
         while j >= 0 and opr_str[j] in "0123456789":
             j -= 1
-        j += 1
+        if opr_str[j] != "-":
+            j += 1
         if j - 1 >= 0 and opr_str[j-1] == "#":
             return cell
         if len(opr_str[j:i + 1]):
@@ -646,5 +647,3 @@ class Editor:
 # hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
 # ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces
-# "0 stp \n 01 stp 5" is allowed
-# decrementing negative operands keeps adding minus sign
