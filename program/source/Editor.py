@@ -407,7 +407,6 @@ class Editor:
         print("Save this!\nYou have to restart the program in order to properly apply your changes.")
 
     def str_is_digits(self, text): # used for code_font_size_SBX, min_adr_len_SBX and Editor.chng_ETR to only allow entered digits
-        print(text)
         return str.isdigit(text) or text == ""
 
     def gt_fonts(self):
@@ -639,6 +638,5 @@ class Editor:
 #   asktosave bei Schließen ausstellbar
 
 # BUGS:
-# hold down on gui.Button, drag away from button, drag into button again: button gets executed without displaying img_clicked
 # ctrl + del on "09 " deletes "9 "
 # change_selected_text() ignores and removes additional whitespaces

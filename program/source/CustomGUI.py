@@ -3,11 +3,13 @@ import tkinter.ttk as ttk
 
 class Button(ttk.Label):
 
-    def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 30, *args, **kwargs):
+    def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 3000, *args, **kwargs):
         ttk.Label.__init__(self, root, *args, **kwargs)
         self.root = root
         self.command = command
-        self.hovering = False
+        self.hovering = False # mouse is on button
+        self.pressing = False # button is getting pressed down
+        self.clicked  = False # button got activated
         self.click_display_time = click_display_time
         self.img_default  = None
         self.img_hovering = None
@@ -39,19 +41,33 @@ class Button(ttk.Label):
 
     def on_enter(self, event = None):
         self.hovering = True
-        self.set_img(self.img_hovering)
+        if not self.pressing:
+            self.set_img(self.img_hovering)
+        else:
+            self.set_img(self.img_clicked)
 
     def on_leave(self, event = None):
         self.hovering = False
-        self.set_img(self.img_default)
+        if not self.clicked:
+            self.set_img(self.img_default)
 
     def on_pressed(self, event = None):
+        self.pressing = True
         self.set_img(self.img_clicked)
 
     def on_released(self, event = None):
+        self.pressing = False
         if self.hovering:
-            self.root.after(self.click_display_time, self.on_enter)
+            self.clicked = True
+            self.root.after(self.click_display_time, self.after_click)
             self.command()
+
+    def after_click(self):
+        self.clicked = False
+        if self.hovering:
+            self.set_img(self.img_hovering)
+        else:
+            self.set_img(self.img_default)
 
 
 class OptionMenu(ttk.OptionMenu):
