@@ -6,22 +6,22 @@ import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
-from program.source import Emulator  as emu
-from program.source import CustomGUI as gui
-from program.source import Options   as opt
-from program.source import PackHandler
+from program.source import Emulator    as emu
+from program.source import Widgets     as wdg
+from program.source import Subwindows  as sub
+from program.source import PackHandler as pck
 
 def startup(profile_dir, root, testing = False):
     global ph
     global lh
     global eh
     global sh
-    ph = PackHandler.ProfileHandler(profile_dir)
-    lh = PackHandler.LangHandler(ph.language())
-    eh = PackHandler.ErrorHandler()
-    sh = PackHandler.SpriteHandler(ph.is_light_theme())
+    ph = pck.ProfileHandler(profile_dir)
+    lh = pck.LangHandler(ph.language())
+    eh = pck.ErrorHandler()
+    sh = pck.SpriteHandler(ph.is_light_theme())
     emu.startup(profile_handler = ph, error_handler = eh)
-    opt.startup(profile_handler = ph, language_handler = lh, emulator = emu)
+    sub.startup(profile_handler = ph, language_handler = lh, emulator = emu)
 
     ed = Editor(root = root, testing = testing)
 
@@ -38,10 +38,9 @@ class Editor:
         self.emu        = emu.Emulator()
         self.is_new_pro = False
         self.already_modified = False
-        self.tkinter_gui()
+        self.build_gui()
         if self.testing:
             self.open_demo_prg()
-            self.open_options_win()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -56,7 +55,7 @@ class Editor:
             else:
                 mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
 
-    def tkinter_gui(self):
+    def build_gui(self):
         self.root = tk.Tk()
         tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errorsf
         self.change_amount_VAR  = tk.StringVar(value = "1")
@@ -64,10 +63,10 @@ class Editor:
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
         self.set_theme(is_light_theme = ph.is_light_theme())
-        self.options_SUB   = None
-        self.shortcuts_WIN = None
-        self.assembly_WIN  = None
-        self.about_WIN     = None
+        self.options_SUB   = sub.Options(editor = self)
+        self.shortcuts_SUB = sub.Shortcuts(editor = self)
+        self.assembly_SUB  = sub.Assembly(editor = self)
+        self.about_SUB     = sub.About(editor = self)
         minsize = lh.gui("minsize")
         self.root.minsize(minsize[0], minsize[1])
         self.root.config(bg = self.theme_base_bg)
@@ -97,41 +96,41 @@ class Editor:
         self.file_MNU.add_command(label = lh.gui("Reload"),   command = self.reload_file)
         self.file_MNU.add_command(label = lh.gui("Save"),     command = self.save_file)
         self.file_MNU.add_command(label = lh.gui("SaveAs"),   command = self.save_file_as)
-        self.file_MNU.add_command(label = lh.gui("Options"),  command = self.open_options_win)
+        self.file_MNU.add_command(label = lh.gui("Options"),  command = self.options_SUB.open)
         self.file_MNU.add_command(label = lh.gui("Exit"),     command = self.destroy)
         self.menubar.add_cascade(label = lh.gui("File"), menu = self.file_MNU, underline = 0)
 
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
-        self.help_MNU.add_command(label = lh.gui("Assembly"),  command = self.open_assembly_win)
-        self.help_MNU.add_command(label = lh.gui("Shortcuts"), command = self.open_shortcuts_win)
+        self.help_MNU.add_command(label = lh.gui("Assembly"),  command = self.assembly_SUB.open)
+        self.help_MNU.add_command(label = lh.gui("Shortcuts"), command = self.shortcuts_SUB.open)
         self.help_MNU.add_command(label = lh.gui("DemoPrg"), command = self.open_demo_prg)
-        self.help_MNU.add_command(label = lh.gui("About"),     command = self.open_about_win)
+        self.help_MNU.add_command(label = lh.gui("About"),     command = self.about_SUB.open)
         self.menubar.add_cascade(label = lh.gui("Help"), menu = self.help_MNU, underline = 0)
 
         self.taskbar_FRM = ttk.Frame(self.root)
         self.taskbar_FRM.pack(fill = "x")
 
-        self.run_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
+        self.run_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
         self.run_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
-        self.run_TIP = gui.Tooltip(self.run_BTN, text = lh.gui("RunPrg"))
+        self.run_TIP = wdg.Tooltip(self.run_BTN, text = lh.gui("RunPrg"))
 
-        self.step_BTN = gui.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_step, img_default = sh.gt_sprite("BTN_run_once_default"), img_hovering= sh.gt_sprite("BTN_run_once_hovering"), img_clicked = sh.gt_sprite("BTN_run_once_clicked"))
+        self.step_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_step, img_default = sh.gt_sprite("BTN_run_once_default"), img_hovering= sh.gt_sprite("BTN_run_once_hovering"), img_clicked = sh.gt_sprite("BTN_run_once_clicked"))
         self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
-        self.step_TIP = gui.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
+        self.step_TIP = wdg.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
         self.chng_FRM = ttk.Frame(self.taskbar_FRM)
-        self.incr_BTN = gui.Button(self.chng_FRM, style = "img.TLabel", command = self.increment_selected_inp_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
-        self.decr_BTN = gui.Button(self.chng_FRM, style = "img.TLabel", command = self.decrement_selected_inp_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
+        self.incr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.increment_selected_inp_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
+        self.decr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.decrement_selected_inp_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
         self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
         self.incr_BTN.pack()
         self.decr_BTN.pack()
-        self.incr_TIP = gui.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
-        self.decr_TIP = gui.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
+        self.incr_TIP = wdg.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
+        self.decr_TIP = wdg.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
 
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
         vcmd = self.chng_adjust_FRM.register(self.char_is_digit)
         self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 3)
-        self.chng_opt_OMN = gui.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
+        self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option ="adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
         self.chng_ETR.pack(anchor = "nw")
         self.chng_opt_OMN.pack()
@@ -217,9 +216,7 @@ class Editor:
         self.ireg_opr_LBL.config(  font = ph.code_font())
         self.accu_value_LBL.config(font = ph.code_font())
         self.prgc_value_LBL.config(font = ph.code_font())
-        if self.assembly_WIN:  # restart necessary because unable to access local widget variable text_TXT
-            self.close_child_win("self.assembly_WIN")
-            self.open_assembly_win()
+        self.assembly_SUB.set_code_font()
 
     def update_incr_decr_tooltips(self, event = None):
         option = self.chng_opt_OMN.current_option()  # either "adr", "adr_opr", "opr"
@@ -332,94 +329,6 @@ class Editor:
         if self.file_path:
             self.save_file()
             self.root.title(self.file_path + " – " + lh.gui("title"))
-
-    def open_options_win(self):
-        if self.options_SUB: # set focus on already existing window
-            self.options_SUB.set_child_win_focus("options_WIN")
-        else:
-            self.options_SUB = opt.Options(editor = self)
-
-    def close_options_win(self): # TODO temp
-        self.options_SUB = None
-
-    def open_assembly_win(self):
-        if self.assembly_WIN: # set focus on already existing window
-            self.set_child_win_focus("self.assembly_WIN")
-            return
-        self.assembly_WIN = tk.Toplevel(self.root)
-        minsize = lh.asm_win("minsize")
-        self.assembly_WIN.minsize(minsize[0], minsize[1])
-        self.assembly_WIN.config(bg = self.theme_base_bg)
-        self.assembly_WIN.title(lh.asm_win("title"))
-
-        assembly_FRM = ttk.Frame(self.assembly_WIN, style = "TFrame")
-        text_SCB = tk.Scrollbar(assembly_FRM)
-        text_TXT = tk.Text(assembly_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 5, relief = "flat", wrap = "word", font = ("TkDefaultFont", 10), yscrollcommand = text_SCB.set)
-        assembly_FRM.pack(fill = "both", expand = True)
-        text_TXT.pack(side = "left",  fill = "both", expand = True)
-        text_SCB.pack(side = "right", fill = "y")
-        text_TXT.tag_config("asm_code", font = ph.code_font())
-
-        text_code_pairs = lh.asm_win("text")
-        for text_code_pair in text_code_pairs:
-            text_TXT.insert("end", text_code_pair[0])
-            text_TXT.insert("end", text_code_pair[1], "asm_code")
-        text_SCB.config(command = text_TXT.yview)
-        text_TXT.config(state = "disabled")
-        self.set_child_win_focus("self.assembly_WIN")
-        self.assembly_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.assembly_WIN"))
-
-    def open_shortcuts_win(self):
-        if self.shortcuts_WIN: # set focus on already existing window
-            self.set_child_win_focus("self.shortcuts_WIN")
-            return
-        combos = lh.shc_win("combos")
-        actions = lh.shc_win("actions")
-        self.shortcuts_WIN = tk.Toplevel(self.root)
-        self.shortcuts_WIN.geometry(lh.shc_win("geometry"))
-        self.shortcuts_WIN.resizable(False, False)
-        self.shortcuts_WIN.config(bg = self.theme_base_bg)
-        self.shortcuts_WIN.title(lh.shc_win("title"))
-
-        shortcuts_FRM = ttk.Frame(self.shortcuts_WIN, style = "text.TFrame")
-        combos_LBL    = ttk.Label(shortcuts_FRM, style = "TLabel", text = combos,  justify = "left")
-        actions_LBL   = ttk.Label(shortcuts_FRM, style = "TLabel", text = actions, justify = "left")
-        shortcuts_FRM.pack(fill = "both", expand = True)
-        combos_LBL.pack( side = "left",  fill = "both", expand = True, pady = 5, padx = 5)
-        actions_LBL.pack(side = "right", fill = "both", expand = True, pady = 5, padx = (0, 5))
-        self.set_child_win_focus("self.shortcuts_WIN")
-        self.shortcuts_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.shortcuts_WIN"))
-
-    def open_about_win(self):
-        if self.about_WIN: # set focus on already existing window
-            self.set_child_win_focus("self.about_WIN")
-            return
-        self.is_about_win_open = True
-        title = lh.gui("title")
-        text  = lh.abt_win("text")
-        self.about_WIN = tk.Toplevel(self.root)
-        self.about_WIN.geometry(lh.abt_win("geometry"))
-        self.about_WIN.resizable(False, False)
-        self.about_WIN.config(bg = self.theme_base_bg)
-        self.about_WIN.title(lh.abt_win("title"))
-
-        about_FRM = ttk.Frame(self.about_WIN, style = "text.TFrame")
-        title_LBL = ttk.Label(about_FRM, style = "TLabel", text = title, anchor = "center", justify = "left", font = self.title_font)
-        text_LBL  = ttk.Label(about_FRM, style = "TLabel", text = text,  anchor = "w",      justify = "left")
-        about_FRM.pack(fill = "both", expand = True)
-        title_LBL.pack(fill = "both", expand = True, padx = 5, pady = (5, 0))
-        text_LBL.pack( fill = "both", expand = True, padx = 5, pady = (0, 5))
-        self.set_child_win_focus("self.about_WIN")
-        self.about_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.about_WIN"))
-
-    def set_child_win_focus(self, win_str):
-        eval(win_str + ".focus_force()")
-        eval(win_str + ".lift()")
-        self.root.update()
-
-    def close_child_win(self, win_str):
-        eval(win_str + ".destroy()")
-        exec(win_str + " = None")
 
     def open_demo_prg(self):
         if self.dirty_flag:
