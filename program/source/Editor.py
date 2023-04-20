@@ -5,11 +5,11 @@ import tkinter              as tk
 import tkinter.ttk          as ttk
 import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
-import tkinter.font         as fn
 import tkinter.messagebox   as mb
+from program.source import Emulator  as emu
 from program.source import CustomGUI as gui
+from program.source import Options   as opt
 from program.source import PackHandler
-from program.source import Emulator
 
 def startup(profile_dir, root, testing = False):
     global ph
@@ -20,7 +20,9 @@ def startup(profile_dir, root, testing = False):
     lh = PackHandler.LangHandler(ph.language())
     eh = PackHandler.ErrorHandler()
     sh = PackHandler.SpriteHandler(ph.is_light_theme())
-    Emulator.startup(profile_handler = ph, error_handler = eh)
+    emu.startup(profile_handler = ph, error_handler = eh)
+    opt.startup(profile_handler = ph, language_handler = lh, emulator = emu)
+
     ed = Editor(root = root, testing = testing)
 
 
@@ -33,7 +35,7 @@ class Editor:
         self.file_path  = None
         self.last_dir   = root
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
-        self.emu        = Emulator.Emulator()
+        self.emu        = emu.Emulator()
         self.is_new_pro = False
         self.already_modified = False
         self.tkinter_gui()
@@ -56,18 +58,13 @@ class Editor:
 
     def tkinter_gui(self):
         self.root = tk.Tk()
-        tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errors
-        self.is_light_theme_VAR = tk.IntVar(   value = int(ph.is_light_theme()))
-        self.language_name_VAR  = tk.StringVar(value = lh.gt_lang_name(lh.cur_lang))
-        self.code_font_name_VAR = tk.StringVar(value = ph.code_font()[0])
-        self.code_font_size_VAR = tk.IntVar(   value = ph.code_font()[1])
-        self.min_adr_len_VAR    = tk.IntVar(   value = ph.min_adr_len())
+        tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errorsf
         self.change_amount_VAR  = tk.StringVar(value = "1")
         self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language-dependent; use self.chng_opt_OMN.current_optiont()
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
-        self.set_theme(init = True)
-        self.options_WIN   = None
+        self.set_theme(is_light_theme = ph.is_light_theme())
+        self.options_SUB   = None
         self.shortcuts_WIN = None
         self.assembly_WIN  = None
         self.about_WIN     = None
@@ -86,7 +83,7 @@ class Editor:
         self.style.configure("TLabel",                background = self.theme_text_bg,           foreground = self.theme_text_fg)
         self.style.configure("img.TLabel",            background = self.theme_base_bg) # for gui.Button that inherits from ttk.Label
         self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
-        self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.gt_code_font())
+        self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = ph.code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
         self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
         self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)            # , relief = "flat", borderwidth = 1)
@@ -132,7 +129,7 @@ class Editor:
         self.decr_TIP = gui.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
 
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
-        vcmd = self.chng_adjust_FRM.register(self.str_is_digits)
+        vcmd = self.chng_adjust_FRM.register(self.char_is_digit)
         self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 3)
         self.chng_opt_OMN = gui.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
@@ -160,11 +157,11 @@ class Editor:
         self.prgc_value_LBL = ttk.Label(self.prgc_FRM, style ="info_value.TLabel", width = 5)
         self.prgc_FRM.pack(side = "right", padx = (5, 0), pady = 5)
         self.prgc_title_LBL.pack(side = "top",    fill = "x")
-        self.prgc_value_LBL.pack(side ="bottom", fill ="x")
+        self.prgc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = ttk.Frame(self.root)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = self.gt_code_font(), insertbackground = self.theme_cursor_color)
-        self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = self.gt_code_font())
+        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font(), insertbackground = self.theme_cursor_color)
+        self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font())
         self.text_FRM.pack(fill = "both", expand = True)
         self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
         self.out_SCT.pack(side = "right", fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
@@ -186,8 +183,11 @@ class Editor:
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
-    def set_theme(self, init = False):
-        if self.is_light_theme_VAR.get():
+    def char_is_digit(self, char): # used by Editor.chng_ETR to only allow entered digits
+        return str.isdigit(char) or char == ""
+
+    def set_theme(self, is_light_theme):
+        if is_light_theme:
             sh.set_theme(is_light_theme = True)
             self.theme_base_bg = "#DDDDDD"
             self.theme_text_bg = "#FFFFFF"
@@ -209,37 +209,17 @@ class Editor:
             self.theme_highlight_base_bg = "#EEEEEE"
             self.theme_highlight_text_bg = "#DDDDDD"
             self.theme_highlight_text_fg = "#000000"
-        if not init:
-            ph.save_profile_data(key = "is_light_theme", new_value = bool(self.is_light_theme_VAR.get()))
-            self.restart_opt_change()
 
-    def set_language(self, new_language_name):
-        language = lh.gt_lang(new_language_name)
-        ph.save_profile_data(key = "language", new_value = language)
-        self.restart_opt_change()
-
-    def update_code_font(self, event = None, win = None):
-        if win: # remove focus from code_font_size_SBX
-            win.focus()
-        ph.save_profile_data(key = "code_font", new_value = (self.code_font_name_VAR.get(), self.code_font_size_VAR.get()))
-        self.inp_SCT.config(       font = self.gt_code_font())
-        self.out_SCT.config(       font = self.gt_code_font())
-        self.ireg_cmd_LBL.config(  font = self.gt_code_font())
-        self.ireg_opr_LBL.config(  font = self.gt_code_font())
-        self.accu_value_LBL.config(font = self.gt_code_font())
-        self.prgc_value_LBL.config(font = self.gt_code_font())
+    def update_code_font(self):
+        self.inp_SCT.config(       font = ph.code_font())
+        self.out_SCT.config(       font = ph.code_font())
+        self.ireg_cmd_LBL.config(  font = ph.code_font())
+        self.ireg_opr_LBL.config(  font = ph.code_font())
+        self.accu_value_LBL.config(font = ph.code_font())
+        self.prgc_value_LBL.config(font = ph.code_font())
         if self.assembly_WIN:  # restart necessary because unable to access local widget variable text_TXT
             self.close_child_win("self.assembly_WIN")
             self.open_assembly_win()
-
-    def gt_code_font(self):
-        return self.code_font_name_VAR.get(), self.code_font_size_VAR.get()
-
-    def update_min_adr_len(self, win = None):
-        if win: # remove focus from code_font_size_SBX
-            win.focus()
-        ph.save_profile_data(key = "min_adr_len", new_value = self.min_adr_len_VAR.get())
-        Emulator.update_properties()
 
     def update_incr_decr_tooltips(self, event = None):
         option = self.chng_opt_OMN.current_option()  # either "adr", "adr_opr", "opr"
@@ -252,7 +232,6 @@ class Editor:
         elif option == "opr":
             self.incr_TIP.update_text(lh.gui("IncrOprs"))
             self.decr_TIP.update_text(lh.gui("DecrOprs"))
-
 
     def destroy(self):
         if not self.dirty_flag or self.testing or self.wants_to_save() == True: # "== True" checks if user didn't abort in wants_to_save()
@@ -355,64 +334,13 @@ class Editor:
             self.root.title(self.file_path + " – " + lh.gui("title"))
 
     def open_options_win(self):
-        if self.options_WIN: # set focus on already existing window
-            self.set_child_win_focus("self.options_WIN")
-            return
-        self.options_WIN = tk.Toplevel(self.root)
-        self.options_WIN.geometry(lh.opt_win("geometry"))
-        self.options_WIN.resizable(False, False)
-        self.options_WIN.config(bg = self.theme_base_bg)
-        self.options_WIN.title(lh.opt_win("title"))
+        if self.options_SUB: # set focus on already existing window
+            self.options_SUB.set_child_win_focus("options_WIN")
+        else:
+            self.options_SUB = opt.Options(editor = self)
 
-        options_FRM = ttk.Frame(self.options_WIN, style = "text.TFrame")
-        options_FRM.pack(fill="both", expand=True)
-        vcmd = options_FRM.register(self.str_is_digits) # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
-    # appearance
-        appearance_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"))
-        light_theme_CHB    = ttk.Checkbutton(options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = self.set_theme, onvalue = True, offvalue = False)
-        if not self.is_light_theme_VAR.get():
-            light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
-        language_FRM       = ttk.Frame(options_FRM, style = "text.TFrame")
-        language_LBL       = ttk.Label(language_FRM, style = "TLabel", text = lh.opt_win("Language"))
-        language_MNU       = ttk.OptionMenu(language_FRM, self.language_name_VAR, self.language_name_VAR.get(), *lh.gt_lang_names(), command = self.set_language, style = "TMenubutton")
-        code_font_FRM      = ttk.Frame(options_FRM, style = "text.TFrame")
-        code_font_LBL      = ttk.Label(code_font_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
-        code_font_size_SBX = ttk.Spinbox(code_font_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_code_font, width = 3, style = "TSpinbox")
-        code_font_face_MNU = ttk.OptionMenu(code_font_FRM, self.code_font_name_VAR, self.code_font_name_VAR.get(), *self.gt_fonts(), command = self.update_code_font, style = "TMenubutton")
-        appearance_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
-        light_theme_CHB.pack(   fill = "x",     pady = 5, padx = (20, 5))
-        language_FRM.pack(      fill = "x",               padx = (20, 5))
-        language_LBL.pack(      side = "left",  pady = 5, padx = (0, 15))
-        language_MNU.pack(      side = "right", pady = 5, padx = 5)
-        code_font_FRM.pack(     fill = "x",               padx = (20, 5))
-        code_font_LBL.pack(     side = "left",  pady = 5, padx = (0, 15))
-        code_font_size_SBX.pack(side = "right", pady = 5, padx = 5)
-        code_font_face_MNU.pack(side = "right", pady = 5, padx = 5)
-    # Assembler
-        assembler_subtitle_LBL = ttk.Label(options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Assembler"))
-        min_adr_len_FRM = ttk.Frame(options_FRM, style = "text.TFrame")
-        min_adr_len_LBL = ttk.Label(min_adr_len_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
-        min_adr_len_SBX = ttk.Spinbox(min_adr_len_FRM, textvariable = self.min_adr_len_VAR, from_ = 1, to = 10, validate = "all", validatecommand = (vcmd, "%P"), command = self.update_min_adr_len, width = 3, style = "TSpinbox")
-        assembler_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
-        min_adr_len_FRM.pack(fill = "x",               padx = (20, 5))
-        min_adr_len_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
-        min_adr_len_SBX.pack(side = "right", pady = 5, padx = 5)
-
-        code_font_size_SBX.bind(sequence = "<Return>", func = lambda win: self.update_code_font(win = self.options_WIN))
-        min_adr_len_SBX.bind(   sequence = "<Return>", func = lambda win: self.update_min_adr_len(self.options_WIN))
-        self.set_child_win_focus("self.options_WIN")
-        self.options_WIN.protocol("WM_DELETE_WINDOW", lambda: self.close_child_win("self.options_WIN"))
-
-    def restart_opt_change(self):
-        print("Save this!\nYou have to restart the program in order to properly apply your changes.")
-
-    def str_is_digits(self, text): # used for code_font_size_SBX, min_adr_len_SBX and Editor.chng_ETR to only allow entered digits
-        return str.isdigit(text) or text == ""
-
-    def gt_fonts(self):
-        fonts = list(fn.families())
-        fonts.sort()
-        return fonts
+    def close_options_win(self): # TODO temp
+        self.options_SUB = None
 
     def open_assembly_win(self):
         if self.assembly_WIN: # set focus on already existing window
@@ -430,7 +358,7 @@ class Editor:
         assembly_FRM.pack(fill = "both", expand = True)
         text_TXT.pack(side = "left",  fill = "both", expand = True)
         text_SCB.pack(side = "right", fill = "y")
-        text_TXT.tag_config("asm_code", font = self.gt_code_font())
+        text_TXT.tag_config("asm_code", font = ph.code_font())
 
         text_code_pairs = lh.asm_win("text")
         for text_code_pair in text_code_pairs:
@@ -512,7 +440,7 @@ class Editor:
         pass # overwrites self.key_enter()
 
     def key_ctrl_backspace(self, event):
-        if self.inp_SCT.index("insert") != "1.0":
+        if self.inp_SCT.index("insert") != "1.0": # to prevent deleting word after cursor on position 0
             if self.inp_SCT.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
                 self.inp_SCT.delete("insert-1c", "insert") # delete potential space before word
             self.inp_SCT.delete("insert-1c wordstart", "insert-1c wordend") # delete word
@@ -532,8 +460,8 @@ class Editor:
 
     def add_leading_zeros(self, adr):
         adr_str = str(adr)
-        if len(adr_str) < Emulator.MIN_ADR_LEN:
-            adr_str = (Emulator.MIN_ADR_LEN - len(adr_str)) * "0" + adr_str
+        if len(adr_str) < emu.MIN_ADR_LEN:
+            adr_str = (emu.MIN_ADR_LEN - len(adr_str)) * "0" + adr_str
         return adr_str
 
     def increment_selected_inp_text(self):

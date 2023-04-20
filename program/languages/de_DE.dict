@@ -5,8 +5,8 @@
         "authors": ["Blyfh"]
     },
     "file_mng": {
-        "AsmFiles":     "Assembler-Dateien",
-        "TxtFiles":     "Textdateien",
+        "AsmFiles": "Assembler-Dateien",
+        "TxtFiles": "Textdateien",
 
         "UnsavedChanges": "Ungespeicherte Änderungen",
         "Save?":          "Programm vor Schließen speichern?",
@@ -47,7 +47,7 @@
         "IR:":  "Befehlsregister:"
     },
     "opt_win": {
-        "title": "Einstellungen",
+        "title":    "Einstellungen",
         "geometry": "400x500",
 
         "Appearance": "Erscheinungsbild",
@@ -61,10 +61,18 @@
         "MaxIteDep": "Maximale Iterationstiefe",
 
         "DeveloperOptions": "Entwicklereinstellungen",
-        "FullTb": "Kompletter Fehler-Traceback"
+        "FullTb":           "Kompletter Fehler-Traceback",
+
+        "RestartRequired": "Assemblitor muss neugestartet werden, damit die Änderungen vollständig übernommen werden können",
+
+        "Cancel":  "Abbrechen",
+        "Apply":   "Übernehmen",
+        "Ok":      "OK",
+        "Restart": "Neustarten",
+        "Reset":   "Zurücksetzen"
     },
     "asm_win": {
-        "title": "Assembly",
+        "title":   "Assembly",
         "minsize": (850, 200),
 
         "text":  """Dieser Assembly-Dialekt ist eine spaltenbasierte Low-Level-Programmiersprache, die sehr nah an Maschinencode ist. Groß-/Kleinschreibung wird nicht beachtet.

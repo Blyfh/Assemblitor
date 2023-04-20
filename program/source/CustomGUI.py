@@ -80,7 +80,7 @@ class OptionMenu(ttk.OptionMenu):
         try:
             default = self.options[self.default_option]
         except:
-            raise Exception(f"OptionMenu '{self.__name__}': Can't find default option '{self.default_option}' in given options.")
+            raise Exception(f"OptionMenu : Can't find default option '{self.default_option}' in given options.")
         ttk.OptionMenu.__init__(self, root, self.textvariable, default, *self.options.values(), command = command)
         self.config(**kwargs)
 
@@ -89,7 +89,7 @@ class OptionMenu(ttk.OptionMenu):
         for option in self.options:
             if self.options[option] == current_option_displaytext:
                 return option
-        raise Exception(f"OptionMenu '{self.__name__}': Can't find current option for selected displaytext '{current_option_displaytext}'.")
+        raise Exception(f"OptionMenu: Can't find current option for selected displaytext '{current_option_displaytext}'.")
 
 
 class Tooltip:

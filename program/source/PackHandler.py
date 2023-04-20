@@ -59,6 +59,10 @@ class ProfileHandler:
     def __init__(self, profile_dir):
         self.profile_dir = profile_dir
 
+    def reset_profile(self):
+        default_profile_data = ph.gt_pack_data("default_profile", f"{program_dir}/resources")
+        ph.st_pack_data("profile", f"{self.profile_dir}", new_data = default_profile_data)
+
     def save_profile_data(self, key, new_value):
         profile_data = ph.gt_pack_data("profile", f"{self.profile_dir}")
         try:
@@ -80,8 +84,14 @@ class ProfileHandler:
     def language(self):
         return self.gt_value("language")
 
+    def code_font_face(self):
+        return self.gt_value("code_font_face")
+
+    def code_font_size(self):
+        return self.gt_value("code_font_size")
+
     def code_font(self):
-        return self.gt_value("code_font")
+        return self.code_font_face(), self.code_font_size()
 
     def max_jmps(self):
         return self.gt_value("max_jmps")
@@ -121,11 +131,11 @@ class LangHandler:
             raise FileNotFoundError(f"Couldn't fetch info data for 'name' from language pack '{lang}'.")
         return lang_name
 
-    def gt_lang_names(self):
-        lang_names = []
+    def gt_langs_with_names(self):
+        langs_with_names = {}
         for lang in self.gt_langs():
-            lang_names.append(self.gt_lang_name(lang))
-        return lang_names
+            langs_with_names[lang] = self.gt_lang_name(lang)
+        return langs_with_names
 
     def demo(self):
         try:

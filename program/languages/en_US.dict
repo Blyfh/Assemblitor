@@ -47,12 +47,12 @@
         "IR:":  "Instruction Register:"
     },
     "opt_win": {
-        "title": "Options",
+        "title":    "Options",
         "geometry": "400x500",
 
         "Appearance": "Appearance",
         "LightTheme": "Light theme",
-        "Language": "Language",
+        "Language":   "Language",
         "EditorFont": "Editor font",
 
         "Assembler": "Assembler",
@@ -61,10 +61,18 @@
         "MaxIteDep": "Maximum iteration depth",
 
         "DeveloperOptions": "Developer Options",
-        "FullTb": "Complete error traceback"
+        "FullTb":           "Complete error traceback",
+
+        "RestartRequired": "You have to restart Assemblitor in order to properly apply your changes",
+
+        "Cancel":  "Cancel",
+        "Apply":   "Apply",
+        "Ok":      "OK",
+        "Restart": "Restart",
+        "Reset":   "Reset"
     },
     "asm_win": {
-        "title": "Assembly",
+        "title":   "Assembly",
         "minsize": (710, 200),
 
         "text":  """This Assembly dialect is a very low-level column-oriented programming language that is close to machine code. It is not case-sensitive.
