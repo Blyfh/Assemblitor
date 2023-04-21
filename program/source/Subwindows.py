@@ -67,16 +67,25 @@ class Subwindow:
 
 class Options(Subwindow):
 
-    def build_gui(self):
+    def __init__(self, editor):
+        super().__init__(editor)
+        self.restart_required_flag = False
+        self.startup()
+
+    def startup(self):
         self.is_light_theme_VAR = tk.BooleanVar(value = ph.is_light_theme())
-        self.language_VAR       = tk.StringVar( value = ph.language())
-        self.code_font_face_VAR = tk.StringVar( value = ph.code_font()[0])
-        self.code_font_size_VAR = tk.IntVar(    value = ph.code_font()[1])
+        self.language_VAR       = tk.StringVar( value = lh.gt_lang_name(ph.language()))
+        self.code_font_face_VAR = tk.StringVar( value = font_face_name(ph.code_font_face()))
+        self.code_font_size_VAR = tk.IntVar(    value = ph.code_font_size())
         self.min_adr_len_VAR    = tk.IntVar(    value = ph.min_adr_len())
+        try:
+            print("changing init_state for theme from", self.init_state["is_light_theme"], "to", self.is_light_theme_VAR.get())
+        except:
+            pass
         self.init_state = {
             "is_light_theme": self.is_light_theme_VAR.get(),
-            "language":       self.language_VAR .get(),
-            "code_font_face": self.code_font_face_VAR.get(),
+            "language":       ph.language(),
+            "code_font_face": ph.code_font_face(),
             "code_font_size": self.code_font_size_VAR.get(),
             "min_adr_len":    self.min_adr_len_VAR   .get()
         }
@@ -87,6 +96,8 @@ class Options(Subwindow):
             "code_font_size": False,
             "min_adr_len":    False
         }
+
+    def build_gui(self):
 
         self.subroot = tk.Toplevel(self.ed.root)
         self.subroot.geometry(lh.opt_win("geometry"))
@@ -103,11 +114,11 @@ class Options(Subwindow):
             self.light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
         self.language_FRM       = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.language_LBL       = ttk.Label(self.language_FRM, style = "TLabel", text = lh.opt_win("Language"))
-        self.language_OMN       = wdg.OptionMenu(self.language_FRM, textvariable = self.language_VAR, default_option = self.language_VAR.get(), options = lh.gt_langs_with_names(), command = lambda event: self.change("language", restart_required = True), style ="TMenubutton")
+        self.language_OMN       = wdg.OptionMenu(self.language_FRM, textvariable = self.language_VAR, default_option = ph.language(), options = lh.gt_langs_with_names(), command = lambda event: self.change("language", restart_required = True), style ="TMenubutton")
         self.code_font_FRM      = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.code_font_LBL      = ttk.Label(self.code_font_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
         self.code_font_size_SBX = ttk.Spinbox(self.code_font_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, command = lambda: self.change("code_font_size", focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 3, style = "TSpinbox")
-        self.code_font_face_OMN = wdg.OptionMenu(self.code_font_FRM, textvariable = self.code_font_face_VAR, default_option = self.code_font_face_VAR.get(), options = gt_font_faces_with_names(), command = lambda event: self.change("code_font_face"), style ="TMenubutton")
+        self.code_font_face_OMN = wdg.OptionMenu(self.code_font_FRM, textvariable = self.code_font_face_VAR, default_option = ph.code_font_face(), options = gt_font_faces_with_names(), command = lambda event: self.change("code_font_face"), style ="TMenubutton")
         self.appearance_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
         self.light_theme_CHB.pack(   fill = "x",     pady = 5, padx = (20, 5))
         self.language_FRM      .pack(fill = "x",               padx = (20, 5))
@@ -128,11 +139,11 @@ class Options(Subwindow):
         self.min_adr_len_SBX.pack(side = "right", pady = 5, padx = 5)
         # taskbar
         self.buttons_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
-        self.cancel_BTN  = wdg.Button(self.buttons_FRM, text = lh.opt_win("Cancel"), command = self.close, style ="TButton")
-        self.apply_BTN   = wdg.Button(self.buttons_FRM, text = lh.opt_win("Apply"), command = self.save, style ="TButton")
-        self.ok_BTN      = wdg.Button(self.buttons_FRM, text = lh.opt_win("Ok"), command = self.ok_btn, style ="TButton")
-        self.restart_BTN = wdg.Button(self.buttons_FRM, text = lh.opt_win("Restart"), command = self.restart, style ="TButton", state ="disabled")
-        self.reset_BTN   = wdg.Button(self.buttons_FRM, text = lh.opt_win("Reset"), command = self.reset, style ="TButton")
+        self.cancel_BTN  = wdg.Button(self.buttons_FRM, text = lh.opt_win("Cancel"),  command = self.close,   style = "TButton")
+        self.apply_BTN   = wdg.Button(self.buttons_FRM, text = lh.opt_win("Apply"),   command = self.save,    style = "TButton")
+        self.ok_BTN      = wdg.Button(self.buttons_FRM, text = lh.opt_win("Ok"),      command = self.ok_btn,  style = "TButton")
+        self.restart_BTN = wdg.Button(self.buttons_FRM, text = lh.opt_win("Restart"), command = self.restart, style = "TButton", state = "disabled")
+        self.reset_BTN   = wdg.Button(self.buttons_FRM, text = lh.opt_win("Reset"),   command = self.reset,   style = "TButton")
         self.restart_LBL = ttk.Label(self.options_FRM, text = "", foreground = "#FF4444", style = "TLabel")
         self.buttons_FRM.pack(fill = "x", side = "bottom", pady = 5, padx = 5)
         self.cancel_BTN .pack(side = "right", padx = (5, 0))
@@ -142,6 +153,8 @@ class Options(Subwindow):
         self.restart_BTN.pack(side = "right", padx = (5, 0))
         self.reset_BTN  .pack(side = "left")
         self.restart_LBL.pack(fill = "x", side = "bottom", pady = (5, 0), padx = 5)
+        if self.restart_required_flag:
+            self.restart_required()
 
         self.code_font_size_SBX.bind(sequence = "<Return>", func = lambda event: self.change("code_font_size", focus_flag = True))
         self.min_adr_len_SBX.bind(   sequence = "<Return>", func = lambda event: self.change("min_adr_len",    focus_flag = True))
@@ -168,6 +181,10 @@ class Options(Subwindow):
         else:
             self.restart_no_longer_required()
 
+    def close(self):
+        super().close()
+        self.startup()
+
     def ok_btn(self):
         self.save()
         self.close()
@@ -181,7 +198,7 @@ class Options(Subwindow):
         ph.reset_profile()
         self.update_options()
 
-    def change(self, option, restart_required = False, focus_flag = False, event = None):
+    def change(self, option:str, restart_required = False, focus_flag = False, event = None):
         if focus_flag: # remove focus from code_font_size_SBX and min_adr_len_SBX (to remove cursor in the spinbox)
             self.focus()
         if self.option_changed(option): # real change
@@ -190,48 +207,58 @@ class Options(Subwindow):
                 self.restart_required()
         else: # just reverted to initial state of option
             self.changes[option] = False
+            print("restart no longer req:", option, self.changes["language"])
             if restart_required and (option == "is_light_theme" and not self.changes["language"] or option == "language" and not self.changes["is_light_theme"]): # also revert enabling of button when changes get reverted
+                # TODO doesn't get called after changing, OKing, reopening, and reverting options
                 self.restart_no_longer_required()
 
-    def option_changed(self, option):
+    def option_changed(self, option:str):
+        print("real change bc:", self.init_state[option], self.current_state(option))
         return self.init_state[option] != self.current_state(option)
 
-    def current_state(self, option):
+    def current_state(self, option:str):
         if option == "language" or option == "code_font_face":
             return eval(f"self.{option}_OMN.current_option()")
         else:
             return eval(f"self.{option}_VAR.get()")
 
     def restart_required(self):
+        self.restart_required_flag = True
         self.restart_LBL.config(text = lh.opt_win("RestartRequired"))
         self.restart_BTN.config(state = "enabled")
 
     def restart_no_longer_required(self):
+        self.restart_required_flag = False
         self.restart_LBL.config(text = "")
         self.restart_BTN.config(state = "disabled")
 
     def save(self):
         for option in self.changes:
             if self.changes[option]:
-                eval(f"self.save_option_{option}()")
+                ph.save_profile_data(key = option, new_value = self.current_state(option))
                 self.changes[option] = False
+                keep_init_state = eval(f"self.save_option_{option}()") # individual saving methods
+                if not keep_init_state:
+                    print("CHANGING INIT_STATE")
+                    self.init_state[option] = self.current_state(option)
 
     def save_option_is_light_theme(self):
-        ph.save_profile_data(key = "is_light_theme", new_value = self.is_light_theme_VAR.get())
+        if self.restart_required_flag:
+            print("saving is_light_theme")
+            return True
 
     def save_option_language(self):
-        ph.save_profile_data(key = "language", new_value = self.language_OMN.current_option())
+        if self.restart_required_flag:
+            print("saving language")
+            return True
 
     def save_option_code_font_face(self):
-        ph.save_profile_data(key = "code_font_face", new_value = self.code_font_face_OMN.current_option())
         self.ed.update_code_font()
 
     def save_option_code_font_size(self):
-        ph.save_profile_data(key = "code_font_size", new_value = self.code_font_size_VAR.get())
         self.ed.update_code_font()
 
     def save_option_min_adr_len(self):
-        ph.save_profile_data(key = "min_adr_len", new_value = self.min_adr_len_VAR.get())
         emu.update_properties()
 
 

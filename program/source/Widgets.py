@@ -80,7 +80,7 @@ class OptionMenu(ttk.OptionMenu):
         try:
             default = self.options[self.default_option]
         except:
-            raise RuntimeError(f"OptionMenu : Can't find default option '{self.default_option}' in given options.")
+            raise RuntimeError(f"OptionMenu : Can't find default option '{self.default_option}' in given options:\n    {self.options}")
         ttk.OptionMenu.__init__(self, root, self.textvariable, default, *self.options.values(), command = command)
         self.config(**kwargs)
 
