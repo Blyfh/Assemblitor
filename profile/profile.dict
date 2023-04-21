@@ -1,6 +1,6 @@
 {
-    "is_light_theme": False,
-    "language": "de_DE",
+    "theme": "dark",
+    "language": "en_US",
     "code_font_face": "Courier New",
     "code_font_size": 10,
     "min_adr_len": 2,

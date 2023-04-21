@@ -19,7 +19,7 @@ def startup(profile_dir, root, testing = False):
     ph = pck.ProfileHandler(profile_dir)
     lh = pck.LangHandler(ph.language())
     eh = pck.ErrorHandler()
-    sh = pck.SpriteHandler(ph.is_light_theme())
+    sh = pck.SpriteHandler(ph.theme())
     emu.startup(profile_handler = ph, error_handler = eh)
     sub.startup(profile_handler = ph, language_handler = lh, emulator = emu)
 
@@ -36,7 +36,6 @@ class Editor:
         self.last_dir   = root
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
         self.emu        = emu.Emulator()
-        self.is_new_pro = False
         self.already_modified = False
         self.build_gui()
         if self.testing:
@@ -59,16 +58,17 @@ class Editor:
         self.root = tk.Tk()
         tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errorsf
         self.change_amount_VAR  = tk.StringVar(value = "1")
-        self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language-dependent; use self.chng_opt_OMN.current_optiont()
+        self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language-dependent; use self.chng_opt_OMN.current_option()
+        self.active_theme    = ph.theme() # won't change without restart
+        self.active_language = ph.language()       # won't change without restart
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
-        self.set_theme(is_light_theme = ph.is_light_theme())
+        self.set_theme(theme = self.active_theme)
         self.options_SUB   = sub.Options(editor = self)
         self.shortcuts_SUB = sub.Shortcuts(editor = self)
         self.assembly_SUB  = sub.Assembly(editor = self)
         self.about_SUB     = sub.About(editor = self)
-        minsize = lh.gui("minsize")
-        self.root.minsize(minsize[0], minsize[1])
+        self.root.minsize(*lh.gui("minsize"))
         self.root.config(bg = self.theme_base_bg)
         self.root.title(lh.gui("title"))
 
@@ -185,9 +185,9 @@ class Editor:
     def char_is_digit(self, char): # used by Editor.chng_ETR to only allow entered digits
         return str.isdigit(char) or char == ""
 
-    def set_theme(self, is_light_theme):
-        if is_light_theme:
-            sh.set_theme(is_light_theme = True)
+    def set_theme(self, theme):
+        if theme == "light":
+            sh.set_theme(theme = "light")
             self.theme_base_bg = "#DDDDDD"
             self.theme_text_bg = "#FFFFFF"
             self.theme_text_fg = "#000000"
@@ -197,8 +197,8 @@ class Editor:
             self.theme_highlight_base_bg = "#BBBBFF"
             self.theme_highlight_text_bg = "#CCCCFF"
             self.theme_highlight_text_fg = "#000000"
-        else:
-            sh.set_theme(is_light_theme = False)
+        elif theme == "dark":
+            sh.set_theme(theme = "dark")
             self.theme_base_bg = "#222222"
             self.theme_text_bg = "#333333"
             self.theme_text_fg = "#FFFFFF"

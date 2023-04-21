@@ -78,8 +78,12 @@ class ProfileHandler:
         except:
             raise FileNotFoundError(f"Couldn't fetch profile data for '{key}'.")
 
-    def is_light_theme(self):
-        return self.gt_value("is_light_theme")
+    def theme(self):
+        theme = self.gt_value("theme")
+        if theme == "dark" or theme == "light":
+            return theme
+        else:
+            raise RuntimeError(f"Unknown theme '{theme}' in profile.")
 
     def language(self):
         return self.gt_value("language")
@@ -234,9 +238,9 @@ class ErrorHandler:
 
 class SpriteHandler:
 
-    def __init__(self, is_light_theme):
+    def __init__(self, theme):
         self.theme = None
-        self.set_theme(is_light_theme)
+        self.set_theme(theme)
 
     def gt_sprite(self, file, x = 35, y = 35):
         try:
@@ -246,10 +250,10 @@ class SpriteHandler:
         img = img.resize((x, y))
         return ImageTk.PhotoImage(img)
 
-    def set_theme(self, is_light_theme):
-        if is_light_theme:
+    def set_theme(self, theme):
+        if theme == "light":
             self.theme = "light_theme"
-        else:
+        elif theme == "dark":
             self.theme = "dark_theme"
 
 

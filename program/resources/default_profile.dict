@@ -1,5 +1,5 @@
 {
-    "is_light_theme": False,
+    "theme": "dark",
     "language": "en_US",
     "code_font_face": "Courier New",
     "code_font_size": 10,

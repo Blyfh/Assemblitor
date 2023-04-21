@@ -3,7 +3,7 @@ import tkinter.ttk as ttk
 
 class Button(ttk.Label):
 
-    def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 3000, *args, **kwargs):
+    def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 30, *args, **kwargs):
         ttk.Label.__init__(self, root, *args, **kwargs)
         self.root = root
         self.command = command

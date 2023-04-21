@@ -69,33 +69,27 @@ class Options(Subwindow):
 
     def __init__(self, editor):
         super().__init__(editor)
-        self.restart_required_flag = False
-        self.startup()
 
-    def startup(self):
-        self.is_light_theme_VAR = tk.BooleanVar(value = ph.is_light_theme())
-        self.language_VAR       = tk.StringVar( value = lh.gt_lang_name(ph.language()))
-        self.code_font_face_VAR = tk.StringVar( value = font_face_name(ph.code_font_face()))
+    def open(self):
+        self.is_light_theme_VAR = tk.BooleanVar(value = ph.theme() == "light")
+        self.language_VAR       = tk.StringVar( value = lh.gt_lang_name(ph.language())) # do not use to get current option as this StringVar is language-dependent; use self.language_OMN.current_option()
+        self.code_font_face_VAR = tk.StringVar( value = font_face_name(ph.code_font_face())) # do not use to get current option as this StringVar is language-dependent; use self.code_font_face_OMN.current_option()
         self.code_font_size_VAR = tk.IntVar(    value = ph.code_font_size())
         self.min_adr_len_VAR    = tk.IntVar(    value = ph.min_adr_len())
-        try:
-            print("changing init_state for theme from", self.init_state["is_light_theme"], "to", self.is_light_theme_VAR.get())
-        except:
-            pass
         self.init_state = {
-            "is_light_theme": self.is_light_theme_VAR.get(),
+            "theme":          self.gt_theme(),
             "language":       ph.language(),
             "code_font_face": ph.code_font_face(),
             "code_font_size": self.code_font_size_VAR.get(),
-            "min_adr_len":    self.min_adr_len_VAR   .get()
+            "min_adr_len":    self.min_adr_len_VAR.get()
         }
-        self.changes = {
-            "is_light_theme": False,
-            "language":       False,
-            "code_font_face": False,
-            "code_font_size": False,
-            "min_adr_len":    False
-        }
+        super().open()
+
+    def gt_theme(self):
+        if self.is_light_theme_VAR.get():
+            return "light"
+        else:
+            return "dark"
 
     def build_gui(self):
 
@@ -109,7 +103,7 @@ class Options(Subwindow):
         vcmd = self.options_FRM.register(char_is_digit) # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
         # appearance
         self.appearance_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"))
-        self.light_theme_CHB    = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = lambda: self.change("is_light_theme", restart_required = True), onvalue = True, offvalue = False)
+        self.light_theme_CHB    = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = lambda: self.change("theme", restart_required = True), onvalue = True, offvalue = False)
         if not self.is_light_theme_VAR.get():
             self.light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
         self.language_FRM       = ttk.Frame(self.options_FRM, style = "text.TFrame")
@@ -153,7 +147,7 @@ class Options(Subwindow):
         self.restart_BTN.pack(side = "right", padx = (5, 0))
         self.reset_BTN  .pack(side = "left")
         self.restart_LBL.pack(fill = "x", side = "bottom", pady = (5, 0), padx = 5)
-        if self.restart_required_flag:
+        if self.restart_required_flag():
             self.restart_required()
 
         self.code_font_size_SBX.bind(sequence = "<Return>", func = lambda event: self.change("code_font_size", focus_flag = True))
@@ -162,28 +156,22 @@ class Options(Subwindow):
         super().build_gui()
 
     def set_option_vars(self):
-        self.is_light_theme_VAR.set(value = ph.is_light_theme())
+        self.is_light_theme_VAR.set(value = ph.theme() == "light")
         self.language_VAR      .set(value = lh.gt_lang_name(lh.cur_lang))
         self.code_font_face_VAR.set(value = ph.code_font()[0])
         self.code_font_size_VAR.set(value = ph.code_font()[1])
         self.min_adr_len_VAR   .set(value = ph.min_adr_len())
 
+    def restart_required_flag(self):
+        print("restart req", self.ed.active_theme != self.current_state("theme") or self.ed.active_language != self.current_state("language"))
+        return self.ed.active_theme != self.current_state("theme") or self.ed.active_language != self.current_state("language")
+
     def update_options(self):
-        self.old_state = {}
-        for option in self.changes:
-            self.old_state[option] = self.current_state(option)
-        self.set_option_vars()
-        for option in self.changes:
-            if self.current_state(option) != self.old_state[option]: # detect changes caused by reset
-                self.changes[option] = True
-        if self.option_changed("is_light_theme") or self.option_changed("language"):
+        self.set_option_vars() # reset
+        if self.restart_required_flag():
             self.restart_required()
         else:
             self.restart_no_longer_required()
-
-    def close(self):
-        super().close()
-        self.startup()
 
     def ok_btn(self):
         self.save()
@@ -201,56 +189,44 @@ class Options(Subwindow):
     def change(self, option:str, restart_required = False, focus_flag = False, event = None):
         if focus_flag: # remove focus from code_font_size_SBX and min_adr_len_SBX (to remove cursor in the spinbox)
             self.focus()
-        if self.option_changed(option): # real change
-            self.changes[option] = True
-            if restart_required:
+        if restart_required:
+            if self.restart_required_flag():
                 self.restart_required()
-        else: # just reverted to initial state of option
-            self.changes[option] = False
-            print("restart no longer req:", option, self.changes["language"])
-            if restart_required and (option == "is_light_theme" and not self.changes["language"] or option == "language" and not self.changes["is_light_theme"]): # also revert enabling of button when changes get reverted
-                # TODO doesn't get called after changing, OKing, reopening, and reverting options
-                self.restart_no_longer_required()
+            else:
+                self.restart_no_longer_required() # also revert displaying restart_BTN & restart_LBL when changes got reverted
 
     def option_changed(self, option:str):
-        print("real change bc:", self.init_state[option], self.current_state(option))
+        print(f"option {option} changed?", self.init_state[option], self.current_state(option))
         return self.init_state[option] != self.current_state(option)
 
     def current_state(self, option:str):
         if option == "language" or option == "code_font_face":
             return eval(f"self.{option}_OMN.current_option()")
+        elif option == "theme":
+            return self.gt_theme()
         else:
             return eval(f"self.{option}_VAR.get()")
 
     def restart_required(self):
-        self.restart_required_flag = True
         self.restart_LBL.config(text = lh.opt_win("RestartRequired"))
         self.restart_BTN.config(state = "enabled")
 
     def restart_no_longer_required(self):
-        self.restart_required_flag = False
         self.restart_LBL.config(text = "")
         self.restart_BTN.config(state = "disabled")
 
     def save(self):
-        for option in self.changes:
-            if self.changes[option]:
+        for option in self.init_state:
+            if self.option_changed(option): # TODO also saves unchanged options?
                 ph.save_profile_data(key = option, new_value = self.current_state(option))
-                self.changes[option] = False
-                keep_init_state = eval(f"self.save_option_{option}()") # individual saving methods
-                if not keep_init_state:
-                    print("CHANGING INIT_STATE")
-                    self.init_state[option] = self.current_state(option)
+                self.init_state[option] = self.current_state(option)
+                eval(f"self.save_option_{option}()") # individual saving methods
 
-    def save_option_is_light_theme(self):
-        if self.restart_required_flag:
-            print("saving is_light_theme")
-            return True
+    def save_option_theme(self):
+        pass
 
     def save_option_language(self):
-        if self.restart_required_flag:
-            print("saving language")
-            return True
+        pass
 
     def save_option_code_font_face(self):
         self.ed.update_code_font()
