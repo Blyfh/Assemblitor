@@ -484,6 +484,7 @@ class Editor:
 # "00 sta 02
 # 01 stp
 # 02 	; optionaler kommentar nach Tab" hat visuellen Bug: Ergebnis wird nach Tab (mit dem Kommentar) dargestellt
+# "0 stp ;" verschluckt Semikolon
 
 # SUGGESTIONS
 # ALU anzeigen
