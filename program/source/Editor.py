@@ -477,9 +477,13 @@ class Editor:
 #   reset options (= reset profile)
 #   show full error traceback
 #   asktosave bei Schließen ausstellbar
+# "10 add #-1" -> allow negative values?
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
+# "00 sta 02
+# 01 stp
+# 02 	; optionaler kommentar nach Tab" hat visuellen Bug: Ergebnis wird nach Tab (mit dem Kommentar) dargestellt
 
 # SUGGESTIONS
 # ALU anzeigen
