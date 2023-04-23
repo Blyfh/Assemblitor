@@ -480,3 +480,16 @@ class Editor:
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
+
+# SUGGESTIONS
+# ALU anzeigen
+# (single step) execution scrolls to the top of the prg (option)
+# don't show automatically filled empty cells
+# break points for debugging
+# farbige markierung der Sprache
+# bei fehler auch den jetzigen Stand des Prg ausgeben
+# strg + h
+# Kommentare mit Tabs davor beim ausführen spacing falsch (siehe #spam auf MPT-DC)
+#
+# neuladen -> neu laden
+# "neu" als Dateioption
