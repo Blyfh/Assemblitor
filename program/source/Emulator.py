@@ -29,10 +29,12 @@ def concatenate(str1, str2): # used by Cell.gt_content() for adding spaces betwe
         return str1 + str2
 
 def split_at_comment(cel_cmt_str): # used by Programm.gt_cells() and Editor.change_text() for splitting cell and comment
-    for i in range(len(cel_cmt_str)):
-        if cel_cmt_str[i] == ";":
-            return cel_cmt_str[:i], cel_cmt_str[i:]
-    return cel_cmt_str, ""
+    i = 0
+    while i < len(cel_cmt_str) and cel_cmt_str[i] != ";":
+        i += 1
+    while cel_cmt_str[i - 1] in string.whitespace and cel_cmt_str[i - 2] in string.whitespace: # move additional whitespaces after cell to comment (first whitespace is appended to cell)
+        i -= 1
+    return cel_cmt_str[:i], cel_cmt_str[i:]
 
 
 class Emulator:
@@ -282,14 +284,14 @@ class Cell:
 
     def create_toks(self, tok_strs):
         for tpos in range(len(tok_strs)):
-            if len(tok_strs[tpos]) == 0 and tpos == 2: # ignore empty operands
+            if tpos == 2 and len(tok_strs[tpos]) == 0: # ignore empty operands
                 pass
             elif tpos == 0:
                 tok = Token(tok_strs[tpos], tpos)
                 self.toks.append(tok)
-            elif tpos != 1 and self.toks[1].type == 2: # operand after a value
+            elif tpos == 2 and self.toks[1].type == 2: # operand after a value
                 raise Exception(eh.error("MaxCelLength_ValCell", adr = self.gt_adr()))
-            elif tpos != 1 and self.toks[1].tok == "STP": # operand after STP
+            elif tpos == 2 and self.toks[1].tok == "STP": # operand after STP
                 raise Exception(eh.error("MaxCelLength_StpCell", adr = self.gt_adr()))
             else:
                 tok = Token(tok_strs[tpos], tpos, self.gt_adr())

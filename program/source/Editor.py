@@ -39,7 +39,7 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.open_demo_prg()
+            self.open_prg("00 sta 02\n01 stp\n02 	;")
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -293,17 +293,6 @@ class Editor:
         self.run(execute_all = False)
 
     def reload_file(self, event = None):
-        if self.dirty_flag:
-            if self.wants_to_save() == "abort":
-                return
-        if self.file_path:
-            self.inp_SCT.delete("1.0", "end")
-            with open(self.file_path, "r", encoding = "utf-8") as file:
-                self.init_inp = file.read()
-            self.inp_SCT.insert("insert", self.init_inp)
-            self.set_dirty_flag(False)
-
-    def reload_file(self, event = None):
         if self.file_path:
             with open(self.file_path, "r", encoding = "utf-8") as file:
                 prg_str = file.read()
@@ -484,9 +473,6 @@ class Editor:
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
-# "00 sta 02
-# 01 stp
-# 02 	; optionaler kommentar nach Tab" hat visuellen Bug: Ergebnis wird nach Tab (mit dem Kommentar) dargestellt
 
 # SUGGESTIONS
 # ALU anzeigen
