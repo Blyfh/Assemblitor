@@ -207,7 +207,9 @@ class LangHandler:
 class ErrorHandler:
 
     def __init__(self):
-        self.errors = ph.gt_pack_data("errors", f"{program_dir}/resources")
+        pack_data = ph.gt_pack_data("errors", f"{program_dir}/resources")
+        self.errors   = pack_data["errors"]
+        self.messages = pack_data["messages"]
 
     def error(self, err, **kwargs):
         try:
@@ -234,6 +236,13 @@ class ErrorHandler:
                     err_desc += txt_arg_pair[0] + str(arg)
             err_desc += blocks[len(blocks) - 1]
         return err_name + ": " + err_desc
+
+    def prg_state_msg(self):
+        try:
+            prg_state_msg = self.messages["PrgStateMsg"]
+        except:
+            raise FileNotFoundError(f"Couldn't fetch error message data for 'PrgStateMsg'.")
+        return prg_state_msg
 
 
 class SpriteHandler:

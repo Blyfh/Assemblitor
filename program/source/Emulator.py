@@ -32,7 +32,7 @@ def split_at_comment(cel_cmt_str): # used by Programm.gt_cells() and Editor.chan
     i = 0
     while i < len(cel_cmt_str) and cel_cmt_str[i] != ";":
         i += 1
-    while cel_cmt_str[i - 1] in string.whitespace and cel_cmt_str[i - 2] in string.whitespace: # move additional whitespaces after cell to comment (first whitespace is appended to cell)
+    while i > 1 and cel_cmt_str[i - 1] in string.whitespace and cel_cmt_str[i - 2] in string.whitespace: # move additional whitespaces after cell to comment (first whitespace is appended to cell)
         i -= 1
     return cel_cmt_str[:i], cel_cmt_str[i:]
 
@@ -72,6 +72,7 @@ class Emulator:
 
     def create_prg(self, prg_str):
         self.prg_str = prg_str
+        self.prg = None # for Editor.format_error() detecting failed program initialisation
         self.prg = Program(prg_str)
         self.is_new_prg = False
 
@@ -93,9 +94,9 @@ class Program:
         return prg_str
 
     def gt_prg(self, execute_all = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
-        if not execute_all:
+        if not execute_all and len(self.cells) > 0:
             prg_str1 = self.top_cmt
-            cell_that_is_currently_executed = ""
+            executed_cell = ""
             prg_str2 = ""
             for cell in self.cells:
                 if cell.gt_adr() < self.pc:
@@ -103,8 +104,8 @@ class Program:
                 elif cell.gt_adr() > self.pc:
                     prg_str2 += str(cell)
                 else:
-                    cell_that_is_currently_executed = cell
-            return prg_str1, cell_that_is_currently_executed.gt_content(), cell_that_is_currently_executed.gt_comment() + "\n" + prg_str2
+                    executed_cell = cell
+            return prg_str1, executed_cell.gt_content(), executed_cell.gt_comment() + "\n" + prg_str2
         else:
             return str(self), "", ""
 

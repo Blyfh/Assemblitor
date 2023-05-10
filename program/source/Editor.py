@@ -39,14 +39,16 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.options_SUB.open()
+            self.open_prg("""0 lda #5
+01 sta 5
+02 rgrojp""")
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
         if exc.__name__ == "Exception": # normal case for Assembly errors caused by user
             self.out_SCT.config(state = "normal", fg = self.theme_error_color)
             self.out_SCT.delete("1.0", "end")
-            self.out_SCT.insert("insert", val)
+            self.out_SCT.insert("insert", self.format_exception_message(val))
             self.out_SCT.config(state = "disabled")
         else: # special case for internal errors
             if self.testing:
@@ -54,13 +56,20 @@ class Editor:
             else:
                 mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
 
+    def format_exception_message(self, val):
+        if self.emu.prg is None: # program initialisation exception
+            self.emu.creating_new_prg_flag = False
+            return str(val)
+        else: # runtime exception
+            return str(val) + eh.prg_state_msg() + str(self.emu.prg)
+
     def build_gui(self):
         self.root = tk.Tk()
-        tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errorsf
+        tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errors
         self.change_amount_VAR  = tk.StringVar(value = "1")
         self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language-dependent; use self.chng_opt_OMN.current_option()
         self.active_theme    = ph.theme() # won't change without restart
-        self.active_language = ph.language()       # won't change without restart
+        self.active_language = ph.language() # won't change without restart
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
         self.set_theme(theme = self.active_theme)
@@ -473,6 +482,11 @@ class Editor:
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
+# "0 lda #5" throws different errors for different execute_all + freezes out_SCT error message
+# ireg has no padding on the right
+# "0 lda 0
+# 01 stp" doesn't throw an error
+# ctrl + del on "word1 |word2" (cursor = |) deletes word2
 
 # SUGGESTIONS
 # ALU anzeigen
