@@ -22,6 +22,12 @@ def update_properties():
     MAX_JMPS    = ph.max_jmps()
     MAX_CELS    = ph.max_cels()
 
+def concatenate(str1, str2): # used by Cell.gt_content() for adding spaces between tokens if necessary
+    if len(str1) > 0 and len(str2) > 0 and not str1[-1] in string.whitespace:
+        return str1 + " " + str2
+    else:
+        return str1 + str2
+
 
 class Emulator:
 
@@ -263,10 +269,10 @@ class Cell:
         else:
             return "" # hide empty automatically generated cells to avoid cluttering the program
 
-    def gt_content(self): # cell without comment
+    def gt_content(self): # cell content without comment
         cel_str = ""
         for tok in self.toks:
-            cel_str += str(tok)
+            cel_str = concatenate(cel_str, str(tok))
         return cel_str
 
     def gt_comment(self):
@@ -349,8 +355,6 @@ class Token:
         self.tok     = self.create_tok(self.tok_str)
 
     def __str__(self):
-        if len(self.tok_str) > 0 and self.tok_str[-1] != " ":
-            self.tok_str += " "
         return self.add_leading_zeros(self.tok_str)
 
     def create_tok(self, tok_str):

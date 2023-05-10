@@ -493,7 +493,6 @@ class Editor:
 # 01 stp
 # 02 	; optionaler kommentar nach Tab" hat visuellen Bug: Ergebnis wird nach Tab (mit dem Kommentar) dargestellt
 # "0 stp ;" verschluckt Semikolon
-# Ergebnis-Zellen haben Leerzeichen am Ende: "0 STP" -> "0 STP "
 
 # SUGGESTIONS
 # ALU anzeigen
