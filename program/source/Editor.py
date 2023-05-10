@@ -412,12 +412,7 @@ class Editor:
         lines     = text.split("\n")
         new_text  = ""
         for line in lines:
-            cell_comment_pair = line.split(";", maxsplit = 1)
-            if len(cell_comment_pair) > 1:
-                comment = ";" + cell_comment_pair[1]
-            else:
-                comment = ""
-            cell = cell_comment_pair[0]
+            cell, comment = emu.split_at_comment(line)
             if len(cell):
                 if change_adrs:
                     cell = self.change_adr(cell, change)
@@ -492,7 +487,6 @@ class Editor:
 # "00 sta 02
 # 01 stp
 # 02 	; optionaler kommentar nach Tab" hat visuellen Bug: Ergebnis wird nach Tab (mit dem Kommentar) dargestellt
-# "0 stp ;" verschluckt Semikolon
 
 # SUGGESTIONS
 # ALU anzeigen

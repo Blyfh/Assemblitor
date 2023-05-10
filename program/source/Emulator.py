@@ -28,6 +28,12 @@ def concatenate(str1, str2): # used by Cell.gt_content() for adding spaces betwe
     else:
         return str1 + str2
 
+def split_at_comment(cel_cmt_str): # used by Programm.gt_cells() and Editor.change_text() for splitting cell and comment
+    for i in range(len(cel_cmt_str)):
+        if cel_cmt_str[i] == ";":
+            return cel_cmt_str[:i], cel_cmt_str[i:]
+    return cel_cmt_str, ""
+
 
 class Emulator:
 
@@ -136,11 +142,7 @@ class Program:
         lines = prg_str.split("\n")
         cells  = []
         for i in range(len(lines)):
-            line = lines[i].split(";")
-            if len(line) < 2:
-                line.append("")
-            if len(line[1]) > 0:
-                line[1] = ";" + line[1]
+            line = split_at_comment(lines[i])
             if line[0].strip() == "": # no cell in line
                 if len(cells) > 0: # not first line; some empty line in between
                     cells[-1].cmt += "\n" + line[0] + line[1]

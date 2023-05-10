@@ -229,7 +229,7 @@ class ErrorHandler:
                     for kw in kwargs: # search for matching argument
                         if kw == txt_arg_pair[1]:
                             arg = kwargs[kw]
-                    if arg == None:
+                    if arg is None:
                         raise TypeError(f"LangHandler.error() missing required keyword argument '{txt_arg_pair[1]}' in error data for '{err}'.")
                     err_desc += txt_arg_pair[0] + str(arg)
             err_desc += blocks[len(blocks) - 1]
