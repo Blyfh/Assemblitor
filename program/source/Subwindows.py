@@ -67,22 +67,24 @@ class Subwindow:
 
 class Options(Subwindow):
 
-    def __init__(self, editor):
-        super().__init__(editor)
-
     def open(self):
         self.is_light_theme_VAR = tk.BooleanVar(value = ph.theme() == "light")
         self.language_VAR       = tk.StringVar( value = lh.gt_lang_name(ph.language())) # do not use to get current option as this StringVar is language-dependent; use self.language_OMN.current_option()
         self.code_font_face_VAR = tk.StringVar( value = font_face_name(ph.code_font_face())) # do not use to get current option as this StringVar is language-dependent; use self.code_font_face_OMN.current_option()
         self.code_font_size_VAR = tk.IntVar(    value = ph.code_font_size())
         self.min_adr_len_VAR    = tk.IntVar(    value = ph.min_adr_len())
+        self.max_cels_VAR       = tk.IntVar(    value = ph.max_cels())
+        self.max_jmps_VAR       = tk.IntVar(    value = ph.max_jmps())
         self.init_state = {
             "theme":          self.gt_theme(),
             "language":       ph.language(),
             "code_font_face": ph.code_font_face(),
             "code_font_size": self.code_font_size_VAR.get(),
-            "min_adr_len":    self.min_adr_len_VAR.get()
+            "min_adr_len":    self.min_adr_len_VAR.get(),
+            "max_cels":       self.max_cels_VAR.get(),
+            "max_jmps":       self.max_jmps_VAR.get()
         }
+
         super().open()
 
     def gt_theme(self):
@@ -101,18 +103,19 @@ class Options(Subwindow):
         self.options_FRM = ttk.Frame(self.subroot, style ="text.TFrame")
         self.options_FRM.pack(fill = "both", expand = True)
         vcmd = self.options_FRM.register(char_is_digit) # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
+
         # appearance
         self.appearance_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"))
-        self.light_theme_CHB    = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = lambda: self.change("theme", restart_required = True), onvalue = True, offvalue = False)
+        self.light_theme_CHB    = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = lambda: self.change(restart_required = True), onvalue = True, offvalue = False)
         if not self.is_light_theme_VAR.get():
             self.light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
         self.language_FRM       = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.language_LBL       = ttk.Label(self.language_FRM, style = "TLabel", text = lh.opt_win("Language"))
-        self.language_OMN       = wdg.OptionMenu(self.language_FRM, textvariable = self.language_VAR, default_option = ph.language(), options = lh.gt_langs_with_names(), command = lambda event: self.change("language", restart_required = True), style ="TMenubutton")
+        self.language_OMN       = wdg.OptionMenu(self.language_FRM, textvariable = self.language_VAR, default_option = ph.language(), options = lh.gt_langs_with_names(), command = lambda event: self.change(restart_required = True), style = "TMenubutton")
         self.code_font_FRM      = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.code_font_LBL      = ttk.Label(self.code_font_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
-        self.code_font_size_SBX = ttk.Spinbox(self.code_font_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, command = lambda: self.change("code_font_size", focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 3, style = "TSpinbox")
-        self.code_font_face_OMN = wdg.OptionMenu(self.code_font_FRM, textvariable = self.code_font_face_VAR, default_option = ph.code_font_face(), options = gt_font_faces_with_names(), command = lambda event: self.change("code_font_face"), style ="TMenubutton")
+        self.code_font_size_SBX = ttk.Spinbox(self.code_font_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 3, style = "TSpinbox")
+        self.code_font_face_OMN = wdg.OptionMenu(self.code_font_FRM, textvariable = self.code_font_face_VAR, default_option = ph.code_font_face(), options = gt_font_faces_with_names(), command = lambda event: self.change(), style = "TMenubutton")
         self.appearance_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
         self.light_theme_CHB.pack(   fill = "x",     pady = 5, padx = (20, 5))
         self.language_FRM      .pack(fill = "x",               padx = (20, 5))
@@ -122,15 +125,29 @@ class Options(Subwindow):
         self.code_font_LBL     .pack(side = "left",  pady = 5, padx = (0, 15))
         self.code_font_size_SBX.pack(side = "right", pady = 5, padx = 5)
         self.code_font_face_OMN.pack(side = "right", pady = 5, padx = 5)
+
         # Assembler
         self.assembler_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Assembler"))
         self.min_adr_len_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.min_adr_len_LBL = ttk.Label(self.min_adr_len_FRM, style = "TLabel", text = lh.opt_win("MinAdrLen"))
-        self.min_adr_len_SBX = ttk.Spinbox(self.min_adr_len_FRM, textvariable = self.min_adr_len_VAR, from_ = 1, to = 10, command = lambda: self.change("min_adr_len", focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 3, style = "TSpinbox")
+        self.min_adr_len_SBX = ttk.Spinbox(self.min_adr_len_FRM, textvariable = self.min_adr_len_VAR, from_ = 1, to = 10, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 3, style = "TSpinbox")
+        self.max_cels_FRM    = ttk.Frame(self.options_FRM, style = "text.TFrame")
+        self.max_cels_LBL    = ttk.Label(self.max_cels_FRM, style = "TLabel", text = lh.opt_win("MaxCels"))
+        self.max_cels_SBX    = ttk.Spinbox(self.max_cels_FRM, textvariable = self.max_cels_VAR, from_ = 1, to = 1048576, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 6, style = "TSpinbox")
+        self.max_jmps_FRM    = ttk.Frame(self.options_FRM, style = "text.TFrame")
+        self.max_jmps_LBL    = ttk.Label(self.max_jmps_FRM, style = "TLabel", text = lh.opt_win("MaxJmps"))
+        self.max_jmps_SBX    = ttk.Spinbox(self.max_jmps_FRM, textvariable = self.max_jmps_VAR, from_ = 1, to = 1048576, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 6, style = "TSpinbox")
         self.assembler_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
         self.min_adr_len_FRM.pack(fill = "x",               padx = (20, 5))
         self.min_adr_len_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
         self.min_adr_len_SBX.pack(side = "right", pady = 5, padx = 5)
+        self.max_cels_FRM   .pack(fill = "x",               padx = (20, 5))
+        self.max_cels_LBL   .pack(side = "left",  pady = 5, padx = (0, 15))
+        self.max_cels_SBX   .pack(side = "right", pady = 5, padx = 5)
+        self.max_jmps_FRM   .pack(fill = "x",     padx = (20, 5))
+        self.max_jmps_LBL   .pack(side = "left",  pady = 5, padx = (0, 15))
+        self.max_jmps_SBX   .pack(side = "right", pady = 5, padx = 5)
+
         # taskbar
         self.buttons_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.cancel_BTN  = wdg.Button(self.buttons_FRM, text = lh.opt_win("Cancel"),  command = self.close,   style = "TButton")
@@ -150,20 +167,24 @@ class Options(Subwindow):
         if self.restart_required_flag():
             self.restart_required()
 
-        self.code_font_size_SBX.bind(sequence = "<Return>", func = lambda event: self.change("code_font_size", focus_flag = True))
-        self.min_adr_len_SBX.bind(   sequence = "<Return>", func = lambda event: self.change("min_adr_len",    focus_flag = True))
+        # events
+        self.code_font_size_SBX.bind(sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
+        self.min_adr_len_SBX.bind(   sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
+        self.max_cels_SBX.bind(      sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
+        self.max_jmps_SBX.bind(      sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
 
         super().build_gui()
 
     def set_option_vars(self):
         self.is_light_theme_VAR.set(value = ph.theme() == "light")
         self.language_VAR      .set(value = lh.gt_lang_name(lh.cur_lang))
-        self.code_font_face_VAR.set(value = ph.code_font()[0])
-        self.code_font_size_VAR.set(value = ph.code_font()[1])
+        self.code_font_face_VAR.set(value = font_face_name(ph.code_font_face()))
+        self.code_font_size_VAR.set(value = ph.code_font_size())
         self.min_adr_len_VAR   .set(value = ph.min_adr_len())
+        self.max_cels_VAR      .set(value = ph.max_cels())
+        self.max_jmps_VAR      .set(value = ph.max_jmps())
 
     def restart_required_flag(self):
-        print("restart req", self.ed.active_theme != self.current_state("theme") or self.ed.active_language != self.current_state("language"))
         return self.ed.active_theme != self.current_state("theme") or self.ed.active_language != self.current_state("language")
 
     def update_options(self):
@@ -186,8 +207,8 @@ class Options(Subwindow):
         ph.reset_profile()
         self.update_options()
 
-    def change(self, option:str, restart_required = False, focus_flag = False, event = None):
-        if focus_flag: # remove focus from code_font_size_SBX and min_adr_len_SBX (to remove cursor in the spinbox)
+    def change(self, restart_required = False, focus_flag = False, event = None):
+        if focus_flag: # remove focus from spinboxes (to remove cursor in the spinbox)
             self.focus()
         if restart_required:
             if self.restart_required_flag():
@@ -196,7 +217,6 @@ class Options(Subwindow):
                 self.restart_no_longer_required() # also revert displaying restart_BTN & restart_LBL when changes got reverted
 
     def option_changed(self, option:str):
-        print(f"option {option} changed?", self.init_state[option], self.current_state(option))
         return self.init_state[option] != self.current_state(option)
 
     def current_state(self, option:str):
@@ -235,6 +255,12 @@ class Options(Subwindow):
         self.ed.update_code_font()
 
     def save_option_min_adr_len(self):
+        emu.update_properties()
+
+    def save_option_max_cels(self):
+        emu.update_properties()
+
+    def save_option_max_jmps(self):
         emu.update_properties()
 
 

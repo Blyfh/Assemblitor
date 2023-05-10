@@ -39,7 +39,7 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.open_prg("00 sta 02\n01 stp\n02 	;")
+            self.options_SUB.open()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -466,10 +466,10 @@ class Editor:
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # turn IntVars into BoolVars if necessary
 # OPTIONS:
-#   reset options (= reset profile)
+#   show state of prg before error
 #   show full error traceback
+#   last dir fixed or automatic
 #   asktosave bei Schließen ausstellbar
-# "10 add #-1" -> allow negative values?
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces

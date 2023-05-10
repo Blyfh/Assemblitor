@@ -57,8 +57,8 @@
 
         "Assembler": "Assembler",
         "MinAdrLen": "Minimum number of digits",
-        "MaxPrgLen": "Maximum program length",
-        "MaxIteDep": "Maximum iteration depth",
+        "MaxCels":   "Maximum program length",
+        "MaxJmps":   "Maximum iteration depth",
 
         "DeveloperOptions": "Developer Options",
         "FullTb":           "Complete error traceback",

@@ -97,14 +97,14 @@ class ProfileHandler:
     def code_font(self):
         return self.code_font_face(), self.code_font_size()
 
-    def max_jmps(self):
-        return self.gt_value("max_jmps")
+    def min_adr_len(self):
+        return self.gt_value("min_adr_len")
 
     def max_cels(self):
         return self.gt_value("max_cels")
 
-    def min_adr_len(self):
-        return self.gt_value("min_adr_len")
+    def max_jmps(self):
+        return self.gt_value("max_jmps")
 
 
 class LangHandler:
