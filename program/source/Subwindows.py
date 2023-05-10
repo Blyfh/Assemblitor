@@ -150,11 +150,11 @@ class Options(Subwindow):
 
         # taskbar
         self.buttons_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
-        self.cancel_BTN  = wdg.Button(self.buttons_FRM, text = lh.opt_win("Cancel"),  command = self.close,   style = "TButton")
-        self.apply_BTN   = wdg.Button(self.buttons_FRM, text = lh.opt_win("Apply"),   command = self.save,    style = "TButton")
-        self.ok_BTN      = wdg.Button(self.buttons_FRM, text = lh.opt_win("Ok"),      command = self.ok_btn,  style = "TButton")
-        self.restart_BTN = wdg.Button(self.buttons_FRM, text = lh.opt_win("Restart"), command = self.restart, style = "TButton", state = "disabled")
-        self.reset_BTN   = wdg.Button(self.buttons_FRM, text = lh.opt_win("Reset"),   command = self.reset,   style = "TButton")
+        self.cancel_BTN  = ttk.Button(self.buttons_FRM, text = lh.opt_win("Cancel"),  command = self.close,   style = "TButton")
+        self.apply_BTN   = ttk.Button(self.buttons_FRM, text = lh.opt_win("Apply"),   command = self.save,    style = "TButton")
+        self.ok_BTN      = ttk.Button(self.buttons_FRM, text = lh.opt_win("Ok"),      command = self.ok_btn,  style = "TButton")
+        self.restart_BTN = ttk.Button(self.buttons_FRM, text = lh.opt_win("Restart"), command = self.restart, style = "TButton", state = "disabled")
+        self.reset_BTN   = ttk.Button(self.buttons_FRM, text = lh.opt_win("Reset"),   command = self.reset,   style = "TButton")
         self.restart_LBL = ttk.Label(self.options_FRM, text = "", foreground = "#FF4444", style = "TLabel")
         self.buttons_FRM.pack(fill = "x", side = "bottom", pady = 5, padx = 5)
         self.cancel_BTN .pack(side = "right", padx = (5, 0))

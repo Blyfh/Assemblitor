@@ -117,20 +117,20 @@ class Editor:
         self.menubar.add_cascade(label = lh.gui("Help"), menu = self.help_MNU, underline = 0)
 
         self.taskbar_FRM = ttk.Frame(self.root)
-        self.taskbar_FRM.pack(fill = "x")
+        self.taskbar_FRM.pack(fill = "x", padx = 5, pady = 5)
 
         self.run_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
-        self.run_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.run_BTN.pack(side = "left", anchor = "center")
         self.run_TIP = wdg.Tooltip(self.run_BTN, text = lh.gui("RunPrg"))
 
         self.step_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_step, img_default = sh.gt_sprite("BTN_run_once_default"), img_hovering= sh.gt_sprite("BTN_run_once_hovering"), img_clicked = sh.gt_sprite("BTN_run_once_clicked"))
-        self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0))
         self.step_TIP = wdg.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
         self.chng_FRM = ttk.Frame(self.taskbar_FRM)
         self.incr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.increment_selected_inp_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
         self.decr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.decrement_selected_inp_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
-        self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.incr_BTN.pack()
         self.decr_BTN.pack()
         self.incr_TIP = wdg.Tooltip(self.incr_BTN, text = lh.gui("IncrAdrs"))
@@ -140,7 +140,7 @@ class Editor:
         vcmd = self.chng_adjust_FRM.register(self.char_is_digit)
         self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 3)
         self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option ="adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
-        self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0), pady = 5)
+        self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.chng_ETR.pack(anchor = "nw")
         self.chng_opt_OMN.pack()
 
@@ -148,7 +148,7 @@ class Editor:
         self.ireg_title_LBL = ttk.Label(self.ireg_FRM, style = "info_title.TLabel", text = lh.gui("IR:"))
         self.ireg_cmd_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
         self.ireg_opr_LBL   = ttk.Label(self.ireg_FRM, style = "info_value.TLabel", width = 6)
-        self.ireg_FRM.pack(side = "right", padx = (5, 0), pady = 5)
+        self.ireg_FRM.pack(side = "right", padx = (5, 0))
         self.ireg_title_LBL.grid(row = 0, column = 0, columnspan = 2)
         self.ireg_cmd_LBL.grid(row = 1, column = 0, padx = 1)
         self.ireg_opr_LBL.grid(row = 1, column = 1, padx = 1)
@@ -156,23 +156,23 @@ class Editor:
         self.accu_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.accu_title_LBL = ttk.Label(self.accu_FRM, style = "info_title.TLabel", text = lh.gui("ACC:"))
         self.accu_value_LBL = ttk.Label(self.accu_FRM, style = "info_value.TLabel", width = 5)
-        self.accu_FRM.pack(side = "right", padx = (5, 0), pady = 5)
+        self.accu_FRM.pack(side = "right", padx = (5, 0))
         self.accu_title_LBL.pack(side = "top",    fill = "x")
         self.accu_value_LBL.pack(side = "bottom", fill = "x")
 
         self.prgc_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
         self.prgc_title_LBL = ttk.Label(self.prgc_FRM, style = "info_title.TLabel", text = lh.gui("PC:"))
         self.prgc_value_LBL = ttk.Label(self.prgc_FRM, style ="info_value.TLabel", width = 5)
-        self.prgc_FRM.pack(side = "right", padx = (5, 0), pady = 5)
+        self.prgc_FRM.pack(side = "right", padx = (5, 0))
         self.prgc_title_LBL.pack(side = "top",    fill = "x")
         self.prgc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = ttk.Frame(self.root)
         self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font(), insertbackground = self.theme_cursor_color)
         self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font())
-        self.text_FRM.pack(fill = "both", expand = True)
-        self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (5, 5), pady = (0, 5))
-        self.out_SCT.pack(side = "right", fill = "both", expand = True, padx = (0, 5), pady = (0, 5))
+        self.text_FRM.pack(fill = "both", expand = True, padx = 5, pady = (0, 5))
+        self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
+        self.out_SCT.pack(side = "right", fill = "both", expand = True)
         self.out_SCT.tag_config("pc_is_here", foreground = self.theme_accent_color)
         self.out_SCT.config(state = "disabled")
 
@@ -483,7 +483,6 @@ class Editor:
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
 # "0 lda #5" throws different errors for different execute_all + freezes out_SCT error message
-# ireg has no padding on the right
 # "0 lda 0
 # 01 stp" doesn't throw an error
 # ctrl + del on "word1 |word2" (cursor = |) deletes word2
