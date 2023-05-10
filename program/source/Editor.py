@@ -259,7 +259,7 @@ class Editor:
         if self.dirty_flag != new_bool:
             self.dirty_flag = not self.dirty_flag
             if self.dirty_flag:
-                self.root.title("*" + self.root.title())
+                self.root.title(f"*{self.root.title()}")
             else:
                 self.root.title(self.root.title()[1:])
 
@@ -303,13 +303,18 @@ class Editor:
             self.inp_SCT.insert("insert", self.init_inp)
             self.set_dirty_flag(False)
 
+    def reload_file(self, event = None):
+        if self.file_path:
+            with open(self.file_path, "r", encoding = "utf-8") as file:
+                prg_str = file.read()
+            self.open_prg(prg_str = prg_str, win_title = f"{self.file_path} – {lh.gui('title')}")
+
     def open_file(self, event = None):
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return
         self.file_path = fd.askopenfilename(title = lh.file_mng("OpenFile"), initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
-            self.root.title(self.file_path + " – " + lh.gui("title"))
             file_name = os.path.basename(self.file_path)
             self.last_dir = self.file_path.split(file_name)[0]
             self.set_dirty_flag(False)
@@ -330,16 +335,19 @@ class Editor:
             self.save_file()
             self.root.title(self.file_path + " – " + lh.gui("title"))
 
-    def open_demo_prg(self):
+    def open_prg(self, prg_str, win_title = None):
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return
-        demo = lh.demo()
         self.inp_SCT.delete("1.0", "end")
-        self.init_inp = demo
-        self.inp_SCT.insert("insert", demo)
+        self.init_inp = prg_str
+        self.inp_SCT.insert("insert", prg_str)
         self.set_dirty_flag(False)
-        self.root.title(lh.gui("title"))
+        if not win_title:
+            self.root.title(lh.gui("title"))
+
+    def open_demo_prg(self):
+        self.open_prg(lh.demo())
 
     def key_enter(self, event):
         self.insert_address()
@@ -485,11 +493,11 @@ class Editor:
 # 01 stp
 # 02 	; optionaler kommentar nach Tab" hat visuellen Bug: Ergebnis wird nach Tab (mit dem Kommentar) dargestellt
 # "0 stp ;" verschluckt Semikolon
+# Ergebnis-Zellen haben Leerzeichen am Ende: "0 STP" -> "0 STP "
 
 # SUGGESTIONS
 # ALU anzeigen
 # (single step) execution scrolls to the top of the prg (option)
-# don't show automatically filled empty cells
 # break points for debugging
 # farbige markierung der Sprache
 # bei fehler auch den jetzigen Stand des Prg ausgeben

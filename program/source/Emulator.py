@@ -75,7 +75,7 @@ class Program:
     def __str__(self):
         prg_str = self.top_cmt
         for cell in self.cells:
-            prg_str += str(cell) + "\n"
+            prg_str += str(cell)
         return prg_str
 
     def gt_prg(self, execute_all = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
@@ -85,12 +85,12 @@ class Program:
             prg_str2 = ""
             for cell in self.cells:
                 if cell.gt_adr() < self.pc:
-                    prg_str1 += str(cell) + "\n"
+                    prg_str1 += str(cell)
                 elif cell.gt_adr() > self.pc:
-                    prg_str2 += str(cell) + "\n"
+                    prg_str2 += str(cell)
                 else:
                     cell_that_is_currently_executed = cell
-            return prg_str1, cell_that_is_currently_executed.gt_cell(), cell_that_is_currently_executed.gt_comment() + "\n" + prg_str2
+            return prg_str1, cell_that_is_currently_executed.gt_content(), cell_that_is_currently_executed.gt_comment() + "\n" + prg_str2
         else:
             return str(self), "", ""
 
@@ -150,14 +150,6 @@ class Program:
         cells = self.fill_empty_cells(cells)
         return cells
 
-    def gt_cel(self, adr):
-        if adr > MAX_CELS - 1:
-            raise Exception(eh.error("MaxPrgLength", max_adrs = MAX_CELS, adrs =adr + 1))
-        while adr >= len(self.cells):
-            cell = Cell(str(len(self.cells)) + " ")
-            self.cells.append(cell)
-        return self.cells[adr]
-
     def fill_empty_cells(self, cells):
         i = 0
         while i < len(cells):
@@ -167,7 +159,7 @@ class Program:
             if i == adr:
                 pass
             elif i < adr:
-                cell = Cell(str(i) + " ")
+                cell = Cell(f"{i} ", is_user_generated = False)
                 cells.insert(i, cell)
             else:
                 if str(cells[adr].toks[1]) == "":
@@ -176,6 +168,14 @@ class Program:
                     raise Exception(eh.error("AdrNotUnique", adr = adr))
             i += 1
         return cells
+
+    def gt_cel(self, adr):
+        if adr > MAX_CELS - 1:
+            raise Exception(eh.error("MaxPrgLength", max_adrs = MAX_CELS, adrs = adr + 1))
+        while adr >= len(self.cells):
+            cell = Cell(str(len(self.cells)) + " ", is_user_generated = False)
+            self.cells.append(cell)
+        return self.cells[adr]
 
     def gt_final_value(self, opr_info): # interprets final result of operand pointer as a value (for commands like ADD, SUB, MUL, LDA)
         typ = opr_info[0] # opr_info = (opr.typ, opr.opr, opr.opr_str)
@@ -250,16 +250,20 @@ class Program:
 
 class Cell:
 
-    def __init__(self, cel_str = "", cmt = ""):
-        tok_strs  = self.split_cel_str(cel_str)
+    def __init__(self, cel_str = "", cmt = "", is_user_generated = True):
+        self.is_user_generated = is_user_generated
         self.cmt  = cmt
         self.toks = []
+        tok_strs = self.split_cel_str(cel_str)
         self.create_toks(tok_strs)
 
     def __str__(self):
-        return self.gt_cell() + self.gt_comment()
+        if self.is_user_generated or not self.is_empty():
+            return self.gt_content() + self.gt_comment() + "\n"
+        else:
+            return "" # hide empty automatically generated cells to avoid cluttering the program
 
-    def gt_cell(self): # cell without comment
+    def gt_content(self): # cell without comment
         cel_str = ""
         for tok in self.toks:
             cel_str += str(tok)
@@ -307,6 +311,9 @@ class Cell:
             self.toks[1].edit(new_val)
         else:
             raise Exception(eh.error("ValNotInt_Load", adr = self.gt_adr(), val = new_val))
+
+    def is_empty(self):
+        return self.toks[1].is_empty()
 
     def gt_adr(self):
         return self.toks[0].gt_adr()
@@ -400,6 +407,9 @@ class Token:
             self.tok_str = str(self.tok) + self.tok_str[i:]
         else:
             raise Exception(eh.error("TokNotVal_Overwrite", tpos = self.tpos, adr = self.cpos, tok = self.tok, new_val = new_val))
+
+    def is_empty(self):
+        return self.tok_str.strip() == ""
 
     def gt_cmd(self):
         if self.type == 1:
