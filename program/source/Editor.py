@@ -475,7 +475,6 @@ class Editor:
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # turn IntVars into BoolVars if necessary
 # OPTIONS:
-#   show state of prg before error
 #   show full error traceback
 #   last dir fixed or automatic
 #   asktosave bei Schließen ausstellbar
@@ -492,9 +491,5 @@ class Editor:
 # (single step) execution scrolls to the top of the prg (option)
 # break points for debugging
 # farbige markierung der Sprache
-# bei fehler auch den jetzigen Stand des Prg ausgeben
 # strg + h
-# Kommentare mit Tabs davor beim ausführen spacing falsch (siehe #spam auf MPT-DC)
-#
-# neuladen -> neu laden
 # "neu" als Dateioption
