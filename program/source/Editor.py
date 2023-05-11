@@ -39,9 +39,7 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.open_prg("""0 lda #5
-01 sta 5
-02 rgrojp""")
+            self.open_prg("0 lda 0\n01 stp")
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -482,8 +480,6 @@ class Editor:
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
 # "0 lda #5" throws different errors for different execute_all + freezes out_SCT error message
-# "0 lda 0
-# 01 stp" doesn't throw an error
 # ctrl + del on "word1 |word2" (cursor = |) deletes word2
 
 # SUGGESTIONS

@@ -330,10 +330,7 @@ class Cell:
         return self.toks[0].gt_adr()
 
     def gt_val(self):
-        if self.toks[1].tok == "":
-            return 0
-        else:
-            return self.toks[1].tok
+        return self.toks[1].gt_val()
 
     def gt_cmd(self):
         return self.toks[1].gt_cmd()
@@ -420,32 +417,39 @@ class Token:
     def is_empty(self):
         return self.tok_str.strip() == ""
 
+    def gt_val(self):
+        if self.type == 2:
+            return self.tok
+        elif self.type == 1:
+            raise Exception(eh.error("TokNotVal_CmdTok", tpos = self.tpos, adr = self.cpos, tok = self.tok))
+        else:
+            raise Exception(eh.error("TokNotVal", tpos = self.tpos, adr = self.cpos, tok = self.tok))
+
     def gt_cmd(self):
         if self.type == 1:
             return self.tok
+        elif self.type == 2:
+            raise Exception(eh.error("TokNotCmd_ValTok", tpos = self.tpos, adr = self.cpos, tok = self.tok))
+        elif len(self.tok_str) == 0:
+            raise Exception(eh.error("TokNotCmd_EmptyTok", tpos = self.tpos, adr = self.cpos))
         else:
-            if len(self.tok_str) > 0:
-                raise Exception(eh.error("TokNotCmd", tpos = self.tpos, adr = self.cpos, tok = self.tok))
-            else:
-                raise Exception(eh.error("TokNotCmd_EmptyTok", tpos = self.tpos, adr = self.cpos))
+            raise Exception(eh.error("TokNotCmd", tpos = self.tpos, adr = self.cpos, tok = self.tok))
 
     def gt_opr(self):
         if self.type == 3:
             return self.tok
+        elif len(self.tok_str) == 0:
+            raise Exception(eh.error("TokNotOpr_EmptyTok", tpos = self.tpos, adr = self.cpos))
         else:
-            if len(self.tok_str) > 0:
-                raise Exception(eh.error("TokNotOpr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
-            else:
-                raise Exception(eh.error("TokNotOpr_EmptyTok", tpos = self.tpos, adr = self.cpos))
+            raise Exception(eh.error("TokNotOpr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
 
     def gt_adr(self):
         if self.type == 0:
             return self.tok
+        elif len(self.tok_str) == 0:
+            raise Exception(eh.error("TokNotAdr_EmptyTok", tpos = self.tpos, adr = self.cpos))
         else:
-            if len(self.tok_str) > 0:
-                raise Exception(eh.error("TokNotAdr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
-            else:
-                raise Exception(eh.error("TokNotAdr_EmptyTok", tpos = self.tpos, adr = self.cpos))
+            raise Exception(eh.error("TokNotAdr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
 
 
 class Operand:
