@@ -144,13 +144,12 @@ Save file as"""
         """
     },
     "demo": """; A simple countdown program
-00 JMP 03
+00 JMP 02
 01 5
-02 1
-03 LDA 01
-04 SUB 02
-05 JLE 08
-06 STA 01
-07 JMP 04
-08 STP"""
+02 LDA 01
+03 SUB #1
+04 JLE 07
+05 STA 01
+06 JMP 03
+07 STP"""
 }

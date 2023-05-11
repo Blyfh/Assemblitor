@@ -39,7 +39,7 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.open_prg("0 lda 0\n01 stp")
+            self.open_prg("0 lda #5")
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -476,6 +476,7 @@ class Editor:
 #   show full error traceback
 #   last dir fixed or automatic
 #   asktosave bei Schließen ausstellbar
+# show current state of pc, accu, and ireg when throwing an error
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces

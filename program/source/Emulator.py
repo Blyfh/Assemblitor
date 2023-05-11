@@ -116,26 +116,33 @@ class Program:
                 while self.executing:
                     self.execute_cell()
             else:
+                print("is already executing:", self.executing)
                 if not self.executing:
                     self.start_executing()
+                print("\nexecuting next cell...")
                 self.execute_cell()
 
     def start_executing(self):
+        print("CELLS:", self.cells)
         self.executing   = True
         self.accu        = 0
         self.pc          = 0
         self.jmps_to_adr.clear()
 
     def execute_cell(self):
+        print(f"executing cell at {self.pc}...")
         if self.pc < len(self.cells):
+            print("    cell gets executed")
             self.execute_command(self.pc)
             self.pc += 1
         else:
+            print("    cell is out of bounds")
             self.executing = False
             raise Exception(eh.error("NeverStopped"))
 
     def execute_command(self, adr):
         cmd = self.gt_cel(adr).gt_cmd()
+        print("    executing cmd", cmd)
         opr = self.gt_cel(adr).gt_opr()
         eval("self.cmd_" + cmd + "(" + str(opr) + ")")
 
@@ -428,10 +435,10 @@ class Token:
     def gt_cmd(self):
         if self.type == 1:
             return self.tok
-        elif self.type == 2:
-            raise Exception(eh.error("TokNotCmd_ValTok", tpos = self.tpos, adr = self.cpos, tok = self.tok))
         elif len(self.tok_str) == 0:
             raise Exception(eh.error("TokNotCmd_EmptyTok", tpos = self.tpos, adr = self.cpos))
+        elif self.type == 2:
+            raise Exception(eh.error("TokNotCmd_ValTok", tpos = self.tpos, adr = self.cpos, tok = self.tok))
         else:
             raise Exception(eh.error("TokNotCmd", tpos = self.tpos, adr = self.cpos, tok = self.tok))
 
