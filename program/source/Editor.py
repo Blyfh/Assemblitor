@@ -356,7 +356,7 @@ class Editor:
         if self.inp_SCT.index("insert") != "1.0": # to prevent deleting word after cursor on position 0
             if self.inp_SCT.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
                 self.inp_SCT.delete("insert-1c", "insert") # delete potential space before word
-            self.inp_SCT.delete("insert-1c wordstart", "insert-1c wordend") # delete word
+            self.inp_SCT.delete("insert-1c wordstart", "insert") # delete word
             return "break"
 
     def insert_address(self):
@@ -480,7 +480,6 @@ class Editor:
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
 # "0 lda #5" throws different errors for different execute_all + freezes out_SCT error message
-# ctrl + del on "word1 |word2" (cursor = |) deletes word2
 
 # SUGGESTIONS
 # ALU anzeigen
