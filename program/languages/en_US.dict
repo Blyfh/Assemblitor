@@ -48,7 +48,7 @@
     },
     "opt_win": {
         "title":    "Options",
-        "geometry": "400x500",
+        "geometry": "450x500",
 
         "Appearance": "Appearance",
         "LightTheme": "Light theme",
@@ -59,6 +59,10 @@
         "MinAdrLen": "Minimum number of digits",
         "MaxCels":   "Maximum program length",
         "MaxJmps":   "Maximum iteration depth",
+
+        "File":                  "File",
+        "ClosingUnsaved":        "Action on closing unsaved program",
+        "ClosingUnsavedOptions": {"ask": "Ask to save", "save": "Always save", "discard": "Always discard"},
 
         "DeveloperOptions": "Developer Options",
         "FullTb":           "Complete error traceback",

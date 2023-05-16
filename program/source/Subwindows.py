@@ -68,21 +68,23 @@ class Subwindow:
 class Options(Subwindow):
 
     def open(self):
-        self.is_light_theme_VAR = tk.BooleanVar(value = ph.theme() == "light")
-        self.language_VAR       = tk.StringVar( value = lh.gt_lang_name(ph.language())) # do not use to get current option as this StringVar is language-dependent; use self.language_OMN.current_option()
-        self.code_font_face_VAR = tk.StringVar( value = font_face_name(ph.code_font_face())) # do not use to get current option as this StringVar is language-dependent; use self.code_font_face_OMN.current_option()
-        self.code_font_size_VAR = tk.IntVar(    value = ph.code_font_size())
-        self.min_adr_len_VAR    = tk.IntVar(    value = ph.min_adr_len())
-        self.max_cels_VAR       = tk.IntVar(    value = ph.max_cels())
-        self.max_jmps_VAR       = tk.IntVar(    value = ph.max_jmps())
+        self.is_light_theme_VAR  = tk.BooleanVar(value = ph.theme() == "light")
+        self.language_VAR        = tk.StringVar( value = lh.gt_lang_name(ph.language())) # do not use to get current option as this StringVar is language-dependent; use self.language_OMN.current_option()
+        self.code_font_face_VAR  = tk.StringVar( value = font_face_name(ph.code_font_face())) # do not use to get current option as this StringVar is language-dependent; use self.code_font_face_OMN.current_option()
+        self.code_font_size_VAR  = tk.IntVar(    value = ph.code_font_size())
+        self.min_adr_len_VAR     = tk.IntVar(    value = ph.min_adr_len())
+        self.max_cels_VAR        = tk.IntVar(    value = ph.max_cels())
+        self.max_jmps_VAR        = tk.IntVar(    value = ph.max_jmps())
+        self.closing_unsaved_VAR = tk.StringVar( value = ph.closing_unsaved())
         self.init_state = {
-            "theme":          self.gt_theme(),
-            "language":       ph.language(),
-            "code_font_face": ph.code_font_face(),
-            "code_font_size": self.code_font_size_VAR.get(),
-            "min_adr_len":    self.min_adr_len_VAR.get(),
-            "max_cels":       self.max_cels_VAR.get(),
-            "max_jmps":       self.max_jmps_VAR.get()
+            "theme":           self.gt_theme(),
+            "language":        ph.language(),
+            "code_font_face":  ph.code_font_face(),
+            "code_font_size":  self.code_font_size_VAR.get(),
+            "min_adr_len":     self.min_adr_len_VAR.get(),
+            "max_cels":        self.max_cels_VAR.get(),
+            "max_jmps":        self.max_jmps_VAR.get(),
+            "closing_unsaved": self.closing_unsaved_VAR.get()
         }
 
         super().open()
@@ -148,6 +150,16 @@ class Options(Subwindow):
         self.max_jmps_LBL   .pack(side = "left",  pady = 5, padx = (0, 15))
         self.max_jmps_SBX   .pack(side = "right", pady = 5, padx = 5)
 
+        # File
+        self.file_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("File"))
+        self.closing_unsaved_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
+        self.closing_unsaved_LBL = ttk.Label(self.closing_unsaved_FRM, style = "TLabel", text = lh.opt_win("ClosingUnsaved"))
+        self.closing_unsaved_OMN = wdg.OptionMenu(self.closing_unsaved_FRM, textvariable = self.closing_unsaved_VAR, default_option = ph.closing_unsaved(), options = lh.opt_win("ClosingUnsavedOptions"), command = lambda event: self.change(), style = "TMenubutton")
+        self.file_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        self.closing_unsaved_FRM.pack(fill = "x",               padx = (20, 5))
+        self.closing_unsaved_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
+        self.closing_unsaved_OMN.pack(side = "right", pady = 5, padx = 5)
+
         # taskbar
         self.buttons_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.cancel_BTN  = ttk.Button(self.buttons_FRM, text = lh.opt_win("Cancel"),  command = self.close,   style = "TButton")
@@ -176,13 +188,14 @@ class Options(Subwindow):
         super().build_gui()
 
     def set_option_vars(self):
-        self.is_light_theme_VAR.set(value = ph.theme() == "light")
-        self.language_VAR      .set(value = lh.gt_lang_name(lh.cur_lang))
-        self.code_font_face_VAR.set(value = font_face_name(ph.code_font_face()))
-        self.code_font_size_VAR.set(value = ph.code_font_size())
-        self.min_adr_len_VAR   .set(value = ph.min_adr_len())
-        self.max_cels_VAR      .set(value = ph.max_cels())
-        self.max_jmps_VAR      .set(value = ph.max_jmps())
+        self.is_light_theme_VAR .set(value = ph.theme() == "light")
+        self.language_VAR       .set(value = lh.gt_lang_name(lh.cur_lang))
+        self.code_font_face_VAR .set(value = font_face_name(ph.code_font_face()))
+        self.code_font_size_VAR .set(value = ph.code_font_size())
+        self.min_adr_len_VAR    .set(value = ph.min_adr_len())
+        self.max_cels_VAR       .set(value = ph.max_cels())
+        self.max_jmps_VAR       .set(value = ph.max_jmps())
+        self.closing_unsaved_VAR.set(Value = ph.closing_unsaved())
 
     def restart_required_flag(self):
         return self.ed.active_theme != self.current_state("theme") or self.ed.active_language != self.current_state("language")
@@ -220,7 +233,7 @@ class Options(Subwindow):
         return self.init_state[option] != self.current_state(option)
 
     def current_state(self, option:str):
-        if option == "language" or option == "code_font_face":
+        if option == "language" or option == "code_font_face" or option == "closing_unsaved":
             return eval(f"self.{option}_OMN.current_option()")
         elif option == "theme":
             return self.gt_theme()
@@ -262,6 +275,9 @@ class Options(Subwindow):
 
     def save_option_max_jmps(self):
         emu.update_properties()
+
+    def save_option_closing_unsaved(self):
+        self.ed.action_on_closing_unsaved_prg = self.current_state("closing_unsaved")
 
 
 class Assembly(Subwindow):

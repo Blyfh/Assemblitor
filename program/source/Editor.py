@@ -36,7 +36,7 @@ class Editor:
         self.last_dir   = root
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
         self.emu        = emu.Emulator()
-        self.action_on_closing_unsaved_prg = "ask to save" # TODO link with new option
+        self.action_on_closing_unsaved_prg = ph.closing_unsaved()
         self.already_modified = False
         self.build_gui()
         if self.testing:
@@ -140,7 +140,7 @@ class Editor:
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
         vcmd = self.chng_adjust_FRM.register(self.char_is_digit)
         self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 3)
-        self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option ="adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
+        self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.chng_ETR.pack(anchor = "nw")
         self.chng_opt_OMN.pack()
@@ -245,17 +245,17 @@ class Editor:
             self.root.destroy()
 
     def can_close_unsaved_prg(self): # returns if it is okay to continue
-        if self.action_on_closing_unsaved_prg == "ask to save":
+        if self.action_on_closing_unsaved_prg == "ask":
             is_saving = mb.askyesnocancel(lh.file_mng("UnsavedChanges"), lh.file_mng("Save?")) # returns None when clicking 'Cancel'
             if is_saving:
                 self.save_file()
                 return not self.dirty_flag # checks if user clicked cancel in save_file_as()
             else:
                 return is_saving is not None
-        elif self.action_on_closing_unsaved_prg == "always save":
+        elif self.action_on_closing_unsaved_prg == "save":
             self.save_file()
             return not self.dirty_flag  # checks if user clicked cancel in save_file_as()
-        else:
+        elif self.action_on_closing_unsaved_prg == "discard":
             return True
 
     def on_inp_modified(self, event):

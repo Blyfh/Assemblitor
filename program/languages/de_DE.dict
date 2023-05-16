@@ -48,17 +48,21 @@
     },
     "opt_win": {
         "title":    "Einstellungen",
-        "geometry": "400x500",
+        "geometry": "450x500",
 
         "Appearance": "Erscheinungsbild",
         "LightTheme": "Helles Thema",
-        "Language": "Sprache",
+        "Language":   "Sprache",
         "EditorFont": "Editor-Schriftart",
 
         "Assembler": "Assembler",
         "MinAdrLen": "Mindestanzahl an Ziffern",
         "MaxCels":   "Maximale Programmlänge",
         "MaxJmps":   "Maximale Iterationstiefe",
+
+        "File":                  "Datei",
+        "ClosingUnsaved":        "Beim Schließen von ungespeichertem Programm",
+        "ClosingUnsavedOptions": {"ask": "Fragen", "save": "Immer speichern", "discard": "Immer verwerfen"},
 
         "DeveloperOptions": "Entwicklereinstellungen",
         "FullTb":           "Kompletter Fehler-Traceback",

@@ -106,6 +106,9 @@ class ProfileHandler:
     def max_jmps(self):
         return self.gt_value("max_jmps")
 
+    def closing_unsaved(self):
+        return self.gt_value("closing_unsaved")
+
 
 class LangHandler:
 
