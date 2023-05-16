@@ -39,7 +39,9 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.open_prg("0 lda #5")
+            self.open_prg("""0 lda #5
+01 lda #6
+02 lda #7""")
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -92,7 +94,7 @@ class Editor:
         self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = ph.code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
         self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
-        self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)            # , relief = "flat", borderwidth = 1)
+        self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
 
     # elements
         self.menubar = tk.Menu(self.root)
@@ -271,27 +273,22 @@ class Editor:
                 self.root.title(self.root.title()[1:])
 
     def run(self, execute_all):
-        self.prgc_value_LBL.config(text ="")
+        self.prgc_value_LBL.config(text = "")
         self.accu_value_LBL.config(text = "")
         self.ireg_cmd_LBL.config(  text = "")
         self.ireg_opr_LBL.config(  text = "")
         inp = self.inp_SCT.get(1.0, "end-1c")
-        if inp:
-            out = self.emu.gt_out(inp, execute_all)
-            self.prgc_value_LBL.config(text = out[1])
-            self.accu_value_LBL.config(text = out[2])
-            self.ireg_cmd_LBL.config(  text = out[3][0])
-            self.ireg_opr_LBL.config(  text = out[3][1])
-            self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
-            self.out_SCT.delete("1.0", "end")
-            self.out_SCT.insert("insert", out[0][0])
-            self.out_SCT.insert("insert", out[0][1], "pc_is_here")
-            self.out_SCT.insert("insert", out[0][2])
-            self.out_SCT.config(state = "disabled")
-        else:
-            self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
-            self.out_SCT.delete("1.0", "end")
-            self.out_SCT.config(state = "disabled")
+        out = self.emu.gt_out(inp, execute_all)
+        self.prgc_value_LBL.config(text = out[1])
+        self.accu_value_LBL.config(text = out[2])
+        self.ireg_cmd_LBL.config(  text = out[3][0])
+        self.ireg_opr_LBL.config(  text = out[3][1])
+        self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
+        self.out_SCT.delete("1.0", "end")
+        self.out_SCT.insert("insert", out[0][0])
+        self.out_SCT.insert("insert", out[0][1], "pc_is_here")
+        self.out_SCT.insert("insert", out[0][2])
+        self.out_SCT.config(state = "disabled")
 
     def run_all(self, event = None):
         self.run(execute_all = True)
@@ -331,7 +328,7 @@ class Editor:
             self.save_file()
             self.root.title(self.file_path + " – " + lh.gui("title"))
 
-    def open_prg(self, prg_str, win_title = None):
+    def open_prg(self, prg_str = "", win_title = None):
         if self.dirty_flag:
             if self.wants_to_save() == "abort":
                 return

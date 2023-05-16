@@ -43,32 +43,18 @@ class Emulator:
         self.prg_str     = ""
         self.prg         = None
         self.is_new_prg  = True
+        self.last_execute_all_flag = None
 
-    def gt_out(self, prg_str, execute_all = True):
-        if self.prg_str != prg_str: # program changed
-            self.is_new_prg = True
+    def gt_out(self, prg_str, execute_all_flag = True):
+        if self.prg_str != prg_str or execute_all_flag != self.last_execute_all_flag or self.prg and self.prg.halted: # program or execution type changed or last execution step reached STP/eh.error.NeverStopped
+            self.is_new_prg = True # program reset
+            self.last_execute_all_flag = execute_all_flag
         if self.is_new_prg:
             self.create_prg(prg_str)
-            if not execute_all:  # display first step of program
-                return self.prg.gt_prg(), str(self.prg.pc), str(self.prg.accu), self.gt_ireg()
         if len(self.prg.cells) == 0: # program is empty (can include comments though)
-            return self.prg.gt_prg(), 0, 0, ("", "")
-        self.prg.execute(execute_all)
-        if self.cur_cmd() == "STP": # program reset when reaching end of single-step executing
-            self.is_new_prg = True
-        return self.prg.gt_prg(execute_all), str(self.prg.pc), str(self.prg.accu), self.gt_ireg()
-
-    def gt_ireg(self): # current command in instruction register
-        return self.cur_cmd(), self.cur_opr_str()
-
-    def cur_cell(self): # current cell
-        return self.prg.gt_cel(self.prg.pc)
-
-    def cur_cmd(self):
-        return self.cur_cell().gt_cmd()
-
-    def cur_opr_str(self):
-        return self.cur_cell().gt_opr().opr_str
+            return self.prg.gt_prg(), "", "", ("", "")
+        self.prg.execute(execute_all_flag)
+        return self.prg.gt_prg(execute_all_flag), str(self.prg.pc), str(self.prg.accu), self.prg.ireg
 
     def create_prg(self, prg_str):
         self.prg_str = prg_str
@@ -85,7 +71,9 @@ class Program:
         self.cells       = self.gt_cells(prg_str)
         self.accu        = 0
         self.pc          = 0
+        self.ireg        = ("", "")
         self.executing   = False
+        self.halted = False
 
     def __str__(self):
         prg_str = self.top_cmt
@@ -93,11 +81,11 @@ class Program:
             prg_str += str(cell)
         return prg_str
 
-    def gt_prg(self, execute_all = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
-        if not execute_all and len(self.cells) > 0:
-            prg_str1 = self.top_cmt
-            executed_cell = ""
-            prg_str2 = ""
+    def gt_prg(self, execute_all_flag = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
+        if not execute_all_flag and len(self.cells) > 0:
+            prg_str1      = self.top_cmt
+            executed_cell = None
+            prg_str2      = ""
             for cell in self.cells:
                 if cell.gt_adr() < self.pc:
                     prg_str1 += str(cell)
@@ -105,45 +93,47 @@ class Program:
                     prg_str2 += str(cell)
                 else:
                     executed_cell = cell
-            return prg_str1, executed_cell.gt_content(), executed_cell.gt_comment() + "\n" + prg_str2
+            if executed_cell: # current cell exists
+                return prg_str1, executed_cell.gt_content(), executed_cell.gt_comment() + "\n" + prg_str2
+            else:
+                self.executing = False
+                self.halted    = True
+                raise Exception(eh.error("NeverStopped"))
         else:
             return str(self), "", ""
 
-    def execute(self, execute_all = True):
+    def execute(self, execute_all_flag = True):
         if len(self.cells) > 0:
-            if execute_all:
+            if not self.executing:
                 self.start_executing()
+            else:
+                self.pc += 1
+            if execute_all_flag:
                 while self.executing:
                     self.execute_cell()
             else:
-                print("is already executing:", self.executing)
-                if not self.executing:
-                    self.start_executing()
-                print("\nexecuting next cell...")
                 self.execute_cell()
 
     def start_executing(self):
-        print("CELLS:", self.cells)
         self.executing   = True
+        self.halted      = False
         self.accu        = 0
         self.pc          = 0
+        self.ireg        = ("", "")
         self.jmps_to_adr.clear()
 
     def execute_cell(self):
-        print(f"executing cell at {self.pc}...")
         if self.pc < len(self.cells):
-            print("    cell gets executed")
             self.execute_command(self.pc)
-            self.pc += 1
         else:
-            print("    cell is out of bounds")
             self.executing = False
+            self.halted = True
             raise Exception(eh.error("NeverStopped"))
 
     def execute_command(self, adr):
         cmd = self.gt_cel(adr).gt_cmd()
-        print("    executing cmd", cmd)
         opr = self.gt_cel(adr).gt_opr()
+        self.ireg = (cmd, opr.opr_str)
         eval("self.cmd_" + cmd + "(" + str(opr) + ")")
 
     def gt_cells(self, prg_str):
@@ -232,6 +222,7 @@ class Program:
     def cmd_STP(self):
         self.pc -= 1
         self.executing = False
+        self.halted = True
 
     def cmd_ADD(self, opr_inf):
         self.accu += self.gt_final_value(opr_inf)
