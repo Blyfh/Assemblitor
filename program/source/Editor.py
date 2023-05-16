@@ -273,10 +273,6 @@ class Editor:
                 self.root.title(self.root.title()[1:])
 
     def run(self, execute_all):
-        self.prgc_value_LBL.config(text = "")
-        self.accu_value_LBL.config(text = "")
-        self.ireg_cmd_LBL.config(  text = "")
-        self.ireg_opr_LBL.config(  text = "")
         inp = self.inp_SCT.get(1.0, "end-1c")
         out = self.emu.gt_out(inp, execute_all)
         self.prgc_value_LBL.config(text = out[1])
@@ -470,14 +466,13 @@ class Editor:
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # turn IntVars into BoolVars if necessary
 # OPTIONS:
-#   show full error traceback
+#   developer mode (show full error traceback, no internal error window, always dont save)
 #   last dir fixed or automatic
-#   asktosave bei Schließen ausstellbar
-# show current state of pc, accu, and ireg when throwing an error
+#   closing unsaved program: ask/always save/always don't save
+# rework output colors
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
-# "0 lda #5" throws different errors for different execute_all + freezes out_SCT error message
 
 # SUGGESTIONS
 # ALU anzeigen

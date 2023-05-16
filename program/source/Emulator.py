@@ -220,7 +220,6 @@ class Program:
             return 0
 
     def cmd_STP(self):
-        self.pc -= 1
         self.executing = False
         self.halted = True
 
