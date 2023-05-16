@@ -36,6 +36,7 @@ class Editor:
         self.last_dir   = root
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
         self.emu        = emu.Emulator()
+        self.action_on_closing_unsaved_prg = "ask to save" # TODO link with new option
         self.already_modified = False
         self.build_gui()
         if self.testing:
@@ -240,23 +241,27 @@ class Editor:
             self.decr_TIP.update_text(lh.gui("DecrOprs"))
 
     def destroy(self):
-        if not self.dirty_flag or self.testing or self.wants_to_save() == True: # "== True" checks if user didn't abort in wants_to_save()
+        if not self.dirty_flag or self.testing or self.can_close_unsaved_prg(): # "== True" checks if user didn't abort in can_close_unsaved_prg()
             self.root.destroy()
 
-    def wants_to_save(self):
-        is_saving = mb.askyesnocancel(lh.file_mng("UnsavedChanges"), lh.file_mng("Save?")) # returns None when clicking 'Cancel'
-        if is_saving:
+    def can_close_unsaved_prg(self): # returns if it is okay to continue
+        if self.action_on_closing_unsaved_prg == "ask to save":
+            is_saving = mb.askyesnocancel(lh.file_mng("UnsavedChanges"), lh.file_mng("Save?")) # returns None when clicking 'Cancel'
+            if is_saving:
+                self.save_file()
+                return not self.dirty_flag # checks if user clicked cancel in save_file_as()
+            else:
+                return is_saving is not None
+        elif self.action_on_closing_unsaved_prg == "always save":
             self.save_file()
-            return not self.dirty_flag # checks if user clicked cancel in save_file_as()
-        elif is_saving == None:
-            return "abort"
+            return not self.dirty_flag  # checks if user clicked cancel in save_file_as()
         else:
             return True
 
     def on_inp_modified(self, event):
         if not self.already_modified: # because somehow on_modified always gets called twice
             self.inp_SCT.edit_modified(False)
-            if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless wants_to_save()-ing)
+            if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
                 self.set_dirty_flag(False)
             else:
                 self.set_dirty_flag(True)
@@ -300,7 +305,7 @@ class Editor:
 
     def open_file(self, event = None):
         if self.dirty_flag:
-            if self.wants_to_save() == "abort":
+            if not self.can_close_unsaved_prg():
                 return
         self.file_path = fd.askopenfilename(title = lh.file_mng("OpenFile"), initialdir = self.last_dir, filetypes = self.file_types)
         if self.file_path:
@@ -326,7 +331,7 @@ class Editor:
 
     def open_prg(self, prg_str = "", win_title = None):
         if self.dirty_flag:
-            if self.wants_to_save() == "abort":
+            if not self.can_close_unsaved_prg():
                 return
         self.inp_SCT.delete("1.0", "end")
         self.init_inp = prg_str
@@ -469,7 +474,7 @@ class Editor:
 #   developer mode (show full error traceback, no internal error window, always dont save)
 #   last dir fixed or automatic
 #   closing unsaved program: ask/always save/always don't save
-# rework output colors
+# rework output coloring
 
 # BUGS:
 # change_selected_text() ignores and removes additional whitespaces
