@@ -40,9 +40,8 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.open_prg("""0 lda #5
-01 lda #6
-02 lda #7""")
+            self.open_prg("""  0 lda  (05)
+01  stp""")
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -368,12 +367,6 @@ class Editor:
         new_adr = self.add_leading_zeros(last_adr + 1)
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
 
-    def add_leading_zeros(self, adr):
-        adr_str = str(adr)
-        if len(adr_str) < emu.MIN_ADR_LEN:
-            adr_str = (emu.MIN_ADR_LEN - len(adr_str)) * "0" + adr_str
-        return adr_str
-
     def increment_selected_inp_text(self):
         self.change_selected_inp_text(change = +int(self.change_amount_VAR.get()))
 
@@ -382,18 +375,12 @@ class Editor:
 
     def change_selected_inp_text(self, change):
         option = self.chng_opt_OMN.current_option() # either "adr", "adr_opr", "opr"
-        if "adr" in option:
-            change_adrs = True
-        else:
-            change_adrs = False
-        if "opr" in option:
-            change_oprs = True
-        else:
-            change_oprs = False
+        adrs_flag = "adr" in option
+        oprs_flag = "opr" in option
         sel_range = self.inp_SCT.tag_ranges("sel")
         if sel_range:
             text      = self.inp_SCT.get(*sel_range)
-            new_text  = self.change_text(text, change_adrs, change_oprs, change)
+            new_text  = self.change_text(text, adrs_flag, oprs_flag, change)
             self.inp_SCT.delete(*sel_range)
             self.inp_SCT.insert(sel_range[0], new_text)
             self.select_text(self.inp_SCT, sel_range[0], new_text)
@@ -401,68 +388,73 @@ class Editor:
     def select_text(self, text_widget, pos, text):
         text_widget.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
 
-    def change_text(self, text, change_adrs = True, change_oprs = True, change = 1):
-        lines     = text.split("\n")
-        new_text  = ""
+    def change_text(self, text, adrs_flag, oprs_flag, change = 1):
+        lines    = text.split("\n")
+        new_text = ""
         for line in lines:
-            cell, comment = emu.split_at_comment(line)
+            cell, comment = emu.split_cell_at_comment(line)
             if len(cell):
-                if change_adrs:
+                if adrs_flag:
                     cell = self.change_adr(cell, change)
-                if change_oprs:
+                if oprs_flag:
                     cell = self.change_opr(cell, change)
             new_text += cell + comment + "\n"
-        return new_text[0:-1] # 0:-1 to remove line break from last line
+        return new_text[:-1] # :-1 to remove line break from last line
 
     def change_adr(self, cell, change):
-        adr_rest_pair = cell.split(maxsplit = 1)
-        if len(adr_rest_pair) > 1:
-            cell_rest = adr_rest_pair[1]
-        else:
-            cell_rest = ""
-        adr_str = adr_rest_pair[0]
+        tok_strs  = emu.Cell.split_cel_str(self = None, cel_str_unstripped = cell)
+        cell_rest = "".join(tok_strs[1:])
+        adr_str   = tok_strs[0]
         i = 0
-        j = 0
-        while i < len(adr_str) and adr_str[i] in string.whitespace:
+        while i < len(adr_str) and adr_str[i] in string.whitespace: # jump over left wrapping
             i += 1
+        j = i
+        if j < len(adr_str) and adr_str[j] == "-":
             j += 1
-        if adr_str[j] == "-":
-            old_adr = "-"
-            i += 1
+        while j < len(adr_str) and adr_str[j] in "0123456789": # find end of address
             j += 1
-        else:
-            old_adr = ""
-        while j < len(adr_str) and adr_str[j] in "0123456789":
-            j += 1
-        old_adr += adr_str[i:j]
-        new_adr = int(old_adr) + change
-        whitespace_wrapping = adr_str.split(old_adr)
-        cell = whitespace_wrapping[0] + self.add_leading_zeros(new_adr) + whitespace_wrapping[1] + " " + cell_rest
+        if j < len(adr_str) and adr_str[j] not in string.whitespace: # chars after address are not supported
+            return cell
+        old_adr  = adr_str[i:j]
+        if old_adr and old_adr != "-":
+            wrapping = adr_str.split(old_adr)
+            new_adr  = wrapping[0] + str(int(old_adr) + change) + wrapping[1]
+            cell = emu.add_leading_zeros(new_adr) + cell_rest
         return cell
 
     def change_opr(self, cell, change):
-        toks = cell.split()
-        if len(toks) == 3:
-            opr_str = toks[2]
-            cell_rest = toks[0] + " " + toks[1]
-        else:
-            return cell
+        tok_strs  = emu.Cell.split_cel_str(self = None, cel_str_unstripped = cell)
+        cell_rest = "".join(tok_strs[:-1])
+        opr_str   = tok_strs[-1]
         i = len(opr_str) - 1
-        j = len(opr_str) - 1
-        while i >= 0 and opr_str[i] in string.whitespace + ")":
+        while i >= 0 and opr_str[i] in string.whitespace:
             i -= 1
-            j -= 1
-        while j >= 0 and opr_str[j] in "0123456789":
-            j -= 1
-        if opr_str[j] != "-":
-            j += 1
-        if j - 1 >= 0 and opr_str[j-1] == "#":
-            return cell
-        if len(opr_str[j:i + 1]):
-            old_opr = opr_str[j:i + 1]
-            new_opr = int(old_opr) + change
+        if i >= 0 and opr_str[i] == ")": # indirect address
+            i -= 1
+            j = i
+            while j >= 0 and opr_str[j] in "0123456789":
+                j -= 1
+            if j >= 0 and opr_str[j] != "-":
+                j += 1
+            if j > 0 and opr_str[j - 1] != "(":
+                return cell
+            if j > 1 and opr_str[j - 2] not in string.whitespace: # chars before indirect address are not supported
+                return cell
+            offset = 1
+        else: # direct address
+            j = i
+            while j >= 0 and opr_str[j] in "0123456789":
+                j -= 1
+            if j >= 0 and opr_str[j] != "-":
+                j += 1
+            if j > 0 and opr_str[j - 1] not in string.whitespace: # absolute values or chars before direct address are not supported
+                return cell
+            offset = 0
+        old_opr = opr_str[j:i + 1]
+        if old_opr and old_opr != "-":
             wrapping = opr_str.split(old_opr)
-            cell = cell_rest + " " + wrapping[0] + self.add_leading_zeros(new_opr) + wrapping[1]
+            new_opr = wrapping[0][:-1] + str(int(old_opr) + change) + wrapping[1] # [:-1] because of "("
+            cell = cell_rest + "(" * offset + emu.add_leading_zeros(new_opr, offset)
         return cell
 
 # TO-DO:
@@ -472,11 +464,9 @@ class Editor:
 # OPTIONS:
 #   developer mode (show full error traceback, no internal error window, always dont save)
 #   last dir fixed or automatic
-#   closing unsaved program: ask/always save/always don't save
 # rework output coloring
 
 # BUGS:
-# change_selected_text() ignores and removes additional whitespaces
 
 # SUGGESTIONS
 # ALU anzeigen

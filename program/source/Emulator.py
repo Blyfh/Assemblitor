@@ -28,7 +28,7 @@ def concatenate(str1, str2): # used by Cell.gt_content() for adding spaces betwe
     else:
         return str1 + str2
 
-def split_at_comment(cel_cmt_str): # used by Programm.gt_cells() and Editor.change_text() for splitting cell and comment
+def split_cell_at_comment(cel_cmt_str): # used by Programm.gt_cells() and Editor.change_text() for splitting cell and comment
     i = 0
     while i < len(cel_cmt_str) and cel_cmt_str[i] != ";":
         i += 1
@@ -74,7 +74,7 @@ class Program:
     def __init__(self, prg_str):
         self.jmps_to_adr = {}  # each element logs how many times the pointer jumped to its cell
         self.top_cmt     = ""
-        self.cells       = self.gt_cells(prg_str)
+        self.cells       = self.create_cells(prg_str)
         self.accu        = 0
         self.pc          = 0
         self.executing   = False
@@ -85,6 +85,28 @@ class Program:
         for cell in self.cells:
             prg_str += str(cell)
         return prg_str
+
+    def create_cells(self, prg_str):
+        if not prg_str:
+            return []
+        lines = prg_str.split("\n")
+        cells  = []
+        for i in range(len(lines)):
+            line = split_cell_at_comment(lines[i])
+            if line[0].strip() == "": # no cell in line
+                if len(cells) > 0: # not first line; some empty line in between
+                    cells[-1].cmt += "\n" + line[0] + line[1]
+                elif i == 0:
+                    self.top_cmt = line[0] + line[1]
+                    if line[1]:
+                        self.top_cmt += "\n"
+                else:
+                    self.top_cmt += line[0] + line[1] + "\n"
+            else:
+                cell = Cell(line[0], line[1])
+                cells.append(cell)
+        cells = self.fill_empty_cells(cells)
+        return cells
 
     def gt_prg(self, execute_all_flag = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
         if not execute_all_flag and len(self.cells) > 0:
@@ -139,28 +161,6 @@ class Program:
         cmd = self.gt_cel(adr).gt_cmd()
         opr = self.gt_cel(adr).gt_opr()
         eval(f"self.cmd_{cmd}")(opr)
-
-    def gt_cells(self, prg_str):
-        if not prg_str:
-            return []
-        lines = prg_str.split("\n")
-        cells  = []
-        for i in range(len(lines)):
-            line = split_at_comment(lines[i])
-            if line[0].strip() == "": # no cell in line
-                if len(cells) > 0: # not first line; some empty line in between
-                    cells[-1].cmt += "\n" + line[0] + line[1]
-                elif i == 0:
-                    self.top_cmt = line[0] + line[1]
-                    if line[1]:
-                        self.top_cmt += "\n"
-                else:
-                    self.top_cmt += line[0] + line[1] + "\n"
-            else:
-                cell = Cell(line[0], line[1])
-                cells.append(cell)
-        cells = self.fill_empty_cells(cells)
-        return cells
 
     def fill_empty_cells(self, cells):
         i = 0
@@ -271,15 +271,6 @@ class Cell:
         else:
             return "" # hide empty automatically generated cells to avoid cluttering the program
 
-    def gt_content(self): # cell content without comment
-        cel_str = ""
-        for tok in self.toks:
-            cel_str = concatenate(cel_str, str(tok))
-        return cel_str
-
-    def gt_comment(self):
-        return self.cmt
-
     def create_toks(self, tok_strs):
         for tpos in range(len(tok_strs)):
             if tpos == 0:
@@ -300,22 +291,31 @@ class Cell:
                             raise Exception(eh.error("CmdHasValOpr", opr_str = tok.tok_str, adr = self.gt_adr()))
                 self.toks.append(tok)
 
-    def split_cel_str(self, cel_str):
+    def split_cel_str(self, cel_str_unstripped):
+        cel_str = cel_str_unstripped.lstrip() # remove whitespaces before addres
+        lwrapping = cel_str_unstripped.split(cel_str)[0]
         tok_strs = []
         last_split_pos = 0
         for i in range(len(cel_str)):
-            if cel_str[i] in string.whitespace and i < len(cel_str) - 1 and cel_str[i+1] not in string.whitespace: #last whitespace between tokens
-                if i > 0:
-                    tok_str = cel_str[last_split_pos:i+1]
-                    tok_strs.append(tok_str)
-                    last_split_pos = i + 1
-                else:
-                    pass
+            if cel_str[i] in string.whitespace and i < len(cel_str) - 1 and cel_str[i+1] not in string.whitespace: # last whitespace between tokens
+                tok_str = cel_str[last_split_pos:i+1]
+                tok_strs.append(tok_str)
+                last_split_pos = i + 1
         tok_str = cel_str[last_split_pos:]
         tok_strs.append(tok_str)
         while len(tok_strs) < 3:
             tok_strs.append("")
+        tok_strs[0] = lwrapping + tok_strs[0] # add whitespaces before address
         return tok_strs
+
+    def gt_content(self): # cell content without comment
+        cel_str = ""
+        for tok in self.toks:
+            cel_str = concatenate(cel_str, str(tok))
+        return cel_str
+
+    def gt_comment(self):
+        return self.cmt
 
     def edit(self, new_val):
         if type(new_val) is int:
@@ -451,6 +451,16 @@ class Operand:
         self.type = None # None = empty, 0 = direct address, 1 = indirect address, 2 = value
         self.opr = self.create_opr(self.opr_str)
 
+    def __str__(self):
+        if self.type is None:
+            return ""
+        elif self.type == 0:
+            return add_leading_zeros(str(self.opr))
+        elif self.type == 1:
+            return f"({add_leading_zeros(str(self.opr))})"
+        elif self.type == 2:
+            return f"#{self.opr}"
+
     def create_opr(self, opr_str):
         if len(opr_str) > 0:
             if opr_str[0] == "#":
@@ -480,13 +490,3 @@ class Operand:
                     return opr_int
                 else:
                     raise Exception(eh.error("DirOprIsNegative", adr = self.cpos, opr_str = opr_str))
-
-    def __str__(self):
-        if self.type is None:
-            return ""
-        elif self.type == 0:
-            return add_leading_zeros(str(self.opr))
-        elif self.type == 1:
-            return f"({add_leading_zeros(str(self.opr))})"
-        elif self.type == 2:
-            return f"#{self.opr}"
