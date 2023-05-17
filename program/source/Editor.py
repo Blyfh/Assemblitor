@@ -51,11 +51,10 @@ class Editor:
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", self.format_exception_message(val))
             self.out_SCT.config(state = "disabled")
-        else: # special case for internal errors
-            if self.testing:
-                traceback.print_exception(val)
-            else:
-                mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
+        elif not self.testing: # special case for internal errors
+            mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
+        if self.testing:
+            traceback.print_exception(val)
 
     def format_exception_message(self, val):
         if self.emu.prg is None: # program initialisation exception

@@ -36,6 +36,12 @@ def split_at_comment(cel_cmt_str): # used by Programm.gt_cells() and Editor.chan
         i -= 1
     return cel_cmt_str[:i], cel_cmt_str[i:]
 
+def add_leading_zeros(adr_str, offset = 0):
+    adr_str_stripped = adr_str.strip()
+    leading_zeros = (MIN_ADR_LEN - len(adr_str_stripped) + offset) * "0"
+    whitespace_wrapping = adr_str.split(adr_str_stripped)
+    return whitespace_wrapping[0] + leading_zeros + adr_str_stripped + whitespace_wrapping[1]
+
 
 class Emulator:
 
@@ -54,7 +60,7 @@ class Emulator:
         if len(self.prg.cells) == 0: # program is empty (can include comments though)
             return self.prg.gt_prg(), "", "", ("", "")
         self.prg.execute(execute_all_flag)
-        return self.prg.gt_prg(execute_all_flag), str(self.prg.pc), str(self.prg.accu), self.prg.ireg
+        return self.prg.gt_prg(execute_all_flag), str(self.prg.pc), str(self.prg.accu), self.prg.gt_ireg()
 
     def create_prg(self, prg_str):
         self.prg_str = prg_str
@@ -71,7 +77,6 @@ class Program:
         self.cells       = self.gt_cells(prg_str)
         self.accu        = 0
         self.pc          = 0
-        self.ireg        = ("", "")
         self.executing   = False
         self.halted = False
 
@@ -103,28 +108,28 @@ class Program:
             return str(self), "", ""
 
     def execute(self, execute_all_flag = True):
-        if len(self.cells) > 0:
-            if not self.executing:
-                self.start_executing()
-            else:
-                self.pc += 1
-            if execute_all_flag:
-                while self.executing:
-                    self.execute_cell()
-            else:
+        # all steps
+        if execute_all_flag:
+            self.start_executing()
+            while self.executing:
                 self.execute_cell()
+        # one step
+        elif self.executing:
+            self.execute_cell()
+        else:
+            self.start_executing()
 
     def start_executing(self):
         self.executing   = True
         self.halted      = False
         self.accu        = 0
         self.pc          = 0
-        self.ireg        = ("", "")
         self.jmps_to_adr.clear()
 
     def execute_cell(self):
         if self.pc < len(self.cells):
             self.execute_command(self.pc)
+            self.pc += 1
         else:
             self.executing = False
             self.halted = True
@@ -133,8 +138,7 @@ class Program:
     def execute_command(self, adr):
         cmd = self.gt_cel(adr).gt_cmd()
         opr = self.gt_cel(adr).gt_opr()
-        self.ireg = (cmd, opr.opr_str)
-        eval("self.cmd_" + cmd + "(" + str(opr) + ")")
+        eval(f"self.cmd_{cmd}")(opr)
 
     def gt_cells(self, prg_str):
         if not prg_str:
@@ -169,49 +173,44 @@ class Program:
             elif i < adr:
                 cell = Cell(f"{i} ", is_user_generated = False)
                 cells.insert(i, cell)
+            elif str(cells[adr].toks[1]) == "":
+                raise Exception(eh.error("AdrsNotChronological", small_adr = add_leading_zeros(str(adr)), big_adr = add_leading_zeros(str(cells[i - 1].gt_adr())))) # add_leading_zeros() because error message literally refers to address, not the memory cell
             else:
-                if str(cells[adr].toks[1]) == "":
-                    raise Exception(eh.error("AdrsNotChronological", small_adr = adr, big_adr = str(cells[i - 1].gt_adr())))
-                else:
-                    raise Exception(eh.error("AdrNotUnique", adr = adr))
+                raise Exception(eh.error("AdrNotUnique", adr = add_leading_zeros(str(adr)))) # add_leading_zeros() because error message literally refers to address, not the memory cell
             i += 1
         return cells
+
+    def gt_ireg(self):
+        cmd = self.gt_cel(self.pc).gt_cmd()
+        opr = self.gt_cel(self.pc).gt_opr()
+        return cmd, str(opr)
 
     def gt_cel(self, adr):
         if adr > MAX_CELS - 1:
             raise Exception(eh.error("MaxPrgLength", max_adrs = MAX_CELS, adrs = adr + 1))
         while adr >= len(self.cells):
-            cell = Cell(str(len(self.cells)) + " ", is_user_generated = False)
+            cell = Cell(f"{len(self.cells)} ", is_user_generated = False)
             self.cells.append(cell)
         return self.cells[adr]
 
-    def gt_final_value(self, opr_info): # interprets final result of operand pointer as a value (for commands like ADD, SUB, MUL, LDA)
-        typ = opr_info[0] # opr_info = (opr.typ, opr.opr, opr.opr_str)
-        opr = opr_info[1]
-        if typ == 0: # normal address
-            adr = opr
+    def gt_final_value(self, opr): # interprets final result of operand pointer as a value (for commands like ADD, SUB, MUL, LDA)
+        if opr.type == 0: # normal address
+            return self.gt_cel(opr.opr).gt_val()
+        elif opr.type == 1: # nested address (e.g. 00 LDA (5))
+            adr = self.gt_cel(opr.opr).gt_val()
             return self.gt_cel(adr).gt_val()
-        elif typ == 1: # nested address (e.g. 00 LDA (5))
-            adr = int(self.gt_cel(opr).gt_val())
-            return self.gt_cel(adr).gt_val()
-        elif typ == 2: # value (e.g. 00 LDA #5)
-            return opr
-        else:
-            raise Exception(eh.error("UnknownOprTyp", opr_str = opr_info[2]))
+        elif opr.type == 2: # value (e.g. 00 LDA #5)
+            return opr.opr
 
-    def gt_final_adr(self, opr_info): # interprets final result of operand pointer as an address (for commands like STA, JMP, JLE, JZE)
-        typ = opr_info[0] # opr_info = (opr.typ, opr.opr, opr.opr_str, opr.cpos)
-        opr = opr_info[1]
-        if typ == 0: # normal address
-            adr = opr
+    def gt_final_adr(self, opr): # interprets final result of operand pointer as an address (for commands like STA, JMP, JLE, JZE)
+        if opr.type == 0: # normal address
+            adr = opr.opr
             return adr
-        elif typ == 1: # nested address (e.g. 00 LDA (5))
-            adr = int(self.gt_cel(opr).gt_val())
+        elif opr.type == 1: # nested address (e.g. 00 LDA (5))
+            adr = int(self.gt_cel(opr.opr).gt_val())
             return adr
-        elif typ == 2: # value (e.g. 00 LDA #5)
-            raise Exception(eh.error("CmdHasValOpr", opr_str = opr_info[2], adr = opr_info[3]))
-        else:
-            raise Exception(eh.error("UnknownOprTyp", opr_str = opr_info[2]))
+        elif opr.type == 2: # value (e.g. 00 LDA #5)
+            raise Exception(eh.error("CmdHasValOpr", opr = opr, adr = opr.cpos))
 
     def gt_jmps_to_adr(self, adr):
         if adr in self.jmps_to_adr:
@@ -219,41 +218,42 @@ class Program:
         else:
             return 0
 
-    def cmd_STP(self):
+    def cmd_STP(self, opr):
+        self.pc -= 1
         self.executing = False
         self.halted = True
 
-    def cmd_ADD(self, opr_inf):
-        self.accu += self.gt_final_value(opr_inf)
+    def cmd_ADD(self, opr):
+        self.accu += self.gt_final_value(opr)
 
-    def cmd_SUB(self, opr_inf):
-        self.accu -= self.gt_final_value(opr_inf)
+    def cmd_SUB(self, opr):
+        self.accu -= self.gt_final_value(opr)
 
-    def cmd_MUL(self, opr_inf):
-        self.accu *= self.gt_final_value(opr_inf)
+    def cmd_MUL(self, opr):
+        self.accu *= self.gt_final_value(opr)
 
-    def cmd_LDA(self, opr_inf):
-        self.accu = self.gt_final_value(opr_inf)
+    def cmd_LDA(self, opr):
+        self.accu = self.gt_final_value(opr)
 
-    def cmd_STA(self, opr_inf):
-        adr = self.gt_final_adr(opr_inf)
+    def cmd_STA(self, opr):
+        adr = self.gt_final_adr(opr)
         self.gt_cel(adr).edit(self.accu)
 
-    def cmd_JMP(self, opr_inf):
-        adr = self.gt_final_adr(opr_inf)
+    def cmd_JMP(self, opr):
+        adr = self.gt_final_adr(opr)
         self.pc = adr - 1 # "- 1" because self.pc will increment automatically
         if self.gt_jmps_to_adr(adr) > MAX_JMPS:
             raise Exception(eh.error("MaxIterationDepth", max_jmps = MAX_JMPS, adr = adr))
         else:
             self.jmps_to_adr[adr] = self.gt_jmps_to_adr(adr) + 1 # increment jmps_to_adr for this address
 
-    def cmd_JLE(self, opr_inf):
+    def cmd_JLE(self, opr):
         if self.accu <= 0:
-            self.cmd_JMP(opr_inf)
+            self.cmd_JMP(opr)
 
-    def cmd_JZE(self, opr_inf):
+    def cmd_JZE(self, opr):
         if self.accu == 0:
-            self.cmd_JMP(opr_inf)
+            self.cmd_JMP(opr)
 
 
 class Cell:
@@ -282,19 +282,22 @@ class Cell:
 
     def create_toks(self, tok_strs):
         for tpos in range(len(tok_strs)):
-            if tpos == 2 and len(tok_strs[tpos]) == 0: # ignore empty operands
-                pass
-            elif tpos == 0:
+            if tpos == 0:
                 tok = Token(tok_strs[tpos], tpos)
                 self.toks.append(tok)
-            elif tpos == 2 and self.toks[1].type == 2: # operand after a value
-                raise Exception(eh.error("MaxCelLength_ValCell", adr = self.gt_adr()))
-            elif tpos == 2 and self.toks[1].tok == "STP": # operand after STP
-                raise Exception(eh.error("MaxCelLength_StpCell", adr = self.gt_adr()))
             else:
                 tok = Token(tok_strs[tpos], tpos, self.gt_adr())
-                if tok.type == 3 and tok.tok.type == 2 and self.toks[1].tok in CMDS_no_val_opr: # operand with absolute value (e.g. #5) for an unsupported command
-                    raise Exception(eh.error("CmdHasValOpr", opr_str = tok.tok_str, adr = self.gt_adr()))
+                if tok.type == 3: # token is operand
+                    if tok.tok.type is None: # empty operand
+                        if self.toks[1].type == 1 and self.toks[1].tok != "STP": # command lacks operand
+                            raise Exception(eh.error("MissingOpr", cmd = self.gt_cmd(), adr = self.gt_adr()))
+                    else:
+                        if self.toks[1].type == 2: # operand after a value
+                            raise Exception(eh.error("ValCellOpr", opr = tok.tok, adr = self.gt_adr()))
+                        elif tpos == 2 and self.toks[1].tok == "STP": # operand after STP
+                            raise Exception(eh.error("StpCellOpr", opr = tok.tok, adr = self.gt_adr()))
+                        elif tok.tok.type == 2 and self.gt_cmd() in CMDS_no_val_opr: # operand with absolute value for an unsupported command (e.g. STA #5)
+                            raise Exception(eh.error("CmdHasValOpr", opr_str = tok.tok_str, adr = self.gt_adr()))
                 self.toks.append(tok)
 
     def split_cel_str(self, cel_str):
@@ -333,15 +336,7 @@ class Cell:
         return self.toks[1].gt_cmd()
 
     def gt_opr(self):
-        if len(self.toks) > 2:
-            if self.toks[1].tok == "STP":
-                raise Exception(eh.error("CmdStpHasOpr", adr = self.gt_adr()))
-            else:
-                return self.toks[2].gt_opr()
-        elif self.toks[1].tok == "STP":
-            return Operand("", self.gt_adr())
-        else:
-            raise Exception(eh.error("MissingOpr", cmd = self.gt_cmd(), adr = self.gt_adr()))
+        return self.toks[2].gt_opr()
 
 
 class Token:
@@ -354,7 +349,7 @@ class Token:
         self.tok     = self.create_tok(self.tok_str)
 
     def __str__(self):
-        return self.add_leading_zeros(self.tok_str)
+        return self.add_leading_zeros()
 
     def create_tok(self, tok_str):
         tok = tok_str.rstrip()
@@ -389,17 +384,15 @@ class Token:
         else:
             raise Exception(eh.error("MaxCelLength", adr = self.cpos))
 
-    def add_leading_zeros(self, tok_str):
-        tok_str_stripped = tok_str.strip()
-        if self.type == 0 and len(tok_str_stripped) < MIN_ADR_LEN:
-            whitespace_wrapping = tok_str.split(tok_str_stripped)
-            tok_str = whitespace_wrapping[0] + (MIN_ADR_LEN - len(tok_str_stripped)) * "0" + tok_str_stripped + whitespace_wrapping[1]
+    def add_leading_zeros(self):
+        if self.type == 0:
+            return add_leading_zeros(self.tok_str)
         elif self.type == 3:
-            if self.tok.type == 0 and len(tok_str_stripped) < MIN_ADR_LEN: # direct operand (e.g. 00 LDA 5)
-                tok_str = (MIN_ADR_LEN - len(tok_str_stripped)) * "0" + tok_str
-            elif self.tok.type == 1 and len(tok_str_stripped) < MIN_ADR_LEN + 2: # indirect operand (e.g. 00 LDA (5))
-                tok_str = "(" + (MIN_ADR_LEN - len(tok_str_stripped)) * "0" + tok_str[1:]
-        return tok_str
+            if self.tok.type == 0: # direct operand (e.g. 00 LDA 5)
+                return add_leading_zeros(self.tok_str)
+            elif self.tok.type == 1:  # indirect operand (e.g. 00 LDA (5))
+                return "(" + add_leading_zeros(self.tok_str[1:], offset = 1)
+        return self.tok_str
 
     def edit(self, new_val):
         if self.type == 2:
@@ -435,8 +428,6 @@ class Token:
     def gt_opr(self):
         if self.type == 3:
             return self.tok
-        elif len(self.tok_str) == 0:
-            raise Exception(eh.error("TokNotOpr_EmptyTok", tpos = self.tpos, adr = self.cpos))
         else:
             raise Exception(eh.error("TokNotOpr", tpos = self.tpos, adr = self.cpos, tok = self.tok))
 
@@ -457,7 +448,7 @@ class Operand:
             self.opr_str = opr_str
         else:
             raise Exception(eh.error("OprTokNotStr", opr_str = opr_str))
-        self.type = 0 # 0 = direct address, 1 = indirect address, 2 = value
+        self.type = None # None = empty, 0 = direct address, 1 = indirect address, 2 = value
         self.opr = self.create_opr(self.opr_str)
 
     def create_opr(self, opr_str):
@@ -489,12 +480,13 @@ class Operand:
                     return opr_int
                 else:
                     raise Exception(eh.error("DirOprIsNegative", adr = self.cpos, opr_str = opr_str))
-        else:
-            self.type = None
-            return None
 
     def __str__(self):
         if self.type is None:
             return ""
-        else:
-            return f"({self.type}, {self.opr}, '{self.opr_str}', {self.cpos})"
+        elif self.type == 0:
+            return add_leading_zeros(str(self.opr))
+        elif self.type == 1:
+            return f"({add_leading_zeros(str(self.opr))})"
+        elif self.type == 2:
+            return f"#{self.opr}"
