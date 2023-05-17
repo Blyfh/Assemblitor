@@ -40,8 +40,7 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.testing:
-            self.open_prg("""  0 lda  (05)
-01  stp""")
+            pass
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -364,7 +363,7 @@ class Editor:
             self.inp_SCT.insert("insert", "\n")
             return
         whitespace_wrapping = last_line.split(last_line_stripped)[0]
-        new_adr = self.add_leading_zeros(last_adr + 1)
+        new_adr = emu.add_leading_zeros(str(last_adr + 1))
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
 
     def increment_selected_inp_text(self):
@@ -379,11 +378,12 @@ class Editor:
         oprs_flag = "opr" in option
         sel_range = self.inp_SCT.tag_ranges("sel")
         if sel_range:
-            text      = self.inp_SCT.get(*sel_range)
-            new_text  = self.change_text(text, adrs_flag, oprs_flag, change)
-            self.inp_SCT.delete(*sel_range)
-            self.inp_SCT.insert(sel_range[0], new_text)
-            self.select_text(self.inp_SCT, sel_range[0], new_text)
+            text = self.inp_SCT.get(*sel_range)
+            if text.strip():
+                new_text = self.change_text(text, adrs_flag, oprs_flag, change)
+                self.inp_SCT.delete(*sel_range)
+                self.inp_SCT.insert(sel_range[0], new_text)
+                self.select_text(self.inp_SCT, sel_range[0], new_text)
 
     def select_text(self, text_widget, pos, text):
         text_widget.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
@@ -399,6 +399,7 @@ class Editor:
                 if oprs_flag:
                     cell = self.change_opr(cell, change)
             new_text += cell + comment + "\n"
+        print(f"new'{new_text}'")
         return new_text[:-1] # :-1 to remove line break from last line
 
     def change_adr(self, cell, change):
@@ -467,6 +468,7 @@ class Editor:
 # rework output coloring
 
 # BUGS:
+# change_selected_inp_text adds \n for empty inp or input with empty lines
 
 # SUGGESTIONS
 # ALU anzeigen
