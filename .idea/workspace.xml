@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)" />
+    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="test push" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -156,7 +156,14 @@
       <option name="project" value="LOCAL" />
       <updated>1684360625328</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="test push">
+      <created>1685021333360</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1685021333360</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -182,6 +189,7 @@
     <MESSAGE value="major cleanup of Emulator&#10;* refactoring&#10;* reworked several error messages&#10;* output consistency regarding leading zeros in ireg and error messages&#10;* every cell will now at least have an empty operand&#10;* reverted &quot;single step mode will now highlight the cell that just got executed, accu changes accordingly&quot; due to bad highlighting with JMPs" />
     <MESSAGE value="finished Editor.change_selected_inp_text()&#10;* now supports whitespace wrapping&#10;* refuses to change for non-addresses/non-operands&#10;* fixed edge case bugs&#10;&#10;* fixed bug when having more than one whitespace before an address" />
     <MESSAGE value="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)" />
+    <MESSAGE value="test push" />
+    <option name="LAST_COMMIT_MESSAGE" value="test push" />
   </component>
 </project>
