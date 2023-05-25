@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2Ok0k3w4aiBgSWHKG75mbC446sd" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "last_opened_file_path": "C:/Users/Blyfh/Documents/Files/Programme/assemblitor/Assemblitor.py",
+    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="Start File" type="PythonConfigurationType" factoryName="Python">
+      <module name="assemblitor" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\Blyfh\Documents\Files\Programme\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="C:\Users\Blyfh\Documents\Files\Programme\assemblitor\Assemblitor.pyw" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="" />
+      <created>1682089412990</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1682089412990</updated>
+    </task>
+    <task id="LOCAL-00001" summary="fixed several problems with Options.restart_required()&#10;* replaced profile key is_light_theme with theme&#10;* fixed bug where Button.click_display_time was too long">
+      <created>1682097351867</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1682097351867</updated>
+    </task>
+    <task id="LOCAL-00002" summary="added suggestions for improving Assemblitor">
+      <created>1682246243481</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1682246243481</updated>
+    </task>
+    <task id="LOCAL-00003" summary="reported bug">
+      <created>1682251136875</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1682251136875</updated>
+    </task>
+    <task id="LOCAL-00004" summary="reported bug">
+      <created>1682251228638</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1682251228638</updated>
+    </task>
+    <task id="LOCAL-00005" summary="major improvements to the whole execution process&#10;* after reaching last step, clicking step_BTN once will do nothing&#10;* fixed parity issues regarding Editor.run_all() and Editor.run_step(): threw different errors when STP was missing&#10;* a runtime error will now stop freezing out_SCT content (= program steps can be executed even after an error got thrown, due to program reset)&#10;* code cleanup&#10;* empty programs won't change accu and pc to 0&#10;* single step mode will now highlight the cell that just got executed, accu changes accordingly">
+      <created>1684246971929</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1684246971929</updated>
+    </task>
+    <task id="LOCAL-00006" summary="major improvements to the whole execution process&#10;* after reaching last step, clicking step_BTN once will do nothing&#10;* fixed parity issues regarding Editor.run_all() and Editor.run_step(): threw different errors when STP was missing&#10;* a runtime error will now stop freezing out_SCT content (= program steps can be executed even after an error got thrown, due to program reset)&#10;* code cleanup&#10;* empty programs won't change accu and pc to 0&#10;* single step mode will now highlight the cell that just got executed, accu changes accordingly">
+      <created>1684246984694</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1684246984694</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Editor.prgc_value_LBL/accu_value_LBL/ireg_cmd/opr_LBL will now keep their value when executing (won't be cleared by an error)&#10;* fixed bug when executing STP where PC could get negative">
+      <created>1684249150124</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1684249150124</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Editor.prgc_value_LBL/accu_value_LBL/ireg_cmd/opr_LBL will now keep their value when executing (won't be cleared by an error)&#10;* fixed bug when executing STP where PC could get negative">
+      <created>1684249158343</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1684249158343</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Editor.prgc_value_LBL/accu_value_LBL/ireg_cmd/opr_LBL will now keep their value when executing (won't be cleared by an error)&#10;* fixed bug when executing STP where PC could get negative">
+      <created>1684249211613</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1684249211613</updated>
+    </task>
+    <task id="LOCAL-00010" summary="fixed bug when cancelling saving process for unsaved changes when opening new program&#10;* code cleanup&#10;* introduced Editor.action_on_closing_unsaved_prg for future option">
+      <created>1684250942828</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1684250942828</updated>
+    </task>
+    <task id="LOCAL-00011" summary="new option closing_unsaved">
+      <created>1684267594087</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1684267594087</updated>
+    </task>
+    <task id="LOCAL-00012" summary="major cleanup of Emulator&#10;* refactoring&#10;* reworked several error messages&#10;* output consistency regarding leading zeros in ireg and error messages&#10;* every cell will now at least have an empty operand&#10;* reverted &quot;single step mode will now highlight the cell that just got executed, accu changes accordingly&quot; due to bad highlighting with JMPs">
+      <created>1684350709357</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1684350709357</updated>
+    </task>
+    <task id="LOCAL-00013" summary="finished Editor.change_selected_inp_text()&#10;* now supports whitespace wrapping&#10;* refuses to change for non-addresses/non-operands&#10;* fixed edge case bugs&#10;&#10;* fixed bug when having more than one whitespace before an address">
+      <created>1684359514609</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1684359514609</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)">
+      <created>1684360625328</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1684360625328</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fixed several problems with Options.restart_required()&#10;* replaced profile key is_light_theme with theme&#10;* fixed bug where Button.click_display_time was too long" />
+    <MESSAGE value="added suggestions for improving Assemblitor" />
+    <MESSAGE value="reported bug" />
+    <MESSAGE value="major improvements to the whole execution process&#10;* after reaching last step, clicking step_BTN once will do nothing&#10;* fixed parity issues regarding Editor.run_all() and Editor.run_step(): threw different errors when STP was missing&#10;* a runtime error will now stop freezing out_SCT content (= program steps can be executed even after an error got thrown, due to program reset)" />
+    <MESSAGE value="major improvements to the whole execution process&#10;* after reaching last step, clicking step_BTN once will do nothing&#10;* fixed parity issues regarding Editor.run_all() and Editor.run_step(): threw different errors when STP was missing&#10;* a runtime error will now stop freezing out_SCT content (= program steps can be executed even after an error got thrown, due to program reset)&#10;* code cleanup&#10;* empty programs won't change accu and pc to 0&#10;* single step mode will now highlight the cell that just got executed, accu changes accordingly" />
+    <MESSAGE value="Editor.prgc_value_LBL/accu_value_LBL/ireg_cmd/opr_LBL will now keep their value when executing (won't be cleared by an error)&#10;* fixed bug when executing STP where PC could get negative" />
+    <MESSAGE value="fixed bug when cancelling saving process for unsaved changes when opening new program&#10;* code cleanup&#10;* introduced Editor.action_on_closing_unsaved_prg for future option" />
+    <MESSAGE value="new option closing_unsaved" />
+    <MESSAGE value="major cleanup of Emulator&#10;* refactoring&#10;* reworked several error messages&#10;* output consistency regarding leading zeros in ireg and error messages&#10;* every cell will now at least have an empty operand&#10;* reverted &quot;single step mode will now highlight the cell that just got executed, accu changes accordingly&quot; due to bad highlighting with JMPs" />
+    <MESSAGE value="finished Editor.change_selected_inp_text()&#10;* now supports whitespace wrapping&#10;* refuses to change for non-addresses/non-operands&#10;* fixed edge case bugs&#10;&#10;* fixed bug when having more than one whitespace before an address" />
+    <MESSAGE value="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)" />
+  </component>
+</project>
