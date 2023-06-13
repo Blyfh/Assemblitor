@@ -76,6 +76,7 @@ class Options(Subwindow):
         self.max_cels_VAR        = tk.IntVar(    value = ph.max_cels())
         self.max_jmps_VAR        = tk.IntVar(    value = ph.max_jmps())
         self.closing_unsaved_VAR = tk.StringVar( value = ph.closing_unsaved())
+        self.dev_mode_VAR        = tk.BooleanVar(value = ph.dev_mode())
         self.init_state = {
             "theme":           self.gt_theme(),
             "language":        ph.language(),
@@ -84,7 +85,8 @@ class Options(Subwindow):
             "min_adr_len":     self.min_adr_len_VAR.get(),
             "max_cels":        self.max_cels_VAR.get(),
             "max_jmps":        self.max_jmps_VAR.get(),
-            "closing_unsaved": self.closing_unsaved_VAR.get()
+            "closing_unsaved": self.closing_unsaved_VAR.get(),
+            "dev_mode":        self.dev_mode_VAR.get()
         }
 
         super().open()
@@ -160,6 +162,14 @@ class Options(Subwindow):
         self.closing_unsaved_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
         self.closing_unsaved_OMN.pack(side = "right", pady = 5, padx = 5)
 
+        # Advanced
+        self.advanced_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Advanced"))
+        self.dev_mode_CHB = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("DevMode"), variable = self.dev_mode_VAR, command = lambda: self.change(), onvalue = True, offvalue = False)
+        if not self.dev_mode_VAR.get():
+            self.dev_mode_CHB.state(["!alternate"])  # deselect the checkbutton
+        self.advanced_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        self.dev_mode_CHB.pack(fill = "x", pady = 5, padx = (20, 5))
+
         # taskbar
         self.buttons_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.cancel_BTN  = ttk.Button(self.buttons_FRM, text = lh.opt_win("Cancel"),  command = self.close,   style = "TButton")
@@ -195,7 +205,8 @@ class Options(Subwindow):
         self.min_adr_len_VAR    .set(value = ph.min_adr_len())
         self.max_cels_VAR       .set(value = ph.max_cels())
         self.max_jmps_VAR       .set(value = ph.max_jmps())
-        self.closing_unsaved_VAR.set(Value = ph.closing_unsaved())
+        self.closing_unsaved_VAR.set(value = ph.closing_unsaved())
+        self.dev_mode_VAR       .set(value = ph.dev_mode())
 
     def restart_required_flag(self):
         return self.ed.active_theme != self.current_state("theme") or self.ed.active_language != self.current_state("language")
@@ -278,6 +289,9 @@ class Options(Subwindow):
 
     def save_option_closing_unsaved(self):
         self.ed.action_on_closing_unsaved_prg = self.current_state("closing_unsaved")
+
+    def save_option_dev_mode(self):
+        self.ed.dev_mode = self.dev_mode_VAR.get()
 
 
 class Assembly(Subwindow):

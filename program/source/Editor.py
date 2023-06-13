@@ -11,7 +11,7 @@ from program.source import Widgets     as wdg
 from program.source import Subwindows  as sub
 from program.source import PackHandler as pck
 
-def startup(profile_dir, root, testing = False):
+def startup(profile_dir, root, dev_mode = False):
     global ph
     global lh
     global eh
@@ -23,13 +23,14 @@ def startup(profile_dir, root, testing = False):
     emu.startup(profile_handler = ph, error_handler = eh)
     sub.startup(profile_handler = ph, language_handler = lh, emulator = emu)
 
-    ed = Editor(root = root, testing = testing)
+    ph.save_profile_data("dev_mode", dev_mode)
+    ed = Editor(root = root)
 
 
 class Editor:
 
-    def __init__(self, root, testing = False):
-        self.testing    = testing
+    def __init__(self, root):
+        self.dev_mode   = ph.dev_mode()
         self.init_inp   = ""
         self.dirty_flag = False
         self.file_path  = None
@@ -39,27 +40,31 @@ class Editor:
         self.action_on_closing_unsaved_prg = ph.closing_unsaved()
         self.already_modified = False
         self.build_gui()
-        if self.testing:
+        if self.dev_mode: # special startup for developers
             pass
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
-        if exc.__name__ == "Exception": # normal case for Assembly errors caused by user
+        if self.dev_mode:
+            traceback.print_exception(val)
+        if exc.__name__ == "Exception" or self.dev_mode: # Exceptions are Assembly errors caused by user
             self.out_SCT.config(state = "normal", fg = self.theme_error_color)
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", self.format_exception_message(val))
             self.out_SCT.config(state = "disabled")
-        elif not self.testing: # special case for internal errors
+        else: # internal errors caused by program will be displayed in a window if developer mode isn't enabled
             mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
-        if self.testing:
-            traceback.print_exception(val)
 
     def format_exception_message(self, val):
+        if self.dev_mode: # full traceback
+            error_msg = "".join(traceback.format_exception(val))
+        else: # only error
+            error_msg = str(val)
         if self.emu.prg is None: # program initialisation exception
             self.emu.creating_new_prg_flag = False
-            return str(val)
+            return error_msg
         else: # runtime exception
-            return str(val) + eh.prg_state_msg() + str(self.emu.prg)
+            return error_msg + eh.prg_state_msg() + str(self.emu.prg)
 
     def build_gui(self):
         self.root = tk.Tk()
@@ -238,7 +243,7 @@ class Editor:
             self.decr_TIP.update_text(lh.gui("DecrOprs"))
 
     def destroy(self):
-        if not self.dirty_flag or self.testing or self.can_close_unsaved_prg(): # "== True" checks if user didn't abort in can_close_unsaved_prg()
+        if not self.dirty_flag or self.dev_mode or self.can_close_unsaved_prg():
             self.root.destroy()
 
     def can_close_unsaved_prg(self): # returns if it is okay to continue
@@ -463,7 +468,6 @@ class Editor:
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # turn IntVars into BoolVars if necessary
 # OPTIONS:
-#   developer mode (show full error traceback, no internal error window, always dont save)
 #   last dir fixed or automatic
 # rework output coloring
 

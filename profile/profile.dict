@@ -8,5 +8,5 @@
     "max_cels": 8192,
     "closing_unsaved": "ask",
     "last_dir": "",
-    "show_full_tb": False
+    "dev_mode": False
 }

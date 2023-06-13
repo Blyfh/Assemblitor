@@ -64,8 +64,8 @@
         "ClosingUnsaved":        "Beim Schließen von ungespeichertem Programm",
         "ClosingUnsavedOptions": {"ask": "Fragen", "save": "Immer speichern", "discard": "Immer verwerfen"},
 
-        "DeveloperOptions": "Entwicklereinstellungen",
-        "FullTb":           "Kompletter Fehler-Traceback",
+        "Advanced": "Erweiterte Einstellungen",
+        "DevMode":  "Entwicklermodus",
 
         "RestartRequired": "Assemblitor muss neugestartet werden, damit die Änderungen vollständig übernommen werden können",
 

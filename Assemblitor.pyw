@@ -8,7 +8,7 @@ from program.source import Editor
 
 min_version = (3, 10)
 cur_version = sys.version_info
-testing     = True
+dev_mode    = True
 is_portable = True
 root        = pl.Path(__file__).parent.absolute()
 
@@ -20,11 +20,11 @@ else:
 
 if cur_version >= min_version:
     try:
-        Editor.startup(profile_dir = profile_dir, root = root, testing = testing)
+        Editor.startup(profile_dir = profile_dir, root = root, dev_mode = dev_mode)
     except KeyboardInterrupt:
         pass
     except:
-        if testing:
+        if dev_mode:
             raise
         else:
             exc_type, exc_desc, tb = sys.exc_info()
