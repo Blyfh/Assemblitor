@@ -115,7 +115,7 @@ class Editor:
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
         self.help_MNU.add_command(label = lh.gui("Assembly"),  command = self.assembly_SUB.open)
         self.help_MNU.add_command(label = lh.gui("Shortcuts"), command = self.shortcuts_SUB.open)
-        self.help_MNU.add_command(label = lh.gui("DemoPrg"), command = self.open_demo_prg)
+        self.help_MNU.add_command(label = lh.gui("DemoPrg"),   command = self.open_demo_prg)
         self.help_MNU.add_command(label = lh.gui("About"),     command = self.about_SUB.open)
         self.menubar.add_cascade(label = lh.gui("Help"), menu = self.help_MNU, underline = 0)
 
@@ -171,7 +171,7 @@ class Editor:
         self.prgc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = ttk.Frame(self.root)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font(), insertbackground = self.theme_cursor_color)
+        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font(), undo = True, insertbackground = self.theme_cursor_color)
         self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font())
         self.text_FRM.pack(fill = "both", expand = True, padx = 5, pady = (0, 5))
         self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
@@ -180,16 +180,24 @@ class Editor:
         self.out_SCT.config(state = "disabled")
 
     # events
-        self.root.bind(sequence = "<Control-o>",            func = self.open_file)
         self.root.bind(sequence = "<F5>",                   func = self.run_all)
         self.root.bind(sequence = "<Shift-F5>",             func = self.run_step)
+        self.root.bind(sequence = "<Control-o>",            func = self.open_file)
+        self.root.bind(sequence = "<Control-O>",            func = self.open_file) # double binds necessary due to capslock overwriting lowercase sequence keys
         self.root.bind(sequence = "<Control-r>",            func = self.reload_file)
+        self.root.bind(sequence = "<Control-R>",            func = self.reload_file)
         self.root.bind(sequence = "<Control-s>",            func = self.save_file)
-        self.root.bind(sequence = "<Control-S>",            func = self.save_file_as)
+        self.root.bind(sequence = "<Control-S>",            func = self.save_file)
+        self.root.bind(sequence = "<Control-Shift-s>",      func = self.save_file_as)
+        self.root.bind(sequence = "<Control-Shift-S>",      func = self.save_file_as)
+        bindtags = self.inp_SCT.bindtags()
+        self.inp_SCT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3])) # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o> that adds a newline
+        self.inp_SCT.bind(sequence = "<Control-Shift-z>",   func = lambda event: self.inp_SCT.edit_redo()) # automatic edit_redo() bind is <Control-y>
         self.inp_SCT.bind(sequence = "<Return>",            func = self.key_enter)
         self.inp_SCT.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
         self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
-        self.inp_SCT.bind(sequence = "<<Modified>>", func = self.on_inp_modified)
+        self.inp_SCT.bind(sequence = "<<Modified>>",        func = self.on_inp_modified)
+        self.inp_SCT.bind(sequence = "<Key>",               func = self.on_key_pressed)
 
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
@@ -260,8 +268,12 @@ class Editor:
         elif self.action_on_closing_unsaved_prg == "discard":
             return True
 
+    def on_key_pressed(self, event):
+        if self.inp_SCT.get("insert-1c") in string.whitespace:  # last written char is a whitespace
+            self.inp_SCT.edit_separator() # add seperator to undo stack so that all actions up to the seperator can be undone -> undoes whole words
+
     def on_inp_modified(self, event):
-        if not self.already_modified: # because somehow on_modified always gets called twice
+        if not self.already_modified: # because somehow on_inp_modified always gets called twice
             self.inp_SCT.edit_modified(False)
             if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
                 self.set_dirty_flag(False)
@@ -315,6 +327,7 @@ class Editor:
             self.last_dir = self.file_path.split(file_name)[0]
             self.set_dirty_flag(False)
             self.reload_file()
+        return "break"
 
     def save_file(self, event = None):
         if self.file_path:
@@ -404,7 +417,6 @@ class Editor:
                 if oprs_flag:
                     cell = self.change_opr(cell, change)
             new_text += cell + comment + "\n"
-        print(f"new'{new_text}'")
         return new_text[:-1] # :-1 to remove line break from last line
 
     def change_adr(self, cell, change):
@@ -471,6 +483,7 @@ class Editor:
 # rework output coloring
 
 # BUGS:
+# will default to save_as() when using save() after aborting one save_as()
 
 # SUGGESTIONS
 # ALU anzeigen
