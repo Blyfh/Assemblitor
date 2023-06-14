@@ -66,8 +66,9 @@
 
         "Advanced": "Erweiterte Einstellungen",
         "DevMode":  "Entwicklermodus",
+        "DevModeTip": "Zeigt kompletten Traceback, stellt interne Fehler vollständig dar, gibt Fehler in Konsole aus, verwirft immer ungespeichertes beim Schließen",
 
-        "RestartRequired": "Assemblitor muss neugestartet werden, damit die Änderungen vollständig übernommen werden können",
+        "RestartRequired": "Assemblitor-Neustart notwendig, um Änderungen vollständig zu übernehmen",
 
         "Cancel":  "Abbrechen",
         "Apply":   "Übernehmen",

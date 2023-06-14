@@ -68,15 +68,16 @@ class Subwindow:
 class Options(Subwindow):
 
     def open(self):
-        self.is_light_theme_VAR  = tk.BooleanVar(value = ph.theme() == "light")
-        self.language_VAR        = tk.StringVar( value = lh.gt_lang_name(ph.language())) # do not use to get current option as this StringVar is language-dependent; use self.language_OMN.current_option()
-        self.code_font_face_VAR  = tk.StringVar( value = font_face_name(ph.code_font_face())) # do not use to get current option as this StringVar is language-dependent; use self.code_font_face_OMN.current_option()
-        self.code_font_size_VAR  = tk.IntVar(    value = ph.code_font_size())
-        self.min_adr_len_VAR     = tk.IntVar(    value = ph.min_adr_len())
-        self.max_cels_VAR        = tk.IntVar(    value = ph.max_cels())
-        self.max_jmps_VAR        = tk.IntVar(    value = ph.max_jmps())
-        self.closing_unsaved_VAR = tk.StringVar( value = ph.closing_unsaved())
-        self.dev_mode_VAR        = tk.BooleanVar(value = ph.dev_mode())
+        self.is_light_theme_VAR  = tk.BooleanVar()
+        self.language_VAR        = tk.StringVar()
+        self.code_font_face_VAR  = tk.StringVar()
+        self.code_font_size_VAR  = tk.IntVar()
+        self.min_adr_len_VAR     = tk.IntVar()
+        self.max_cels_VAR        = tk.IntVar()
+        self.max_jmps_VAR        = tk.IntVar()
+        self.closing_unsaved_VAR = tk.StringVar()
+        self.dev_mode_VAR        = tk.BooleanVar()
+        self.set_option_vars()
         self.init_state = {
             "theme":           self.gt_theme(),
             "language":        ph.language(),
@@ -85,7 +86,7 @@ class Options(Subwindow):
             "min_adr_len":     self.min_adr_len_VAR.get(),
             "max_cels":        self.max_cels_VAR.get(),
             "max_jmps":        self.max_jmps_VAR.get(),
-            "closing_unsaved": self.closing_unsaved_VAR.get(),
+            "closing_unsaved": ph.closing_unsaved(),
             "dev_mode":        self.dev_mode_VAR.get()
         }
 
@@ -98,7 +99,6 @@ class Options(Subwindow):
             return "dark"
 
     def build_gui(self):
-
         self.subroot = tk.Toplevel(self.ed.root)
         self.subroot.geometry(lh.opt_win("geometry"))
         self.subroot.resizable(False, False)
@@ -167,6 +167,7 @@ class Options(Subwindow):
         self.dev_mode_CHB = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("DevMode"), variable = self.dev_mode_VAR, command = lambda: self.change(), onvalue = True, offvalue = False)
         if not self.dev_mode_VAR.get():
             self.dev_mode_CHB.state(["!alternate"])  # deselect the checkbutton
+        self.dev_mode_TIP = wdg.Tooltip(self.dev_mode_CHB, text = lh.opt_win("DevModeTip"))
         self.advanced_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
         self.dev_mode_CHB.pack(fill = "x", pady = 5, padx = (20, 5))
 
@@ -199,13 +200,14 @@ class Options(Subwindow):
 
     def set_option_vars(self):
         self.is_light_theme_VAR .set(value = ph.theme() == "light")
-        self.language_VAR       .set(value = lh.gt_lang_name(lh.cur_lang))
-        self.code_font_face_VAR .set(value = font_face_name(ph.code_font_face()))
+        print("cur lang:", ph.language())
+        self.language_VAR       .set(value = lh.gt_lang_name(ph.language())) # StringVar is language dependent displaytext
+        self.code_font_face_VAR .set(value = font_face_name(ph.code_font_face())) # StringVar is language dependent displaytext
         self.code_font_size_VAR .set(value = ph.code_font_size())
         self.min_adr_len_VAR    .set(value = ph.min_adr_len())
         self.max_cels_VAR       .set(value = ph.max_cels())
         self.max_jmps_VAR       .set(value = ph.max_jmps())
-        self.closing_unsaved_VAR.set(value = ph.closing_unsaved())
+        self.closing_unsaved_VAR.set(value = lh.opt_win("ClosingUnsavedOptions")[ph.closing_unsaved()]) # StringVar is language dependent displaytext
         self.dev_mode_VAR       .set(value = ph.dev_mode())
 
     def restart_required_flag(self):

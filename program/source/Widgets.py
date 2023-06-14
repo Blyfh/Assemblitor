@@ -74,7 +74,7 @@ class OptionMenu(ttk.OptionMenu):
 
     def __init__(self, root, textvariable:tk.StringVar, default_option, options:dict, command, **kwargs):
         self.root = root
-        self.options = options # {"option1_name": "option1_display_text", "option2_name": "option2_display_text"}
+        self.options = options # {"option1_name": "option1_displaytext", "option2_name": "option2_displaytext"}
         self.textvariable = textvariable
         self.default_option = default_option
         try:

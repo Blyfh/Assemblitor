@@ -64,8 +64,9 @@
         "ClosingUnsaved":        "Action on closing unsaved program",
         "ClosingUnsavedOptions": {"ask": "Ask to save", "save": "Always save", "discard": "Always discard"},
 
-        "Advanced": "Advanced",
-        "DevMode":  "Developer Mode",
+        "Advanced":   "Advanced",
+        "DevMode":    "Developer Mode",
+        "DevModeTip": "Shows error traceback, fully displays internal errors, prints errors to console, always closes unsaved programs",
 
         "RestartRequired": "You have to restart Assemblitor in order to properly apply your changes",
 
