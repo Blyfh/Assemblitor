@@ -52,7 +52,7 @@ class Editor:
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", self.format_exception_message(val))
             self.out_SCT.config(state = "disabled")
-        else: # internal errors caused by program will be displayed in a window if developer mode isn't enabled
+        else: # internal errors caused by program will be displayed in a small pop-up window if developer mode isn't enabled
             mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
 
     def format_exception_message(self, val):
@@ -70,16 +70,16 @@ class Editor:
         self.root = tk.Tk()
         tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errors
         self.change_amount_VAR  = tk.StringVar(value = "1")
-        self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language-dependent; use self.chng_opt_OMN.current_option()
+        self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language dependent; use self.chng_opt_OMN.current_option()
         self.active_theme    = ph.theme() # won't change without restart
         self.active_language = ph.language() # won't change without restart
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
         self.set_theme(theme = self.active_theme)
-        self.options_SUB   = sub.Options(editor = self)
+        self.options_SUB   = sub.Options(  editor = self)
         self.shortcuts_SUB = sub.Shortcuts(editor = self)
-        self.assembly_SUB  = sub.Assembly(editor = self)
-        self.about_SUB     = sub.About(editor = self)
+        self.assembly_SUB  = sub.Assembly( editor = self)
+        self.about_SUB     = sub.About(    editor = self)
         self.root.minsize(*lh.gui("minsize"))
         self.root.config(bg = self.theme_base_bg)
         self.root.title(lh.gui("title"))
@@ -466,13 +466,11 @@ class Editor:
 # TO-DO:
 # strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
-# turn IntVars into BoolVars if necessary
 # OPTIONS:
 #   last dir fixed or automatic
 # rework output coloring
 
 # BUGS:
-# change_selected_inp_text adds \n for empty inp or input with empty lines
 
 # SUGGESTIONS
 # ALU anzeigen

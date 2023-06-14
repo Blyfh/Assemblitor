@@ -291,8 +291,8 @@ class Cell:
                             raise Exception(eh.error("CmdHasValOpr", opr_str = tok.tok_str, adr = self.gt_adr()))
                 self.toks.append(tok)
 
-    def split_cel_str(self, cel_str_unstripped):
-        cel_str = cel_str_unstripped.lstrip() # remove whitespaces before addres
+    def split_cel_str(self:None, cel_str_unstripped): # is static but belongs here topically
+        cel_str = cel_str_unstripped.lstrip() # remove whitespaces before address
         lwrapping = cel_str_unstripped.split(cel_str)[0]
         tok_strs = []
         last_split_pos = 0
