@@ -80,9 +80,19 @@ class OptionMenu(ttk.OptionMenu):
         try:
             default = self.options[self.default_option]
         except:
-            raise RuntimeError(f"OptionMenu : Can't find default option '{self.default_option}' in given options:\n    {self.options}")
+            raise RuntimeError(f"OptionMenu: Can't find default option '{self.default_option}' in given options:\n    {self.options}")
         ttk.OptionMenu.__init__(self, root, self.textvariable, default, *self.options.values(), command = command)
         self.config(**kwargs)
+
+    def gt_displaytext(self, option):
+        try:
+            displaytext = self.options[option]
+        except:
+            raise RuntimeError(f"OptionMenu: Can't find option '{option}' in given options:\n    {self.options}")
+        return displaytext
+
+    def set_option(self, option):
+        self.textvariable.set(self.gt_displaytext(option))
 
     def current_option(self):
         current_option_displaytext = self.textvariable.get()

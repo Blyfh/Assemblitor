@@ -41,7 +41,7 @@ class Editor:
         self.already_modified = False
         self.build_gui()
         if self.dev_mode: # special startup for developers
-            pass
+            self.assembly_SUB.open()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -180,24 +180,26 @@ class Editor:
         self.out_SCT.config(state = "disabled")
 
     # events
-        self.root.bind(sequence = "<F5>",                   func = self.run_all)
-        self.root.bind(sequence = "<Shift-F5>",             func = self.run_step)
-        self.root.bind(sequence = "<Control-o>",            func = self.open_file)
-        self.root.bind(sequence = "<Control-O>",            func = self.open_file) # double binds necessary due to capslock overwriting lowercase sequence keys
-        self.root.bind(sequence = "<Control-r>",            func = self.reload_file)
-        self.root.bind(sequence = "<Control-R>",            func = self.reload_file)
-        self.root.bind(sequence = "<Control-s>",            func = self.save_file)
-        self.root.bind(sequence = "<Control-S>",            func = self.save_file)
-        self.root.bind(sequence = "<Control-Shift-s>",      func = self.save_file_as)
-        self.root.bind(sequence = "<Control-Shift-S>",      func = self.save_file_as)
+        self.root.bind(sequence = "<F5>",                   func = lambda event: self.run_all())
+        self.root.bind(sequence = "<Shift-F5>",             func = lambda event: self.run_step())
+        self.root.bind(sequence = "<Control-o>",            func = lambda event: self.open_file())
+        self.root.bind(sequence = "<Control-O>",            func = lambda event: self.open_file()) # double binds necessary due to capslock overwriting lowercase sequence keys
+        self.root.bind(sequence = "<Control-r>",            func = lambda event: self.reload_file())
+        self.root.bind(sequence = "<Control-R>",            func = lambda event: self.reload_file())
+        self.root.bind(sequence = "<Control-s>",            func = lambda event: self.save_file())
+        self.root.bind(sequence = "<Control-S>",            func = lambda event: self.save_file())
+        self.root.bind(sequence = "<Control-Shift-s>",      func = lambda event: self.save_file_as())
+        self.root.bind(sequence = "<Control-Shift-S>",      func = lambda event: self.save_file_as())
+        self.root.bind(sequence = "<Shift-Tab>",            func = lambda event: self.switch_change_option())
+        self.root.bind(sequence = "<Shift-MouseWheel>",     func = self.key_shift_mousewheel)
         bindtags = self.inp_SCT.bindtags()
         self.inp_SCT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3])) # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o> that adds a newline
         self.inp_SCT.bind(sequence = "<Control-Shift-z>",   func = lambda event: self.inp_SCT.edit_redo()) # automatic edit_redo() bind is <Control-y>
-        self.inp_SCT.bind(sequence = "<Return>",            func = self.key_enter)
-        self.inp_SCT.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
-        self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
-        self.inp_SCT.bind(sequence = "<<Modified>>",        func = self.on_inp_modified)
-        self.inp_SCT.bind(sequence = "<Key>",               func = self.on_key_pressed)
+        self.inp_SCT.bind(sequence = "<Return>",            func = lambda event: self.key_enter())
+        self.inp_SCT.bind(sequence = "<Shift-Return>",      func = lambda event: self.key_shift_enter())
+        self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = lambda event: self.key_ctrl_backspace())
+        self.inp_SCT.bind(sequence = "<<Modified>>",        func = lambda event: self.on_inp_modified())
+        self.inp_SCT.bind(sequence = "<Key>",               func = lambda event: self.on_key_pressed())
 
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
@@ -238,7 +240,7 @@ class Editor:
         self.prgc_value_LBL.config(font = ph.code_font())
         self.assembly_SUB.set_code_font()
 
-    def update_incr_decr_tooltips(self, event = None):
+    def update_incr_decr_tooltips(self):
         option = self.chng_opt_OMN.current_option()  # either "adr", "adr_opr", "opr"
         if option == "adr":
             self.incr_TIP.update_text(lh.gui("IncrAdrs"))
@@ -268,11 +270,11 @@ class Editor:
         elif self.action_on_closing_unsaved_prg == "discard":
             return True
 
-    def on_key_pressed(self, event):
+    def on_key_pressed(self):
         if self.inp_SCT.get("insert-1c") in string.whitespace:  # last written char is a whitespace
             self.inp_SCT.edit_separator() # add seperator to undo stack so that all actions up to the seperator can be undone -> undoes whole words
 
-    def on_inp_modified(self, event):
+    def on_inp_modified(self):
         if not self.already_modified: # because somehow on_inp_modified always gets called twice
             self.inp_SCT.edit_modified(False)
             if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
@@ -305,19 +307,19 @@ class Editor:
         self.out_SCT.insert("insert", out[0][2])
         self.out_SCT.config(state = "disabled")
 
-    def run_all(self, event = None):
+    def run_all(self):
         self.run(execute_all = True)
 
-    def run_step(self, event = None):
+    def run_step(self):
         self.run(execute_all = False)
 
-    def reload_file(self, event = None):
+    def reload_file(self):
         if self.file_path:
             with open(self.file_path, "r", encoding = "utf-8") as file:
                 prg_str = file.read()
             self.open_prg(prg_str = prg_str, win_title = f"{self.file_path} – {lh.gui('title')}")
 
-    def open_file(self, event = None):
+    def open_file(self):
         if self.dirty_flag:
             if not self.can_close_unsaved_prg():
                 return
@@ -329,7 +331,7 @@ class Editor:
             self.reload_file()
         return "break"
 
-    def save_file(self, event = None):
+    def save_file(self):
         if self.file_path:
             self.init_inp = self.inp_SCT.get(1.0, "end-1c")
             with open(self.file_path, "w", encoding = "utf-8") as file:
@@ -338,7 +340,7 @@ class Editor:
         else:
             self.save_file_as()
 
-    def save_file_as(self, event = None):
+    def save_file_as(self):
         self.file_path = self.file_path = fd.asksaveasfilename(title = lh.file_mng("SaveFile"), initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
         if self.file_path:
             self.save_file()
@@ -358,19 +360,25 @@ class Editor:
     def open_demo_prg(self):
         self.open_prg(lh.demo())
 
-    def key_enter(self, event):
+    def key_enter(self):
         self.insert_address()
         return "break" # overwrites the line break printing
 
-    def key_shift_enter(self, event):
+    def key_shift_enter(self):
         pass # overwrites self.key_enter()
 
-    def key_ctrl_backspace(self, event):
+    def key_ctrl_backspace(self):
         if self.inp_SCT.index("insert") != "1.0": # to prevent deleting word after cursor on position 0
             if self.inp_SCT.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
                 self.inp_SCT.delete("insert-1c", "insert") # delete potential space before word
             self.inp_SCT.delete("insert-1c wordstart", "insert") # delete word
             return "break"
+
+    def key_shift_mousewheel(self, event):
+        if event.delta > 0:
+            self.increment_selected_inp_text()
+        else:
+            self.decrement_selected_inp_text()
 
     def insert_address(self):
         last_line = self.inp_SCT.get("insert linestart", "insert")
@@ -383,6 +391,16 @@ class Editor:
         whitespace_wrapping = last_line.split(last_line_stripped)[0]
         new_adr = emu.add_leading_zeros(str(last_adr + 1))
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
+
+    def switch_change_option(self):
+        cur_option = self.chng_opt_OMN.current_option()
+        if cur_option == "adr":
+            new_option = "adr_opr"
+        elif cur_option == "adr_opr":
+            new_option = "opr"
+        else:
+            new_option = "adr"
+        self.chng_opt_OMN.set_option(new_option)
 
     def increment_selected_inp_text(self):
         self.change_selected_inp_text(change = +int(self.change_amount_VAR.get()))
@@ -476,11 +494,11 @@ class Editor:
         return cell
 
 # TO-DO:
-# strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # OPTIONS:
 #   last dir fixed or automatic
 # rework output coloring
+# update asm_win (direct value operands)
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()
