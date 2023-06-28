@@ -11,7 +11,7 @@ from program.source import Widgets     as wdg
 from program.source import Subwindows  as sub
 from program.source import PackHandler as pck
 
-def startup(profile_dir, root, testing = False):
+def startup(profile_dir, root, dev_mode = False):
     global ph
     global lh
     global eh
@@ -23,13 +23,14 @@ def startup(profile_dir, root, testing = False):
     emu.startup(profile_handler = ph, error_handler = eh)
     sub.startup(profile_handler = ph, language_handler = lh, emulator = emu)
 
-    ed = Editor(root = root, testing = testing)
+    ph.save_profile_data("dev_mode", dev_mode)
+    ed = Editor(root = root)
 
 
 class Editor:
 
-    def __init__(self, root, testing = False):
-        self.testing    = testing
+    def __init__(self, root):
+        self.dev_mode   = ph.dev_mode()
         self.init_inp   = ""
         self.dirty_flag = False
         self.file_path  = None
@@ -39,42 +40,46 @@ class Editor:
         self.action_on_closing_unsaved_prg = ph.closing_unsaved()
         self.already_modified = False
         self.build_gui()
-        if self.testing:
-            pass
+        if self.dev_mode: # special startup for developers
+            self.assembly_SUB.open()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
-        if exc.__name__ == "Exception": # normal case for Assembly errors caused by user
+        if self.dev_mode:
+            traceback.print_exception(val)
+        if exc.__name__ == "Exception" or self.dev_mode: # Exceptions are Assembly errors caused by user
             self.out_SCT.config(state = "normal", fg = self.theme_error_color)
             self.out_SCT.delete("1.0", "end")
             self.out_SCT.insert("insert", self.format_exception_message(val))
             self.out_SCT.config(state = "disabled")
-        elif not self.testing: # special case for internal errors
+        else: # internal errors caused by program will be displayed in a small pop-up window if developer mode isn't enabled
             mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
-        if self.testing:
-            traceback.print_exception(val)
 
     def format_exception_message(self, val):
+        if self.dev_mode: # full traceback
+            error_msg = "".join(traceback.format_exception(val))
+        else: # only error
+            error_msg = str(val)
         if self.emu.prg is None: # program initialisation exception
             self.emu.creating_new_prg_flag = False
-            return str(val)
+            return error_msg
         else: # runtime exception
-            return str(val) + eh.prg_state_msg() + str(self.emu.prg)
+            return error_msg + eh.prg_state_msg() + str(self.emu.prg)
 
     def build_gui(self):
         self.root = tk.Tk()
         tk.Tk.report_callback_exception = self.report_callback_exception  # overwrite standard Tk method for reporting errors
         self.change_amount_VAR  = tk.StringVar(value = "1")
-        self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language-dependent; use self.chng_opt_OMN.current_option()
+        self.change_options_VAR = tk.StringVar() # do not use to get current option as this StringVar is language dependent; use self.chng_opt_OMN.current_option()
         self.active_theme    = ph.theme() # won't change without restart
         self.active_language = ph.language() # won't change without restart
         self.title_font    = ("Segoe", 15, "bold")
         self.subtitle_font = ("Segoe", 13)
         self.set_theme(theme = self.active_theme)
-        self.options_SUB   = sub.Options(editor = self)
+        self.options_SUB   = sub.Options(  editor = self)
         self.shortcuts_SUB = sub.Shortcuts(editor = self)
-        self.assembly_SUB  = sub.Assembly(editor = self)
-        self.about_SUB     = sub.About(editor = self)
+        self.assembly_SUB  = sub.Assembly( editor = self)
+        self.about_SUB     = sub.About(    editor = self)
         self.root.minsize(*lh.gui("minsize"))
         self.root.config(bg = self.theme_base_bg)
         self.root.title(lh.gui("title"))
@@ -110,7 +115,7 @@ class Editor:
         self.help_MNU = tk.Menu(self.menubar, tearoff = False)
         self.help_MNU.add_command(label = lh.gui("Assembly"),  command = self.assembly_SUB.open)
         self.help_MNU.add_command(label = lh.gui("Shortcuts"), command = self.shortcuts_SUB.open)
-        self.help_MNU.add_command(label = lh.gui("DemoPrg"), command = self.open_demo_prg)
+        self.help_MNU.add_command(label = lh.gui("DemoPrg"),   command = self.open_demo_prg)
         self.help_MNU.add_command(label = lh.gui("About"),     command = self.about_SUB.open)
         self.menubar.add_cascade(label = lh.gui("Help"), menu = self.help_MNU, underline = 0)
 
@@ -166,7 +171,7 @@ class Editor:
         self.prgc_value_LBL.pack(side = "bottom", fill = "x")
 
         self.text_FRM = ttk.Frame(self.root)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font(), insertbackground = self.theme_cursor_color)
+        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font(), undo = True, insertbackground = self.theme_cursor_color)
         self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font())
         self.text_FRM.pack(fill = "both", expand = True, padx = 5, pady = (0, 5))
         self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
@@ -175,16 +180,26 @@ class Editor:
         self.out_SCT.config(state = "disabled")
 
     # events
-        self.root.bind(sequence = "<Control-o>",            func = self.open_file)
-        self.root.bind(sequence = "<F5>",                   func = self.run_all)
-        self.root.bind(sequence = "<Shift-F5>",             func = self.run_step)
-        self.root.bind(sequence = "<Control-r>",            func = self.reload_file)
-        self.root.bind(sequence = "<Control-s>",            func = self.save_file)
-        self.root.bind(sequence = "<Control-S>",            func = self.save_file_as)
-        self.inp_SCT.bind(sequence = "<Return>",            func = self.key_enter)
-        self.inp_SCT.bind(sequence = "<Shift-Return>",      func = self.key_shift_enter)
-        self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = self.key_ctrl_backspace)
-        self.inp_SCT.bind(sequence = "<<Modified>>", func = self.on_inp_modified)
+        self.root.bind(sequence = "<F5>",                   func = lambda event: self.run_all())
+        self.root.bind(sequence = "<Shift-F5>",             func = lambda event: self.run_step())
+        self.root.bind(sequence = "<Control-o>",            func = lambda event: self.open_file())
+        self.root.bind(sequence = "<Control-O>",            func = lambda event: self.open_file()) # double binds necessary due to capslock overwriting lowercase sequence keys
+        self.root.bind(sequence = "<Control-r>",            func = lambda event: self.reload_file())
+        self.root.bind(sequence = "<Control-R>",            func = lambda event: self.reload_file())
+        self.root.bind(sequence = "<Control-s>",            func = lambda event: self.save_file())
+        self.root.bind(sequence = "<Control-S>",            func = lambda event: self.save_file())
+        self.root.bind(sequence = "<Control-Shift-s>",      func = lambda event: self.save_file_as())
+        self.root.bind(sequence = "<Control-Shift-S>",      func = lambda event: self.save_file_as())
+        self.root.bind(sequence = "<Shift-Tab>",            func = lambda event: self.switch_change_option())
+        self.root.bind(sequence = "<Shift-MouseWheel>",     func = self.key_shift_mousewheel)
+        bindtags = self.inp_SCT.bindtags()
+        self.inp_SCT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3])) # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o> that adds a newline
+        self.inp_SCT.bind(sequence = "<Control-Shift-z>",   func = lambda event: self.inp_SCT.edit_redo()) # automatic edit_redo() bind is <Control-y>
+        self.inp_SCT.bind(sequence = "<Return>",            func = lambda event: self.key_enter())
+        self.inp_SCT.bind(sequence = "<Shift-Return>",      func = lambda event: self.key_shift_enter())
+        self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = lambda event: self.key_ctrl_backspace())
+        self.inp_SCT.bind(sequence = "<<Modified>>",        func = lambda event: self.on_inp_modified())
+        self.inp_SCT.bind(sequence = "<Key>",               func = lambda event: self.on_key_pressed())
 
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
@@ -225,7 +240,7 @@ class Editor:
         self.prgc_value_LBL.config(font = ph.code_font())
         self.assembly_SUB.set_code_font()
 
-    def update_incr_decr_tooltips(self, event = None):
+    def update_incr_decr_tooltips(self):
         option = self.chng_opt_OMN.current_option()  # either "adr", "adr_opr", "opr"
         if option == "adr":
             self.incr_TIP.update_text(lh.gui("IncrAdrs"))
@@ -238,7 +253,7 @@ class Editor:
             self.decr_TIP.update_text(lh.gui("DecrOprs"))
 
     def destroy(self):
-        if not self.dirty_flag or self.testing or self.can_close_unsaved_prg(): # "== True" checks if user didn't abort in can_close_unsaved_prg()
+        if not self.dirty_flag or self.dev_mode or self.can_close_unsaved_prg():
             self.root.destroy()
 
     def can_close_unsaved_prg(self): # returns if it is okay to continue
@@ -255,8 +270,12 @@ class Editor:
         elif self.action_on_closing_unsaved_prg == "discard":
             return True
 
-    def on_inp_modified(self, event):
-        if not self.already_modified: # because somehow on_modified always gets called twice
+    def on_key_pressed(self):
+        if self.inp_SCT.get("insert-1c") in string.whitespace:  # last written char is a whitespace
+            self.inp_SCT.edit_separator() # add seperator to undo stack so that all actions up to the seperator can be undone -> undoes whole words
+
+    def on_inp_modified(self):
+        if not self.already_modified: # because somehow on_inp_modified always gets called twice
             self.inp_SCT.edit_modified(False)
             if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
                 self.set_dirty_flag(False)
@@ -288,19 +307,19 @@ class Editor:
         self.out_SCT.insert("insert", out[0][2])
         self.out_SCT.config(state = "disabled")
 
-    def run_all(self, event = None):
+    def run_all(self):
         self.run(execute_all = True)
 
-    def run_step(self, event = None):
+    def run_step(self):
         self.run(execute_all = False)
 
-    def reload_file(self, event = None):
+    def reload_file(self):
         if self.file_path:
             with open(self.file_path, "r", encoding = "utf-8") as file:
                 prg_str = file.read()
             self.open_prg(prg_str = prg_str, win_title = f"{self.file_path} – {lh.gui('title')}")
 
-    def open_file(self, event = None):
+    def open_file(self):
         if self.dirty_flag:
             if not self.can_close_unsaved_prg():
                 return
@@ -310,8 +329,9 @@ class Editor:
             self.last_dir = self.file_path.split(file_name)[0]
             self.set_dirty_flag(False)
             self.reload_file()
+        return "break"
 
-    def save_file(self, event = None):
+    def save_file(self):
         if self.file_path:
             self.init_inp = self.inp_SCT.get(1.0, "end-1c")
             with open(self.file_path, "w", encoding = "utf-8") as file:
@@ -320,7 +340,7 @@ class Editor:
         else:
             self.save_file_as()
 
-    def save_file_as(self, event = None):
+    def save_file_as(self):
         self.file_path = self.file_path = fd.asksaveasfilename(title = lh.file_mng("SaveFile"), initialdir = self.last_dir, filetypes = self.file_types, defaultextension = ".asm")
         if self.file_path:
             self.save_file()
@@ -340,19 +360,25 @@ class Editor:
     def open_demo_prg(self):
         self.open_prg(lh.demo())
 
-    def key_enter(self, event):
+    def key_enter(self):
         self.insert_address()
         return "break" # overwrites the line break printing
 
-    def key_shift_enter(self, event):
+    def key_shift_enter(self):
         pass # overwrites self.key_enter()
 
-    def key_ctrl_backspace(self, event):
+    def key_ctrl_backspace(self):
         if self.inp_SCT.index("insert") != "1.0": # to prevent deleting word after cursor on position 0
             if self.inp_SCT.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
                 self.inp_SCT.delete("insert-1c", "insert") # delete potential space before word
             self.inp_SCT.delete("insert-1c wordstart", "insert") # delete word
             return "break"
+
+    def key_shift_mousewheel(self, event):
+        if event.delta > 0:
+            self.increment_selected_inp_text()
+        else:
+            self.decrement_selected_inp_text()
 
     def insert_address(self):
         last_line = self.inp_SCT.get("insert linestart", "insert")
@@ -365,6 +391,16 @@ class Editor:
         whitespace_wrapping = last_line.split(last_line_stripped)[0]
         new_adr = emu.add_leading_zeros(str(last_adr + 1))
         self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
+
+    def switch_change_option(self):
+        cur_option = self.chng_opt_OMN.current_option()
+        if cur_option == "adr":
+            new_option = "adr_opr"
+        elif cur_option == "adr_opr":
+            new_option = "opr"
+        else:
+            new_option = "adr"
+        self.chng_opt_OMN.set_option(new_option)
 
     def increment_selected_inp_text(self):
         self.change_selected_inp_text(change = +int(self.change_amount_VAR.get()))
@@ -399,7 +435,6 @@ class Editor:
                 if oprs_flag:
                     cell = self.change_opr(cell, change)
             new_text += cell + comment + "\n"
-        print(f"new'{new_text}'")
         return new_text[:-1] # :-1 to remove line break from last line
 
     def change_adr(self, cell, change):
@@ -459,16 +494,14 @@ class Editor:
         return cell
 
 # TO-DO:
-# strg + z
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
-# turn IntVars into BoolVars if necessary
 # OPTIONS:
-#   developer mode (show full error traceback, no internal error window, always dont save)
 #   last dir fixed or automatic
 # rework output coloring
+# update asm_win (direct value operands)
 
 # BUGS:
-# change_selected_inp_text adds \n for empty inp or input with empty lines
+# will default to save_as() when using save() after aborting one save_as()
 
 # SUGGESTIONS
 # ALU anzeigen

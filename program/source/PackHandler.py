@@ -109,6 +109,9 @@ class ProfileHandler:
     def closing_unsaved(self):
         return self.gt_value("closing_unsaved")
 
+    def dev_mode(self):
+        return self.gt_value("dev_mode")
+
 
 class LangHandler:
 

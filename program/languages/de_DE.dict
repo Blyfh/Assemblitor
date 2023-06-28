@@ -64,10 +64,11 @@
         "ClosingUnsaved":        "Beim Schließen von ungespeichertem Programm",
         "ClosingUnsavedOptions": {"ask": "Fragen", "save": "Immer speichern", "discard": "Immer verwerfen"},
 
-        "DeveloperOptions": "Entwicklereinstellungen",
-        "FullTb":           "Kompletter Fehler-Traceback",
+        "Advanced": "Erweiterte Einstellungen",
+        "DevMode":  "Entwicklermodus",
+        "DevModeTip": "Zeigt kompletten Traceback, stellt interne Fehler vollständig dar, gibt Fehler in Konsole aus, verwirft immer ungespeichertes beim Schließen",
 
-        "RestartRequired": "Assemblitor muss neugestartet werden, damit die Änderungen vollständig übernommen werden können",
+        "RestartRequired": "Assemblitor-Neustart notwendig, um Änderungen vollständig zu übernehmen",
 
         "Cancel":  "Abbrechen",
         "Apply":   "Übernehmen",
@@ -77,14 +78,14 @@
     },
     "asm_win": {
         "title":   "Assembly",
-        "minsize": (850, 200),
+        "minsize": (810, 200),
 
-        "text":  """Dieser Assembly-Dialekt ist eine spaltenbasierte Low-Level-Programmiersprache, die sehr nah an Maschinencode ist. Groß-/Kleinschreibung wird nicht beachtet.
+        "text":  """Dieser Assembly-Dialekt ist eine spaltenbasierte Low-Level-Programmiersprache, welche sehr nah an Maschinencode ist. Groß-/Kleinschreibung wird nicht beachtet.
 
-Die Sprache besteht aus einer Folge von Speicherzellen, welche Befehle oder Zahlenwerte speichern können. Jede Speicherzelle beginnt mit ihrer Adresse und endet mit einem Zeilenumbruch. Die Speicherzellen müssen in aufsteigender Reihenfolge sein, aber leere Zellen müssen nicht angegeben werden. Ein Zahlenwert ist immer eine Ganzzahl und wird nach der Adresse gespeichert. Eine leere Speicherzelle wird als eine Zelle mit einem Zahlenwert von 0 interpretiert. Ein Befehl wird auch nach der Adresse angegeben, wobei manche noch ein Operand benötigen.
+Die Sprache besteht aus einer Folge von Speicherzellen, welche Befehle oder Zahlenwerte speichern können. Jede Speicherzelle beginnt mit ihrer Adresse und endet mit einem Zeilenumbruch. Die Speicherzellen müssen in aufsteigender Reihenfolge sein, aber leere Zellen müssen nicht angegeben werden. Ein Zahlenwert ist immer eine Ganzzahl und wird nach der Adresse gespeichert. Eine leere Speicherzelle wird als eine Zelle mit einem Zahlenwert von 0 interpretiert. Ein Befehl wird auch nach der Adresse angegeben, wobei die meisten noch einen Operanden benötigen.
 Kommentare können mit einem Semikolon gemacht werden. Jeglicher Text zwischen dem Semikolon und dem nächsten Zeilenumbruch wird ignoriert.
 
-Das Programm orientiert sich an der Architektur eines Von-Neumann-Prozessors. Das bedeutet, dass es einen Befehlszähler (BZ), einen Zwischenspeicher (genannt Akkumulator oder kurz AKKU) und ein Befehlsregister (BR) benutzt. Zu Beginn ist der BZ auf 0 gesetzt. Wird das Programm ausgeführt, so wird der Befehl an der im BZ gespeicherten Adresse in das BR geladen. Dort wird der Befehl ausgeführt und der BZ um eins erhöht (außer bei Sprüngen und Stopps), sodass der nächste Befehl geladen werden kann.
+Das Programm orientiert sich an der Architektur eines Von-Neumann-Prozessors. Das bedeutet, dass ein Befehlszähler (BZ), ein Zwischenspeicher (genannt Akkumulator oder kurz AKKU) und ein Befehlsregister (BR) benutzt werden. Zu Beginn ist der BZ auf 0 gesetzt. Wird das Programm ausgeführt, so wird der Befehl an der im BZ gespeicherten Adresse in das BR geladen. Dort wird der Befehl ausgeführt und der BZ um eins erhöht (außer bei Sprüngen und Stopps), sodass der nächste Befehl geladen werden kann.
 
 
 Ein einfaches Programm könnte so aussehen:
@@ -103,33 +104,57 @@ So würde das Programm nach dem Ausführen aussehen:
 }
 
 Eine Liste aller akzeptierten Befehle:
-    {STP    } - stoppt das Programm
-    {LDA n  } - lädt den Zahlenwert der Speicherzelle n in den AKKU
-    {LDA #n } - lädt den Zahlenwert n in den AKKU
-    {LDA (n)} - lädt den Zahlenwert der Speicherzelle, dessen Adresse in Speicherzelle n gespeichert ist, in den AKKU
-    {STA n  } - speichert den im AKKU gespeicherten Zahlenwert in Speicherzelle n
-    {ADD n  } - speichert die Summe der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
-    {SUB n  } - speichert die Differenz der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
-    {MUL n  } - speichert das Produkt der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
-    {JMP n  } - springt zu Speicherzelle n indem der BZ auf n gesetzt wird
-    {JZE n  } - springt zu Speicherzelle n indem der BZ auf n gesetzt wird wenn der im AKKU gespeicherte Zahlenwert 0 ist
-    {JLE n  } - springt zu Speicherzelle n indem der BZ auf n gesetzt wird wenn der im AKKU gespeicherte Zahlenwert kleiner oder gleich 0 ist"""
+    {STP    } stoppt das Programm
+    {LDA n  } lädt den Zahlenwert der Speicherzelle n in den AKKU
+    {LDA #n } lädt den Zahlenwert n in den AKKU
+    {LDA (n)} lädt den Zahlenwert der Speicherzelle, dessen Adresse in Speicherzelle n gespeichert ist, in den AKKU
+    {STA n  } speichert den im AKKU gespeicherten Zahlenwert in Speicherzelle n
+    {ADD n  } speichert die Summe der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
+    {ADD #n } speichert die Summe der Zahlenwerte des AKKUs und n in den AKKU
+    {ADD (n)} speichert die Summe der Zahlenwerte des AKKUs und der Speicherzelle, dessen Adresse in Speicherzelle n gespeichert
+    {       } ist, in den AKKU
+    {SUB n  } speichert die Differenz der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
+    {SUB #n } speichert die Differenz der Zahlenwerte des AKKUs und n in den AKKU
+    {SUB (n)} speichert die Differenz der Zahlenwerte des AKKUs und der Speicherzelle, dessen Adresse in Speicherzelle n gespeichert
+    {       } ist, in den AKKU
+    {MUL n  } speichert das Produkt der Zahlenwerte des AKKUs und der Speicherzelle n in den AKKU
+    {MUL #n } speichert das Produkt der Zahlenwerte des AKKUs und n in den AKKU
+    {MUL (n)} speichert das Produkt der Zahlenwerte des AKKUs und der Speicherzelle, dessen Adresse in Speicherzelle n gespeichert
+    {       } ist, in den AKKU
+    {JMP n  } springt zu Speicherzelle n indem der BZ auf n gesetzt wird
+    {JZE n  } springt zu Speicherzelle n indem der BZ auf n gesetzt wird wenn der im AKKU gespeicherte Zahlenwert 0 ist
+    {JLE n  } springt zu Speicherzelle n indem der BZ auf n gesetzt wird wenn der im AKKU gespeicherte Zahlenwert kleiner oder gleich
+    {       } 0 ist"""
     },
     "shc_win": {
         "title":    "Tastenkombinationen",
-        "geometry": "244x120",
+        "geometry": "305x225",
 
         "combos": """F5
 Shift + F5
+Ctrl + Z
+Ctrl + Shift + Z
+Ctrl + Y
+Ctrl + Backspace
 Shift + Enter
-Strg + O
-Strg + R
-Strg + S
-Strg + Shift + S""",
+Shift + Tab
+Shift + Scroll up
+Shift + Scroll down
+Ctrl + O
+Ctrl + R
+Ctrl + S
+Ctrl + Shift + S""",
 
         "actions": """Programm ausführen
 Einzelnen Schritt ausführen
-adressloser Zeilenumbruch
+Änderung rückgängig machen
+Änderung wiederherstellen
+Änderung wiederherstellen
+Ganzes Wort löschen
+Adressloser Zeilenumbruch
+Betroffene Zahlen umstellen
+Betroffene Zahlen inkrementieren
+Betroffene Zahlen dekrementieren
 Datei öffnen
 Datei neu laden
 Datei speichern
