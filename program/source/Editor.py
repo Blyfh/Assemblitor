@@ -47,7 +47,7 @@ class Editor:
         if self.dev_mode:
             traceback.print_exception(val)
         if exc.__name__ == "Exception" or self.dev_mode: # Exceptions are Assembly errors caused by user
-            self.out_SCT.display_error(self.format_exception_message(val))
+            self.out_CDB.display_error(self.format_exception_message(val))
         else: # internal errors caused by program will be displayed in a small pop-up window if developer mode isn't enabled
             mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
 
@@ -120,10 +120,10 @@ class Editor:
         self.taskbar_FRM.pack(fill = "x",    padx = 5, pady = 5)
         self.text_FRM.pack(   fill = "both", padx = 5, pady = (0, 5), expand = True)
 
-        self.inp_SCT = wdg.InpCodeBlock(self.text_FRM, self)
-        self.out_SCT = wdg.OutCodeBlock(self.text_FRM, self)
-        self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
-        self.out_SCT.pack(side = "right", fill = "both", expand = True)
+        self.inp_CDB = wdg.InpCodeBlock(self.text_FRM, self)
+        self.out_CDB = wdg.OutCodeBlock(self.text_FRM, self)
+        self.inp_CDB.pack(side ="left", fill ="both", expand = True, padx = (0, 5))
+        self.out_CDB.pack(side ="right", fill ="both", expand = True)
 
         self.run_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
         self.run_BTN.pack(side = "left", anchor = "center")
@@ -134,8 +134,8 @@ class Editor:
         self.step_TIP = wdg.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
         self.chng_FRM = ttk.Frame(self.taskbar_FRM)
-        self.incr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_SCT.increment_selected_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
-        self.decr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_SCT.decrement_selected_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
+        self.incr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_CDB.increment_selected_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
+        self.decr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_CDB.decrement_selected_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
         self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.incr_BTN.pack()
         self.decr_BTN.pack()
@@ -222,8 +222,8 @@ class Editor:
 
     def update_code_font(self):
         code_font = self.gt_code_font()
-        self.inp_SCT.config(       font = code_font)
-        self.out_SCT.config(       font = code_font)
+        self.inp_CDB.SCT.config(font = code_font)
+        self.out_CDB.SCT.config(font = code_font)
         self.ireg_cmd_LBL.config(  font = code_font)
         self.ireg_opr_LBL.config(  font = code_font)
         self.accu_value_LBL.config(font = code_font)
@@ -269,13 +269,13 @@ class Editor:
                 self.root.title(self.root.title()[1:])
 
     def run(self, execute_all):
-        inp = self.inp_SCT.gt_input()
+        inp = self.inp_CDB.gt_input()
         out = self.emu.gt_out(inp, execute_all)
         self.prgc_value_LBL.config(text = out[1])
         self.accu_value_LBL.config(text = out[2])
         self.ireg_cmd_LBL.config(  text = out[3][0])
         self.ireg_opr_LBL.config(  text = out[3][1])
-        self.out_SCT.display_output(out)
+        self.out_CDB.display_output(out)
 
     def run_all(self):
         self.run(execute_all = True)
@@ -303,7 +303,7 @@ class Editor:
 
     def save_file(self):
         if self.file_path:
-            self.init_inp = self.inp_SCT.gt_input()
+            self.init_inp = self.inp_CDB.gt_input()
             with open(self.file_path, "w", encoding = "utf-8") as file:
                 file.write(self.init_inp)
             self.set_dirty_flag(False)
@@ -320,7 +320,7 @@ class Editor:
         if self.dirty_flag:
             if not self.can_close_unsaved_prg():
                 return
-        self.inp_SCT.st_input(prg_str)
+        self.inp_CDB.st_input(prg_str)
         self.init_inp = prg_str
         self.set_dirty_flag(False)
         if not win_title:
@@ -331,9 +331,9 @@ class Editor:
 
     def on_shift_mousewheel(self, event):
         if event.delta > 0:
-            self.inp_SCT.increment_selected_text()
+            self.inp_CDB.increment_selected_text()
         else:
-            self.inp_SCT.decrement_selected_text()
+            self.inp_CDB.decrement_selected_text()
 
     def switch_change_option(self):
         cur_option = self.chng_opt_OMN.current_option()
@@ -346,11 +346,9 @@ class Editor:
         self.chng_opt_OMN.set_option(new_option)
 
 
-
 # TO-DO:
-# horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
 # OPTIONS:
-#   last dir fixed or automatic
+#   last dir fixed (choose path) or automatic
 # rework output coloring
 
 # BUGS:
@@ -358,7 +356,6 @@ class Editor:
 
 # SUGGESTIONS
 # ALU anzeigen
-# (single step) execution scrolls to the top of the prg (option)
 # break points for debugging
 # farbige markierung der Sprache
 # strg + h

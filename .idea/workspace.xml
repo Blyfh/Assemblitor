@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="isolated CodeBlock-related functions from Editor to Widgets&#10;* OutCodeBlock now jumps to current PC if it would be out of sight&#10;* InpCodeBlock now jumps to cursor pos if it would be out of sight after a newline">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/program/languages/de_DE.dict" beforeDir="false" afterPath="$PROJECT_DIR$/program/languages/de_DE.dict" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/program/languages/en_US.dict" beforeDir="false" afterPath="$PROJECT_DIR$/program/languages/en_US.dict" afterDir="false" />
-    </list>
+    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -188,7 +184,28 @@
       <option name="project" value="LOCAL" />
       <updated>1688299070580</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="updated outdated example program in Editor.assembly_SUB">
+      <created>1688299937519</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1688299937519</updated>
+    </task>
+    <task id="LOCAL-00020" summary="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts">
+      <created>1688306030435</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1688306030435</updated>
+    </task>
+    <task id="LOCAL-00021" summary="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts">
+      <created>1688306046926</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1688306046926</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -216,6 +233,8 @@
     <MESSAGE value="fixed bug for Editor.change_selected_inp_text()&#10;* threw error when changing line with spaces (e.g. &quot; &quot;)" />
     <MESSAGE value="test push" />
     <MESSAGE value="isolated CodeBlock-related functions from Editor to Widgets&#10;* OutCodeBlock now jumps to current PC if it would be out of sight&#10;* InpCodeBlock now jumps to cursor pos if it would be out of sight after a newline" />
-    <option name="LAST_COMMIT_MESSAGE" value="isolated CodeBlock-related functions from Editor to Widgets&#10;* OutCodeBlock now jumps to current PC if it would be out of sight&#10;* InpCodeBlock now jumps to cursor pos if it would be out of sight after a newline" />
+    <MESSAGE value="updated outdated example program in Editor.assembly_SUB" />
+    <MESSAGE value="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts" />
+    <option name="LAST_COMMIT_MESSAGE" value="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts" />
   </component>
 </project>

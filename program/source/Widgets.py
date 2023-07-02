@@ -4,37 +4,55 @@ import tkinter.scrolledtext as st
 import string
 from program.source import Emulator as emu
 
+
 # ASSEMBLITOR WIDGETS
 
-class CodeBlock(st.ScrolledText):
+class CodeBlock(tk.Frame):
 
     def __init__(self, root, editor, *args, **kwargs):
         self.root = root
         self.ed = editor
-        st.ScrolledText.__init__(self, root, bg = self.ed.theme_text_bg, fg = self.ed.theme_text_fg, bd = 0, width = 10, wrap = "word", font = self.ed.gt_code_font(), *args, **kwargs)
+        tk.Frame.__init__(self, self.root)
+        self.SCT = st.ScrolledText(self, bg = self.ed.theme_text_bg, fg = self.ed.theme_text_fg, bd = 0, width = 10, wrap = "none", font = self.ed.gt_code_font(), *args, **kwargs)
+        self.xview_SCB = tk.Scrollbar(self, orient = "horizontal", command = self.SCT.xview)
+        self.SCT["xscrollcommand"] = self.xview_SCB.set
+        self.SCT.pack(side = "top", fill = "both", expand = True)
+        self.xview_SCB_flag = False
+    # events
+        self.SCT.bind(sequence = "<Configure>",  func = lambda event: self.check_for_xvisibility())
+        self.SCT.bind(sequence = "<<Modified>>", func = lambda event: self.check_for_xvisibility())
+
+    def check_for_xvisibility(self): # (un-)display xview_SCB if necessary
+        if self.SCT.xview() == (0.0, 1.0):
+            if self.xview_SCB_flag:
+                self.xview_SCB.pack_forget()
+                self.xview_SCB_flag = False
+        elif not self.xview_SCB_flag:
+            self.xview_SCB.pack(side = "bottom", fill = "x")
+            self.xview_SCB_flag = True
 
 
 class OutCodeBlock(CodeBlock):
     def pack(self, *args, **kwargs):
-        st.ScrolledText.pack(self, *args, **kwargs)
-        self.tag_config("pc_is_here", foreground = self.ed.theme_accent_color)
-        self.config(state = "disabled")
+        tk.Frame.pack(self, *args, **kwargs)
+        self.SCT.tag_config("pc_is_here", foreground = self.ed.theme_accent_color)
+        self.SCT.config(state = "disabled")
 
     def display_output(self, out):
-        self.config(state = "normal", fg = self.ed.theme_text_fg)
-        self.delete("1.0", "end")
-        self.insert("insert", out[0][0])
+        self.SCT.config(state = "normal", fg = self.ed.theme_text_fg)
+        self.SCT.delete("1.0", "end")
+        self.SCT.insert("insert", out[0][0])
         if out[0][1]:
-            self.insert("insert", out[0][1], "pc_is_here")
-            self.yview_moveto(1) # jumps to current command
-        self.insert("insert", out[0][2])
-        self.config(state = "disabled")
+            self.SCT.insert("insert", out[0][1], "pc_is_here")
+            self.SCT.yview_moveto(1) # jumps to current command
+        self.SCT.insert("insert", out[0][2])
+        self.SCT.config(state = "disabled")
 
     def display_error(self, exception_message):
-        self.config(state = "normal", fg = self.ed.theme_error_color)
-        self.delete("1.0", "end")
-        self.insert("insert", exception_message)
-        self.config(state = "disabled")
+        self.SCT.config(state = "normal", fg = self.ed.theme_error_color)
+        self.SCT.delete("1.0", "end")
+        self.SCT.insert("insert", exception_message)
+        self.SCT.config(state = "disabled")
 
 
 class InpCodeBlock(CodeBlock):
@@ -42,52 +60,52 @@ class InpCodeBlock(CodeBlock):
     def __init__(self, root, editor):
         super().__init__(root, editor, undo = True)
         self.already_modified = False
-        self.config(insertbackground = self.ed.theme_cursor_color) # necessary because self.ed isn't defined beforehand
+        self.SCT.config(insertbackground = self.ed.theme_cursor_color) # necessary because self.ed isn't defined beforehand
     # events
-        bindtags = self.bindtags()
-        self.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3])) # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o> that adds a newline
-        self.bind(sequence = "<Control-Shift-Z>",   func = lambda event: self.edit_redo()) # automatic edit_redo() bind is <Control-y>
-        self.bind(sequence = "<Shift-Return>",      func = lambda event: self.regular_newline())
-        self.bind(sequence = "<Return>",            func = lambda event: self.smart_newline())
-        self.bind(sequence = "<Control-BackSpace>", func = lambda event: self.delete_word())
-        self.bind(sequence = "<Key>",               func = lambda event: self.on_key_pressed())
-        self.bind(sequence = "<<Modified>>",        func = lambda event: self.on_inp_modified())
+        bindtags = self.SCT.bindtags()
+        self.SCT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3])) # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o> that adds a newline
+        self.SCT.bind(sequence = "<Control-Shift-Z>",   func = lambda event: self.edit_redo()) # automatic edit_redo() bind is <Control-y>
+        self.SCT.bind(sequence = "<Shift-Return>",      func = lambda event: self.regular_newline())
+        self.SCT.bind(sequence = "<Return>",            func = lambda event: self.smart_newline())
+        self.SCT.bind(sequence = "<Control-BackSpace>", func = lambda event: self.delete_word())
+        self.SCT.bind(sequence = "<Key>",               func = lambda event: self.on_key_pressed())
+        self.SCT.bind(sequence = "<<Modified>>",        func = lambda event: self.on_inp_modified(), add = "+") # 'add' keyword necessary because CodeBlock already uses bind "<<Modified>>"
 
     def regular_newline(self):
         pass # overwrites self.smart_newline()
 
     def smart_newline(self):
         self.insert_address()
-        self.see("insert") # jump to cursor pos if it gets out of sight (due to newline)
+        self.SCT.see("insert") # jump to cursor pos if it gets out of sight (due to newline)
         return "break" # overwrites excessive newline printing
 
     def insert_address(self):
-        last_line = self.get("insert linestart", "insert")
+        last_line = self.SCT.get("insert linestart", "insert")
         last_line_stripped = last_line.lstrip()
         try:
             last_adr = int(last_line_stripped.split()[0])
         except:
-            self.insert("insert", "\n")
+            self.SCT.insert("insert", "\n")
             return
         whitespace_wrapping = last_line.split(last_line_stripped)[0]
         new_adr = emu.add_leading_zeros(str(last_adr + 1))
-        self.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
+        self.SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
 
     def delete_word(self):
-        if self.index("insert") != "1.0": # to prevent deleting word after cursor on position 0
-            if self.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
-                self.delete("insert-1c", "insert") # delete potential space before word
-            self.delete("insert-1c wordstart", "insert") # delete word
+        if self.SCT.index("insert") != "1.0": # to prevent deleting word after cursor on position 0
+            if self.SCT.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
+                self.SCT.delete("insert-1c", "insert") # delete potential space before word
+            self.SCT.delete("insert-1c wordstart", "insert") # delete word
             return "break"
 
     def on_key_pressed(self):
-        if self.get("insert-1c") in string.whitespace:  # last written char is a whitespace
-            self.edit_separator() # add seperator to undo stack so that all actions up to the seperator can be undone -> undoes whole words
+        if self.SCT.get("insert-1c") in string.whitespace:  # last written char is a whitespace
+            self.SCT.edit_separator() # add seperator to undo stack so that all actions up to the seperator can be undone -> undoes whole words
 
     def on_inp_modified(self):
         if not self.already_modified: # because somehow on_inp_modified always gets called twice
-            self.edit_modified(False)
-            if self.ed.init_inp == self.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
+            self.SCT.edit_modified(False)
+            if self.ed.init_inp == self.SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
                 self.ed.set_dirty_flag(False)
             else:
                 self.ed.set_dirty_flag(True)
@@ -105,17 +123,17 @@ class InpCodeBlock(CodeBlock):
         option = self.ed.chng_opt_OMN.current_option() # either "adr", "adr_opr", "opr"
         adrs_flag = "adr" in option
         oprs_flag = "opr" in option
-        sel_range = self.tag_ranges("sel")
+        sel_range = self.SCT.tag_ranges("sel")
         if sel_range:
-            text = self.get(*sel_range)
+            text = self.SCT.get(*sel_range)
             if text.strip():
                 new_text = self.change_text(text, adrs_flag, oprs_flag, change)
-                self.delete(*sel_range)
-                self.insert(sel_range[0], new_text)
-                self.select_text(sel_range[0], new_text)
+                self.SCT.delete(*sel_range)
+                self.SCT.insert(sel_range[0], new_text)
+                self.SCT.select_text(sel_range[0], new_text)
 
     def select_text(self, pos, text):
-        self.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
+        self.SCT.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
 
     def change_text(self, text, adrs_flag, oprs_flag, change = 1):
         lines    = text.split("\n")
@@ -187,11 +205,11 @@ class InpCodeBlock(CodeBlock):
         return cell
 
     def gt_input(self):
-        return self.get(1.0, "end-1c")
+        return self.SCT.get(1.0, "end-1c")
 
     def st_input(self, inp_str:str):
-        self.delete("1.0", "end")
-        self.insert("insert", inp_str)
+        self.SCT.delete("1.0", "end")
+        self.SCT.insert("insert", inp_str)
 
 
 # UNIVERSAL WIDGETS
@@ -336,7 +354,7 @@ class Tooltip:
                  waittime=600,
                  wraplength=250):
 
-        self.waittime = waittime  # in miliseconds, originally 500
+        self.waittime = waittime  # in milliseconds, originally 500
         self.wraplength = wraplength  # in pixels, originally 180
         self.widget = widget
         self.text = text
