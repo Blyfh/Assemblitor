@@ -352,7 +352,6 @@ class Editor:
 # OPTIONS:
 #   last dir fixed or automatic
 # rework output coloring
-# update asm_win (direct value operands)
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()

@@ -89,18 +89,15 @@ The program orients itself to the architecture of a von Neumann processor. This 
 
 
 A simple program may look like this:
-{    00 LDA 04 ; load the value of the 4th MC into the ACC
-    01 STA 05 ; store the value of the ACC into the 5th MC
+{    00 LDA #4 ; load the value 4 into the ACC
+    01 STA 04 ; store the value of the ACC into the 3rd MC
     02 STP    ; stop the program
-    04 42     ; a stored value
 }
 This would be the result after executing the program:
-{    00 LDA 04
-    01 STA 05
+{    00 LDA #4
+    01 STA 04
     02 STP
-    03        ; <--- Notice how the formerly hidden 3rd MC is now displayed
-    04 42
-    05 42
+    04 4      ; a stored value
 }
 
 A list of all accepted commands:

@@ -89,18 +89,15 @@ Das Programm orientiert sich an der Architektur eines Von-Neumann-Prozessors. Da
 
 
 Ein einfaches Programm könnte so aussehen:
-{    00 LDA 04 ; lade den Zahlenwert der vierten Speicherzelle in den AKKU
-    01 STA 05 ; speichere den Zahlenwert des AKKUs in die fünfte Speicherzelle
+{    00 LDA #4 ; lade den Zahlenwert 4 in den AKKU
+    01 STA 04 ; speichere des AKKUs Zahlenwert in die 3. Speicherzelle
     02 STP    ; stoppe das Programm
-    04 42     ; ein gespeicherter Zahlenwert
 }
-So würde das Programm nach dem Ausführen aussehen:
-{    00 LDA 04
-    01 STA 05
+So sieht das Ergebnis nach dem Ausführen des Programms aus:
+{    00 LDA #4
+    01 STA 04
     02 STP
-    03        ; <--- man beachte, dass die vorher verstecke dritte Speicherzelle nun gezeigt wird
-    04 42
-    05 42
+    04 4      ; ein gespeicherter Zahlenwert
 }
 
 Eine Liste aller akzeptierten Befehle:
