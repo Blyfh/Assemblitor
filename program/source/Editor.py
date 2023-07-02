@@ -100,6 +100,7 @@ class Editor:
         self.root.config(menu = self.menubar)
 
         self.file_MNU = tk.Menu(self.menubar, tearoff = False)
+        self.file_MNU.add_command(label = lh.gui("New"),      command = self.open_prg)
         self.file_MNU.add_command(label = lh.gui("Open"),     command = self.open_file)
         self.file_MNU.add_command(label = lh.gui("Reload"),   command = self.reload_file)
         self.file_MNU.add_command(label = lh.gui("Save"),     command = self.save_file)
@@ -176,14 +177,16 @@ class Editor:
     # events
         self.root.bind(sequence = "<F5>",                   func = lambda event: self.run_all())
         self.root.bind(sequence = "<Shift-F5>",             func = lambda event: self.run_step())
+        self.root.bind(sequence = "<Control-n>",            func = lambda event: self.open_prg())
+        self.root.bind(sequence = "<Control-N>",            func = lambda event: self.open_prg()) # double binds necessary due to capslock overwriting lowercase sequence keys
         self.root.bind(sequence = "<Control-o>",            func = lambda event: self.open_file())
-        self.root.bind(sequence = "<Control-O>",            func = lambda event: self.open_file()) # double binds necessary due to capslock overwriting lowercase sequence keys
+        self.root.bind(sequence = "<Control-O>",            func = lambda event: self.open_file())
         self.root.bind(sequence = "<Control-r>",            func = lambda event: self.reload_file())
         self.root.bind(sequence = "<Control-R>",            func = lambda event: self.reload_file())
         self.root.bind(sequence = "<Control-s>",            func = lambda event: self.save_file())
         self.root.bind(sequence = "<Control-S>",            func = lambda event: self.save_file())
         self.root.bind(sequence = "<Control-Shift-s>",      func = lambda event: self.save_file_as())
-        self.root.bind(sequence = "<Control-Shift-S>",      func = lambda event: self.save_file_as())
+        self.root.bind(sequence = "<Control-Shift-S>",      func = lambda event: self.save_file_as()) # again: necessary due to capslock
         self.root.bind(sequence = "<Shift-Tab>",            func = lambda event: self.switch_change_option())
         self.root.bind(sequence = "<Shift-MouseWheel>",     func = self.on_shift_mousewheel)
 
@@ -283,12 +286,6 @@ class Editor:
     def run_step(self):
         self.run(execute_all = False)
 
-    def reload_file(self):
-        if self.file_path:
-            with open(self.file_path, "r", encoding = "utf-8") as file:
-                prg_str = file.read()
-            self.open_prg(prg_str = prg_str, win_title = f"{self.file_path} – {lh.gui('title')}")
-
     def open_file(self):
         if self.dirty_flag:
             if not self.can_close_unsaved_prg():
@@ -300,6 +297,12 @@ class Editor:
             self.set_dirty_flag(False)
             self.reload_file()
         return "break"
+
+    def reload_file(self):
+        if self.file_path:
+            with open(self.file_path, "r", encoding = "utf-8") as file:
+                prg_str = file.read()
+            self.open_prg(prg_str = prg_str, win_title = f"{self.file_path} – {lh.gui('title')}")
 
     def save_file(self):
         if self.file_path:
@@ -353,10 +356,10 @@ class Editor:
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()
+# askyesnocancel buttons don't adjust to language
 
 # SUGGESTIONS
 # ALU anzeigen
 # break points for debugging
 # farbige markierung der Sprache
 # strg + h
-# "neu" als Dateioption

@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts" />
+    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/program/languages/de_DE.dict" beforeDir="false" afterPath="$PROJECT_DIR$/program/languages/de_DE.dict" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/program/languages/en_US.dict" beforeDir="false" afterPath="$PROJECT_DIR$/program/languages/en_US.dict" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/program/source/Editor.py" beforeDir="false" afterPath="$PROJECT_DIR$/program/source/Editor.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -205,7 +210,14 @@
       <option name="project" value="LOCAL" />
       <updated>1688306046926</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts">
+      <created>1688306157438</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1688306157438</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

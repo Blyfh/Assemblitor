@@ -18,13 +18,14 @@
         "title":   "Assemblitor",
         "minsize": (637, 500),
 
-        "File":     "Datei",
-        "Open":     "Öffnen",
-        "Reload":   "Neu laden",
-        "Save":     "Speichern",
-        "SaveAs":   "Speichern unter",
-        "Options":  "Einstellungen",
-        "Exit":     "Beenden",
+        "File":    "Datei",
+        "New":     "Neu",
+        "Open":    "Öffnen",
+        "Reload":  "Neu laden",
+        "Save":    "Speichern",
+        "SaveAs":  "Speichern unter",
+        "Options": "Einstellungen",
+        "Exit":    "Beenden",
 
         "Help":      "Hilfe",
         "Assembly":  "Assembly",
@@ -125,7 +126,7 @@ Eine Liste aller akzeptierten Befehle:
     },
     "shc_win": {
         "title":    "Tastenkombinationen",
-        "geometry": "305x225",
+        "geometry": "320x241",
 
         "combos": """F5
 Shift + F5
@@ -135,8 +136,9 @@ Ctrl + Y
 Ctrl + Backspace
 Shift + Enter
 Shift + Tab
-Shift + Scroll up
-Shift + Scroll down
+Shift + Hochscrollen
+Shift + Runterscrollen
+Ctrl + N
 Ctrl + O
 Ctrl + R
 Ctrl + S
@@ -152,6 +154,7 @@ Adressloser Zeilenumbruch
 Betroffene Zahlen umstellen
 Betroffene Zahlen inkrementieren
 Betroffene Zahlen dekrementieren
+Neue Datei
 Datei öffnen
 Datei neu laden
 Datei speichern
@@ -161,8 +164,8 @@ Datei speichern unter"""
         "title":    "Über",
         "geometry": "303x140",
 
-        "text": """    Ein einfacher Emulator und Editor für Assembly
-    Version: 0.1 Alpha
+        "text": """    Ein simpler Emulator und Editor für Assembly
+    Version: 0.9 Alpha
     2022 von Blyfh erstellt
 
     Bug gefunden? Benachrichtige mich unter

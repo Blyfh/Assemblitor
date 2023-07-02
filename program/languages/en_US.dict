@@ -18,13 +18,14 @@
         "title":   "Assemblitor",
         "minsize": (637, 500),
 
-        "File":     "File",
-        "Open":     "Open",
-        "Reload":   "Reload",
-        "Save":     "Save",
-        "SaveAs":   "Save As",
-        "Options":  "Options",
-        "Exit":     "Exit",
+        "File":    "File",
+        "New":     "New",
+        "Open":    "Open",
+        "Reload":  "Reload",
+        "Save":    "Save",
+        "SaveAs":  "Save As",
+        "Options": "Options",
+        "Exit":    "Exit",
 
         "Help":      "Help",
         "Assembly":  "Assembly",
@@ -124,7 +125,7 @@ A list of all accepted commands:
     },
     "shc_win": {
         "title":    "Shortcuts",
-        "geometry": "280x225",
+        "geometry": "280x241",
 
         "combos": """F5
 Shift + F5
@@ -136,6 +137,7 @@ Shift + Enter
 Shift + Tab
 Shift + Scroll up
 Shift + Scroll down
+Ctrl + N
 Ctrl + O
 Ctrl + R
 Ctrl + S
@@ -151,6 +153,7 @@ Line break without address
 Switch affected numbers
 Increment affected numbers
 Decrement affected numbers
+New file
 Open file
 Reload file
 Save file
