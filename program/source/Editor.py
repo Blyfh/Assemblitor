@@ -38,20 +38,16 @@ class Editor:
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
         self.emu        = emu.Emulator()
         self.action_on_closing_unsaved_prg = ph.closing_unsaved()
-        self.already_modified = False
         self.build_gui()
         if self.dev_mode: # special startup for developers
-            self.assembly_SUB.open()
+            pass
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
         if self.dev_mode:
             traceback.print_exception(val)
         if exc.__name__ == "Exception" or self.dev_mode: # Exceptions are Assembly errors caused by user
-            self.out_SCT.config(state = "normal", fg = self.theme_error_color)
-            self.out_SCT.delete("1.0", "end")
-            self.out_SCT.insert("insert", self.format_exception_message(val))
-            self.out_SCT.config(state = "disabled")
+            self.out_SCT.display_error(self.format_exception_message(val))
         else: # internal errors caused by program will be displayed in a small pop-up window if developer mode isn't enabled
             mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
 
@@ -94,7 +90,7 @@ class Editor:
         self.style.configure("TLabel",                background = self.theme_text_bg,           foreground = self.theme_text_fg)
         self.style.configure("img.TLabel",            background = self.theme_base_bg) # for gui.Button that inherits from ttk.Label
         self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
-        self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = ph.code_font())
+        self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.gt_code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
         self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
         self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
@@ -120,7 +116,14 @@ class Editor:
         self.menubar.add_cascade(label = lh.gui("Help"), menu = self.help_MNU, underline = 0)
 
         self.taskbar_FRM = ttk.Frame(self.root)
-        self.taskbar_FRM.pack(fill = "x", padx = 5, pady = 5)
+        self.text_FRM    = ttk.Frame(self.root)
+        self.taskbar_FRM.pack(fill = "x",    padx = 5, pady = 5)
+        self.text_FRM.pack(   fill = "both", padx = 5, pady = (0, 5), expand = True)
+
+        self.inp_SCT = wdg.InpCodeBlock(self.text_FRM, self)
+        self.out_SCT = wdg.OutCodeBlock(self.text_FRM, self)
+        self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
+        self.out_SCT.pack(side = "right", fill = "both", expand = True)
 
         self.run_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
         self.run_BTN.pack(side = "left", anchor = "center")
@@ -131,8 +134,8 @@ class Editor:
         self.step_TIP = wdg.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
         self.chng_FRM = ttk.Frame(self.taskbar_FRM)
-        self.incr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.increment_selected_inp_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
-        self.decr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.decrement_selected_inp_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
+        self.incr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_SCT.increment_selected_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
+        self.decr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_SCT.decrement_selected_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
         self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.incr_BTN.pack()
         self.decr_BTN.pack()
@@ -170,15 +173,6 @@ class Editor:
         self.prgc_title_LBL.pack(side = "top",    fill = "x")
         self.prgc_value_LBL.pack(side = "bottom", fill = "x")
 
-        self.text_FRM = ttk.Frame(self.root)
-        self.inp_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font(), undo = True, insertbackground = self.theme_cursor_color)
-        self.out_SCT = st.ScrolledText(self.text_FRM, bg = self.theme_text_bg, fg = self.theme_text_fg, bd = 0, width = 10, wrap = "word", font = ph.code_font())
-        self.text_FRM.pack(fill = "both", expand = True, padx = 5, pady = (0, 5))
-        self.inp_SCT.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
-        self.out_SCT.pack(side = "right", fill = "both", expand = True)
-        self.out_SCT.tag_config("pc_is_here", foreground = self.theme_accent_color)
-        self.out_SCT.config(state = "disabled")
-
     # events
         self.root.bind(sequence = "<F5>",                   func = lambda event: self.run_all())
         self.root.bind(sequence = "<Shift-F5>",             func = lambda event: self.run_step())
@@ -191,21 +185,16 @@ class Editor:
         self.root.bind(sequence = "<Control-Shift-s>",      func = lambda event: self.save_file_as())
         self.root.bind(sequence = "<Control-Shift-S>",      func = lambda event: self.save_file_as())
         self.root.bind(sequence = "<Shift-Tab>",            func = lambda event: self.switch_change_option())
-        self.root.bind(sequence = "<Shift-MouseWheel>",     func = self.key_shift_mousewheel)
-        bindtags = self.inp_SCT.bindtags()
-        self.inp_SCT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3])) # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o> that adds a newline
-        self.inp_SCT.bind(sequence = "<Control-Shift-z>",   func = lambda event: self.inp_SCT.edit_redo()) # automatic edit_redo() bind is <Control-y>
-        self.inp_SCT.bind(sequence = "<Return>",            func = lambda event: self.key_enter())
-        self.inp_SCT.bind(sequence = "<Shift-Return>",      func = lambda event: self.key_shift_enter())
-        self.inp_SCT.bind(sequence = "<Control-BackSpace>", func = lambda event: self.key_ctrl_backspace())
-        self.inp_SCT.bind(sequence = "<<Modified>>",        func = lambda event: self.on_inp_modified())
-        self.inp_SCT.bind(sequence = "<Key>",               func = lambda event: self.on_key_pressed())
+        self.root.bind(sequence = "<Shift-MouseWheel>",     func = self.on_shift_mousewheel)
 
     # protocols
         self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
 
     def char_is_digit(self, char): # used by Editor.chng_ETR to only allow entered digits
         return str.isdigit(char) or char == ""
+
+    def gt_code_font(self):
+        return ph.code_font()
 
     def set_theme(self, theme):
         if theme == "light":
@@ -232,12 +221,13 @@ class Editor:
             self.theme_highlight_text_fg = "#000000"
 
     def update_code_font(self):
-        self.inp_SCT.config(       font = ph.code_font())
-        self.out_SCT.config(       font = ph.code_font())
-        self.ireg_cmd_LBL.config(  font = ph.code_font())
-        self.ireg_opr_LBL.config(  font = ph.code_font())
-        self.accu_value_LBL.config(font = ph.code_font())
-        self.prgc_value_LBL.config(font = ph.code_font())
+        code_font = self.gt_code_font()
+        self.inp_SCT.config(       font = code_font)
+        self.out_SCT.config(       font = code_font)
+        self.ireg_cmd_LBL.config(  font = code_font)
+        self.ireg_opr_LBL.config(  font = code_font)
+        self.accu_value_LBL.config(font = code_font)
+        self.prgc_value_LBL.config(font = code_font)
         self.assembly_SUB.set_code_font()
 
     def update_incr_decr_tooltips(self):
@@ -270,21 +260,6 @@ class Editor:
         elif self.action_on_closing_unsaved_prg == "discard":
             return True
 
-    def on_key_pressed(self):
-        if self.inp_SCT.get("insert-1c") in string.whitespace:  # last written char is a whitespace
-            self.inp_SCT.edit_separator() # add seperator to undo stack so that all actions up to the seperator can be undone -> undoes whole words
-
-    def on_inp_modified(self):
-        if not self.already_modified: # because somehow on_inp_modified always gets called twice
-            self.inp_SCT.edit_modified(False)
-            if self.init_inp == self.inp_SCT.get(1.0, "end-1c"): # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
-                self.set_dirty_flag(False)
-            else:
-                self.set_dirty_flag(True)
-            self.already_modified = True
-        else:
-            self.already_modified = False
-
     def set_dirty_flag(self, new_bool):
         if self.dirty_flag != new_bool:
             self.dirty_flag = not self.dirty_flag
@@ -294,18 +269,13 @@ class Editor:
                 self.root.title(self.root.title()[1:])
 
     def run(self, execute_all):
-        inp = self.inp_SCT.get(1.0, "end-1c")
+        inp = self.inp_SCT.gt_input()
         out = self.emu.gt_out(inp, execute_all)
         self.prgc_value_LBL.config(text = out[1])
         self.accu_value_LBL.config(text = out[2])
         self.ireg_cmd_LBL.config(  text = out[3][0])
         self.ireg_opr_LBL.config(  text = out[3][1])
-        self.out_SCT.config(state = "normal", fg = self.theme_text_fg)
-        self.out_SCT.delete("1.0", "end")
-        self.out_SCT.insert("insert", out[0][0])
-        self.out_SCT.insert("insert", out[0][1], "pc_is_here")
-        self.out_SCT.insert("insert", out[0][2])
-        self.out_SCT.config(state = "disabled")
+        self.out_SCT.display_output(out)
 
     def run_all(self):
         self.run(execute_all = True)
@@ -333,7 +303,7 @@ class Editor:
 
     def save_file(self):
         if self.file_path:
-            self.init_inp = self.inp_SCT.get(1.0, "end-1c")
+            self.init_inp = self.inp_SCT.gt_input()
             with open(self.file_path, "w", encoding = "utf-8") as file:
                 file.write(self.init_inp)
             self.set_dirty_flag(False)
@@ -350,9 +320,8 @@ class Editor:
         if self.dirty_flag:
             if not self.can_close_unsaved_prg():
                 return
-        self.inp_SCT.delete("1.0", "end")
+        self.inp_SCT.st_input(prg_str)
         self.init_inp = prg_str
-        self.inp_SCT.insert("insert", prg_str)
         self.set_dirty_flag(False)
         if not win_title:
             self.root.title(lh.gui("title"))
@@ -360,37 +329,11 @@ class Editor:
     def open_demo_prg(self):
         self.open_prg(lh.demo())
 
-    def key_enter(self):
-        self.insert_address()
-        return "break" # overwrites the line break printing
-
-    def key_shift_enter(self):
-        pass # overwrites self.key_enter()
-
-    def key_ctrl_backspace(self):
-        if self.inp_SCT.index("insert") != "1.0": # to prevent deleting word after cursor on position 0
-            if self.inp_SCT.get("insert-1c", "insert") != "\n": # to prevent deleting the word of the line above
-                self.inp_SCT.delete("insert-1c", "insert") # delete potential space before word
-            self.inp_SCT.delete("insert-1c wordstart", "insert") # delete word
-            return "break"
-
-    def key_shift_mousewheel(self, event):
+    def on_shift_mousewheel(self, event):
         if event.delta > 0:
-            self.increment_selected_inp_text()
+            self.inp_SCT.increment_selected_text()
         else:
-            self.decrement_selected_inp_text()
-
-    def insert_address(self):
-        last_line = self.inp_SCT.get("insert linestart", "insert")
-        last_line_stripped = last_line.lstrip()
-        try:
-            last_adr = int(last_line_stripped.split()[0])
-        except:
-            self.inp_SCT.insert("insert", "\n")
-            return
-        whitespace_wrapping = last_line.split(last_line_stripped)[0]
-        new_adr = emu.add_leading_zeros(str(last_adr + 1))
-        self.inp_SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
+            self.inp_SCT.decrement_selected_text()
 
     def switch_change_option(self):
         cur_option = self.chng_opt_OMN.current_option()
@@ -402,96 +345,7 @@ class Editor:
             new_option = "adr"
         self.chng_opt_OMN.set_option(new_option)
 
-    def increment_selected_inp_text(self):
-        self.change_selected_inp_text(change = +int(self.change_amount_VAR.get()))
 
-    def decrement_selected_inp_text(self):
-        self.change_selected_inp_text(change = -int(self.change_amount_VAR.get()))
-
-    def change_selected_inp_text(self, change):
-        option = self.chng_opt_OMN.current_option() # either "adr", "adr_opr", "opr"
-        adrs_flag = "adr" in option
-        oprs_flag = "opr" in option
-        sel_range = self.inp_SCT.tag_ranges("sel")
-        if sel_range:
-            text = self.inp_SCT.get(*sel_range)
-            if text.strip():
-                new_text = self.change_text(text, adrs_flag, oprs_flag, change)
-                self.inp_SCT.delete(*sel_range)
-                self.inp_SCT.insert(sel_range[0], new_text)
-                self.select_text(self.inp_SCT, sel_range[0], new_text)
-
-    def select_text(self, text_widget, pos, text):
-        text_widget.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
-
-    def change_text(self, text, adrs_flag, oprs_flag, change = 1):
-        lines    = text.split("\n")
-        new_text = ""
-        for line in lines:
-            cell, comment = emu.split_cell_at_comment(line)
-            if len(cell):
-                if adrs_flag:
-                    cell = self.change_adr(cell, change)
-                if oprs_flag:
-                    cell = self.change_opr(cell, change)
-            new_text += cell + comment + "\n"
-        return new_text[:-1] # :-1 to remove line break from last line
-
-    def change_adr(self, cell, change):
-        tok_strs  = emu.Cell.split_cel_str(self = None, cel_str_unstripped = cell)
-        cell_rest = "".join(tok_strs[1:])
-        adr_str   = tok_strs[0]
-        i = 0
-        while i < len(adr_str) and adr_str[i] in string.whitespace: # jump over left wrapping
-            i += 1
-        j = i
-        if j < len(adr_str) and adr_str[j] == "-":
-            j += 1
-        while j < len(adr_str) and adr_str[j] in "0123456789": # find end of address
-            j += 1
-        if j < len(adr_str) and adr_str[j] not in string.whitespace: # chars after address are not supported
-            return cell
-        old_adr  = adr_str[i:j]
-        if old_adr and old_adr != "-":
-            wrapping = adr_str.split(old_adr)
-            new_adr  = wrapping[0] + str(int(old_adr) + change) + wrapping[1]
-            cell = emu.add_leading_zeros(new_adr) + cell_rest
-        return cell
-
-    def change_opr(self, cell, change):
-        tok_strs  = emu.Cell.split_cel_str(self = None, cel_str_unstripped = cell)
-        cell_rest = "".join(tok_strs[:-1])
-        opr_str   = tok_strs[-1]
-        i = len(opr_str) - 1
-        while i >= 0 and opr_str[i] in string.whitespace:
-            i -= 1
-        if i >= 0 and opr_str[i] == ")": # indirect address
-            i -= 1
-            j = i
-            while j >= 0 and opr_str[j] in "0123456789":
-                j -= 1
-            if j >= 0 and opr_str[j] != "-":
-                j += 1
-            if j > 0 and opr_str[j - 1] != "(":
-                return cell
-            if j > 1 and opr_str[j - 2] not in string.whitespace: # chars before indirect address are not supported
-                return cell
-            offset = 1
-        else: # direct address
-            j = i
-            while j >= 0 and opr_str[j] in "0123456789":
-                j -= 1
-            if j >= 0 and opr_str[j] != "-":
-                j += 1
-            if j > 0 and opr_str[j - 1] not in string.whitespace: # absolute values or chars before direct address are not supported
-                return cell
-            offset = 0
-        old_opr = opr_str[j:i + 1]
-        if old_opr and old_opr != "-":
-            wrapping = opr_str.split(old_opr)
-            new_opr = wrapping[0][:-1] + str(int(old_opr) + change) + wrapping[1] # [:-1] because of "("
-            cell = cell_rest + "(" * offset + emu.add_leading_zeros(new_opr, offset)
-        return cell
 
 # TO-DO:
 # horizontale SCB, wenn Text in SCT zu lang wird (anstelle von word wrap)
