@@ -92,8 +92,8 @@ class Editor:
         self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
         self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.gt_code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
-        self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
-        self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)  # , relief = "flat", borderwidth = 1)
+        self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg) # , relief = "flat", borderwidth = 1)
+        self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg) # , relief = "flat", borderwidth = 1)
 
     # elements
         self.menubar = tk.Menu(self.root)
@@ -123,20 +123,23 @@ class Editor:
 
         self.inp_CDB = wdg.InpCodeBlock(self.text_FRM, self)
         self.out_CDB = wdg.OutCodeBlock(self.text_FRM, self)
-        self.inp_CDB.pack(side ="left", fill ="both", expand = True, padx = (0, 5))
-        self.out_CDB.pack(side ="right", fill ="both", expand = True)
+        self.inp_CDB.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
+        self.out_CDB.pack(side = "right", fill = "both", expand = True)
 
-        self.run_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering= sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
+        self.run_BTN = wdg.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering = sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
         self.run_BTN.pack(side = "left", anchor = "center")
         self.run_TIP = wdg.Tooltip(self.run_BTN, text = lh.gui("RunPrg"))
 
-        self.step_BTN = wdg.Button(self.taskbar_FRM, style ="img.TLabel", command = self.run_step, img_default = sh.gt_sprite("BTN_run_once_default"), img_hovering= sh.gt_sprite("BTN_run_once_hovering"), img_clicked = sh.gt_sprite("BTN_run_once_clicked"))
+        self.step_BTN = wdg.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_step, img_default = sh.gt_sprite("BTN_run_once_default"), img_hovering = sh.gt_sprite("BTN_run_once_hovering"), img_clicked = sh.gt_sprite("BTN_run_once_clicked"))
         self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0))
         self.step_TIP = wdg.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
+        self.seperator_FRM = tk.Frame(self.taskbar_FRM, width = 2, bg = self.theme_text_bg) # not using ttk.Seperator because width and color can't be customized
+        self.seperator_FRM.pack(side = "left", anchor = "center", fill = "y", padx = (5, 0), pady = 3)
+
         self.chng_FRM = ttk.Frame(self.taskbar_FRM)
-        self.incr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_CDB.increment_selected_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
-        self.decr_BTN = wdg.Button(self.chng_FRM, style ="img.TLabel", command = self.inp_CDB.decrement_selected_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering= sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
+        self.incr_BTN = wdg.Button(self.chng_FRM, style = "img.TLabel", command = self.inp_CDB.increment_selected_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering = sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
+        self.decr_BTN = wdg.Button(self.chng_FRM, style = "img.TLabel", command = self.inp_CDB.decrement_selected_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering = sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
         self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.incr_BTN.pack()
         self.decr_BTN.pack()
@@ -145,7 +148,7 @@ class Editor:
 
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
         vcmd = self.chng_adjust_FRM.register(self.char_is_digit)
-        self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 3)
+        self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 1)
         self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.chng_ETR.pack(anchor = "nw")
@@ -346,7 +349,7 @@ class Editor:
             new_option = "opr"
         else:
             new_option = "adr"
-        self.chng_opt_OMN.set_option(new_option)
+        self.chng_opt_OMN.st_option(new_option)
 
 
 # TO-DO:

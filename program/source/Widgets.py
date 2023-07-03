@@ -304,7 +304,7 @@ class OptionMenu(ttk.OptionMenu):
             raise RuntimeError(f"OptionMenu: Can't find option '{option}' in given options:\n    {self.options}")
         return displaytext
 
-    def set_option(self, option):
+    def st_option(self, option):
         self.textvariable.set(self.gt_displaytext(option))
 
     def current_option(self):
@@ -313,6 +313,55 @@ class OptionMenu(ttk.OptionMenu):
             if self.options[option] == current_option_displaytext:
                 return option
         raise RuntimeError(f"OptionMenu: Can't find current option for selected displaytext '{current_option_displaytext}'.")
+
+
+class Spinbox(tk.Text):
+
+    def __init__(self, root, min:int = 0, max:int = 100, default:int = 50, *args, **kwargs):
+        self.root = root
+        self.frame = tk.Frame(self.root)
+        if min >= 0 and max >= 0 and default >= 0:
+            self.min = min
+            self.max = max
+            self.last_valid_inp = default
+        else:
+            raise ValueError(f"Spinbox: Either min {min}, max {max} or default {default} is negative.")
+        tk.Text.__init__(self, self.frame, *args, **kwargs)
+        self.pack(side = "left", fill = "both", expand = True)
+        self.insert("insert", default)
+
+        # Copy geometry methods of self.frame without overriding Text
+        # methods -- hack! [copied by ScrolledText, to redirect packing to self.frame]
+        text_meths = vars(tk.Text).keys()
+        methods = vars(tk.Pack).keys() | vars(tk.Grid).keys() | vars(tk.Place).keys()
+        methods = methods.difference(text_meths)
+        for m in methods:
+            if m[0] != '_' and m != 'config' and m != 'configure':
+                setattr(self, m, getattr(self.frame, m))
+        self.bind(sequence = "<<Modified>>", func = self.validate_chars)
+        self.bind(sequence = "<FocusOut>",   func = self.validate_range)
+
+    def gt(self):
+        return int(self.get(1.0, "end-1c"))
+
+    def st(self, value:int):
+        self.delete(1.0, "end-1c")
+        self.insert(str(value))
+
+    def validate_chars(self, event): # check for nonnumeral characters on <Key>
+        print("hey")
+        inp = self.get(1.0, "end-1c")
+        if inp.isdecimal():
+            self.last_valid_inp = int(inp)
+        else: # reset invalid change
+            self.st(self.last_valid_inp)
+
+    def validate_range(self): # check for invalid numbers on <Enter> or <FocusOut>
+        inp = self.gt()
+        if inp < self.min:
+            self.st(self.min)
+        elif inp > self.max:
+            self.st(self.max)
 
 
 class Tooltip:
@@ -468,3 +517,11 @@ class Tooltip:
         if tw:
             tw.destroy()
         self.tw = None
+
+
+root = tk.Tk()
+root.config(bg = "red")
+root.geometry("200x80")
+etr = Spinbox(root, height = 1, width = 20, default = 4)
+etr.pack()
+root.mainloop()
