@@ -217,8 +217,8 @@ class InpCodeBlock(CodeBlock):
 class Button(ttk.Label):
 
     def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 30, *args, **kwargs):
-        ttk.Label.__init__(self, root, *args, **kwargs)
         self.root = root
+        ttk.Label.__init__(self, self.root, *args, **kwargs)
         self.command = command
         self.hovering = False # mouse is on button
         self.pressing = False # button is getting pressed down
@@ -318,6 +318,7 @@ class OptionMenu(ttk.OptionMenu):
 class Spinbox(tk.Text):
 
     def __init__(self, root, min:int = 0, max:int = 100, default:int = 50, *args, **kwargs):
+        print("init")
         self.root = root
         self.frame = tk.Frame(self.root)
         if min >= 0 and max >= 0 and default >= 0:
@@ -338,8 +339,9 @@ class Spinbox(tk.Text):
         for m in methods:
             if m[0] != '_' and m != 'config' and m != 'configure':
                 setattr(self, m, getattr(self.frame, m))
-        self.bind(sequence = "<<Modified>>", func = self.validate_chars)
-        self.bind(sequence = "<FocusOut>",   func = self.validate_range)
+        print("HEY")
+        self.bind(sequence = "<<Modified>>", func = lambda event: self.validate_chars()) # todo won't get called for some fucking reason
+        self.bind(sequence = "<FocusOut>",   func = lambda event: self.validate_range())
 
     def gt(self):
         return int(self.get(1.0, "end-1c"))
@@ -348,8 +350,8 @@ class Spinbox(tk.Text):
         self.delete(1.0, "end-1c")
         self.insert(str(value))
 
-    def validate_chars(self, event): # check for nonnumeral characters on <Key>
-        print("hey")
+    def validate_chars(self): # check for nonnumeral characters on <Key>
+        print("checking char...")
         inp = self.get(1.0, "end-1c")
         if inp.isdecimal():
             self.last_valid_inp = int(inp)
@@ -357,11 +359,62 @@ class Spinbox(tk.Text):
             self.st(self.last_valid_inp)
 
     def validate_range(self): # check for invalid numbers on <Enter> or <FocusOut>
+        print("focus out")
         inp = self.gt()
         if inp < self.min:
             self.st(self.min)
         elif inp > self.max:
             self.st(self.max)
+
+
+class Slider(ttk.Label):
+
+    def __init__(self, root, command, img = None, steps:int = 1, *args, **kwargs):
+        self.root = root
+        ttk.Label.__init__(self, self.root, *args, **kwargs)
+        self.command = command
+        self.steps = steps
+        if img:
+            self.config(image = img)
+        self.hovering = False
+        self.pressed = False
+        self.motion_tracker = None
+        self.last_y = None
+        self.bind(sequence = "<Enter>",           func = lambda event: self.on_enter())
+        self.bind(sequence = "<Leave>",           func = lambda event: self.on_leave())
+        self.bind(sequence = "<ButtonPress-1>",   func = lambda event: self.on_pressed())
+        self.bind(sequence = "<ButtonRelease-1>", func = lambda event: self.on_released())
+
+    def notify_listeners(self, change):
+        if self.command:
+            self.command(change = change)
+
+    def on_enter(self):
+        self.hovering = True
+        self.root.config(cursor = "double_arrow")
+
+    def on_leave(self):
+        self.hovering = False
+        if not self.pressed:
+            self.root.config(cursor = "arrow")
+
+    def on_pressed(self):
+        self.pressed = True
+        self.motion_tracker = self.root.bind(sequence = "<Motion>", func = self.on_motion)
+
+    def on_released(self):
+        self.pressed = False
+        self.root.unbind(sequence = "<Motion>", funcid = self.motion_tracker)
+        self.last_y = None
+        if not self.hovering:
+            self.root.config(cursor = "arrow")
+
+    def on_motion(self, event):
+        if self.last_y:
+            change = (event.y - self.last_y) * self.steps
+            self.notify_listeners(change)
+        self.last_y = event.y
+
 
 
 class Tooltip:
@@ -522,6 +575,6 @@ class Tooltip:
 root = tk.Tk()
 root.config(bg = "red")
 root.geometry("200x80")
-etr = Spinbox(root, height = 1, width = 20, default = 4)
+etr = Spinbox(root)
 etr.pack()
 root.mainloop()
