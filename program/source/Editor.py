@@ -356,6 +356,7 @@ class Editor:
 # OPTIONS:
 #   last dir fixed (choose path) or automatic
 # rework output coloring
+# lock in-/decrement buttons when nothing is selected
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()

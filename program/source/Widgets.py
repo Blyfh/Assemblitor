@@ -22,7 +22,7 @@ class CodeBlock(tk.Frame):
         self.SCT.bind(sequence = "<Configure>",  func = lambda event: self.check_for_xvisibility())
         self.SCT.bind(sequence = "<<Modified>>", func = lambda event: self.check_for_xvisibility())
 
-    def check_for_xvisibility(self): # (un-)display xview_SCB if necessary
+    def check_for_xvisibility(self): # (de-)display xview_SCB if necessary
         if self.SCT.xview() == (0.0, 1.0):
             if self.xview_SCB_flag:
                 self.xview_SCB.pack_forget()
@@ -216,7 +216,7 @@ class InpCodeBlock(CodeBlock):
 
 class Button(ttk.Label):
 
-    def __init__(self, root, command, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 30, *args, **kwargs):
+    def __init__(self, root, command, text:str = None, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 30, *args, **kwargs):
         self.root = root
         ttk.Label.__init__(self, self.root, *args, **kwargs)
         self.command = command
@@ -228,6 +228,8 @@ class Button(ttk.Label):
         self.img_hovering = None
         self.img_clicked  = None
 
+        if text:
+            self.config(text = text)
         if img_default:
             self.image_flag = True
             self.img_default = img_default
@@ -315,32 +317,29 @@ class OptionMenu(ttk.OptionMenu):
         raise RuntimeError(f"OptionMenu: Can't find current option for selected displaytext '{current_option_displaytext}'.")
 
 
-class Spinbox(tk.Text):
+class Spinbox(tk.Frame):
 
     def __init__(self, root, min:int = 0, max:int = 100, default:int = 50, *args, **kwargs):
-        print("init")
         self.root = root
-        self.frame = tk.Frame(self.root)
+        tk.Frame.__init__(self, self.root)
+        self.text = tk.Text(self, *args, **kwargs)
+        self.text.pack(side = "left", fill = "both", expand = True)
+        self.already_modified = False
         if min >= 0 and max >= 0 and default >= 0:
             self.min = min
             self.max = max
             self.last_valid_inp = default
         else:
-            raise ValueError(f"Spinbox: Either min {min}, max {max} or default {default} is negative.")
-        tk.Text.__init__(self, self.frame, *args, **kwargs)
-        self.pack(side = "left", fill = "both", expand = True)
-        self.insert("insert", default)
+            raise ValueError(f"Spinbox: Either min ({min}), max ({max}) or default ({default}) is negative.")
 
-        # Copy geometry methods of self.frame without overriding Text
-        # methods -- hack! [copied by ScrolledText, to redirect packing to self.frame]
-        text_meths = vars(tk.Text).keys()
-        methods = vars(tk.Pack).keys() | vars(tk.Grid).keys() | vars(tk.Place).keys()
-        methods = methods.difference(text_meths)
+        # redirect every method to self.text except for packing methods, which still direct to the frame
+        methods = dir(tk.Text)
         for m in methods:
-            if m[0] != '_' and m != 'config' and m != 'configure':
-                setattr(self, m, getattr(self.frame, m))
-        print("HEY")
-        self.bind(sequence = "<<Modified>>", func = lambda event: self.validate_chars()) # todo won't get called for some fucking reason
+            if m[0] != "_" and m[:4] not in ["pack", "grid"] and m[:5] != "place": # won't redirect any standard/private/pack/grid/place methods
+                setattr(self, m, getattr(self.text, m))
+
+        self.insert("insert", default)
+        self.bind(sequence = "<<Modified>>", func = self.validate_chars)
         self.bind(sequence = "<FocusOut>",   func = lambda event: self.validate_range())
 
     def gt(self):
@@ -348,15 +347,34 @@ class Spinbox(tk.Text):
 
     def st(self, value:int):
         self.delete(1.0, "end-1c")
-        self.insert(str(value))
+        self.insert("end-1c", str(value))
 
-    def validate_chars(self): # check for nonnumeral characters on <Key>
-        print("checking char...")
-        inp = self.get(1.0, "end-1c")
-        if inp.isdecimal():
-            self.last_valid_inp = int(inp)
-        else: # reset invalid change
-            self.st(self.last_valid_inp)
+    def validate_chars(self, event): # check for nonnumeral characters on <Key>
+        if self.already_modified:
+            self.already_modified = False
+        else:
+            inp = self.get(1.0, "end-1c")
+            if inp.isdigit():
+                if inp[0] == "0": # overwriting to avoid "003" instead of "3"
+                    i = 0
+                    for digit in inp: # find all zeros at front
+                        if digit == "0":
+                            i += 1
+                        else:
+                            break
+                    if i != len(inp): # cut of zeros at front
+                        inp = inp[i:]
+                    else: # inp was only zeros
+                        inp = 0
+                    self.st(inp)
+                self.last_valid_inp = int(inp)
+            elif inp == "":
+                self.last_valid_inp = 0
+                self.st(0)
+            else: # reset invalid change
+                self.st(self.last_valid_inp)
+            self.already_modified = True
+            self.edit_modified(False)
 
     def validate_range(self): # check for invalid numbers on <Enter> or <FocusOut>
         print("focus out")
@@ -414,7 +432,6 @@ class Slider(ttk.Label):
             change = (event.y - self.last_y) * self.steps
             self.notify_listeners(change)
         self.last_y = event.y
-
 
 
 class Tooltip:
@@ -574,7 +591,9 @@ class Tooltip:
 
 root = tk.Tk()
 root.config(bg = "red")
-root.geometry("200x80")
-etr = Spinbox(root)
+root.geometry("400x200")
+etr = Spinbox(root, height = 1)
 etr.pack()
+btn = Spinbox(root, height = 1)
+btn.pack()
 root.mainloop()
