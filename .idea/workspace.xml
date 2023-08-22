@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="finished Spinbox and Slider&#10;* implemented Spinbox for Editor.chng_SBX&#10;* added a slider_wheel sprite&#10;* reworked structure of SpriteHandler and program/sprites&#10;* bugfixing for CodeBlock (bug for using &lt;Control-Shift-Z when all is redone, for reselecting changed text)&#10;* buttons can now get locked&#10;* incr-/decr_BTN now get locked when nothing is selected">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/program/source/Editor.py" beforeDir="false" afterPath="$PROJECT_DIR$/program/source/Editor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/program/source/PackHandler.py" beforeDir="false" afterPath="$PROJECT_DIR$/program/source/PackHandler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/program/source/Subwindows.py" beforeDir="false" afterPath="$PROJECT_DIR$/program/source/Subwindows.py" afterDir="false" />
+    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="implemented Spinbox for options_SUB&#10;* Spinbox now supports textvariables&#10;* OptionMenu doesn't require a command parameter&#10;* SpriteHandler doesn't require a theme parameter&#10;* small cleanup in Subwindows.Options&#10;* Slider speed is now controlled by the threshold parameter">
       <change beforePath="$PROJECT_DIR$/program/source/Widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/program/source/Widgets.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -281,7 +277,14 @@
       <option name="project" value="LOCAL" />
       <updated>1692708292699</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="implemented Spinbox for options_SUB&#10;* Spinbox now supports textvariables&#10;* OptionMenu doesn't require a command parameter&#10;* SpriteHandler doesn't require a theme parameter&#10;* small cleanup in Subwindows.Options&#10;* Slider speed is now controlled by the threshold parameter">
+      <created>1692715242016</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1692715242016</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -316,6 +319,7 @@
     <MESSAGE value="new widget Slider&#10;* unifinished bugfixing because Spinbox event &lt;&lt;Modified&gt;&gt; won't get called" />
     <MESSAGE value="finished bugfixing regarding Spinbox.validate_chars()&#10;* Spinbox is now unable to be blank -&gt; will default to 0&#10;* Spinbox will now cut off unnecessary zeros at the front&#10;* improved method redirecion in Spinbox.__init__()" />
     <MESSAGE value="finished Spinbox and Slider&#10;* implemented Spinbox for Editor.chng_SBX&#10;* added a slider_wheel sprite&#10;* reworked structure of SpriteHandler and program/sprites&#10;* bugfixing for CodeBlock (bug for using &lt;Control-Shift-Z when all is redone, for reselecting changed text)&#10;* buttons can now get locked&#10;* incr-/decr_BTN now get locked when nothing is selected" />
-    <option name="LAST_COMMIT_MESSAGE" value="finished Spinbox and Slider&#10;* implemented Spinbox for Editor.chng_SBX&#10;* added a slider_wheel sprite&#10;* reworked structure of SpriteHandler and program/sprites&#10;* bugfixing for CodeBlock (bug for using &lt;Control-Shift-Z when all is redone, for reselecting changed text)&#10;* buttons can now get locked&#10;* incr-/decr_BTN now get locked when nothing is selected" />
+    <MESSAGE value="implemented Spinbox for options_SUB&#10;* Spinbox now supports textvariables&#10;* OptionMenu doesn't require a command parameter&#10;* SpriteHandler doesn't require a theme parameter&#10;* small cleanup in Subwindows.Options&#10;* Slider speed is now controlled by the threshold parameter" />
+    <option name="LAST_COMMIT_MESSAGE" value="implemented Spinbox for options_SUB&#10;* Spinbox now supports textvariables&#10;* OptionMenu doesn't require a command parameter&#10;* SpriteHandler doesn't require a theme parameter&#10;* small cleanup in Subwindows.Options&#10;* Slider speed is now controlled by the threshold parameter" />
   </component>
 </project>

@@ -353,7 +353,7 @@ class OptionMenu(ttk.OptionMenu):
 
 
 class Spinbox(tk.Frame):
-    # TODO mark text when clicking on Text
+
     def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = None, textvariable:tk.IntVar = None, threshold:int = 15, bg = None, width:int = None, height = None, wrap = None, *args, **kwargs):
         if default is None:
             default = min
@@ -380,6 +380,7 @@ class Spinbox(tk.Frame):
         self.text.bind(sequence = "<<Modified>>", func = lambda event: self.validate_chars())
         self.text.bind(sequence = "<Return>",     func = lambda event: self.focus_out())
         self.text.bind(sequence = "<Escape>",     func = lambda event: self.focus_out())
+        self.text.bind(sequence = "<FocusIn>",    func = lambda event: self.select_all())
         self.text.bind(sequence = "<FocusOut>",   func = lambda event: self.update())
 
     def gt(self):
@@ -423,6 +424,9 @@ class Spinbox(tk.Frame):
         self.root.focus_force()
         self.root.lift()
         self.root.update()
+
+    def select_all(self):
+        self.text.tag_add("sel", 1.0, "end-1c")
 
     def update(self, change:int = 0):
         self.validate_range(change)

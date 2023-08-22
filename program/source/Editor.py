@@ -366,6 +366,7 @@ class Editor:
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()
 # askyesnocancel buttons don't adjust to language
+# <Control-Shift-z> with capslock still buggy
 
 # SUGGESTIONS
 # ALU anzeigen
