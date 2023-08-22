@@ -13,9 +13,6 @@ def startup(profile_handler, language_handler, emulator):
     lh  = language_handler
     emu = emulator
 
-def char_is_digit(char): # used by Options.code_font_size_SBX, Options.min_adr_len_SBX to only allow entered digits
-    return str.isdigit(char) or char == ""
-
 def gt_font_faces_with_names():
     font_faces_with_names = {}
     for font_face in gt_font_faces():
@@ -106,20 +103,19 @@ class Options(Subwindow):
         self.subroot.title(lh.opt_win("title"))
         self.options_FRM = ttk.Frame(self.subroot, style ="text.TFrame")
         self.options_FRM.pack(fill = "both", expand = True)
-        vcmd = self.options_FRM.register(char_is_digit) # used for code_font_size_SBX and min_adr_len_SBX to only allow entered digits
 
         # appearance
         self.appearance_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Appearance"))
-        self.light_theme_CHB    = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = lambda: self.change(restart_required = True), onvalue = True, offvalue = False)
+        self.light_theme_CHB    = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("LightTheme"), variable = self.is_light_theme_VAR, command = lambda: self.update_on_restart_required_change(), onvalue = True, offvalue = False)
         if not self.is_light_theme_VAR.get():
             self.light_theme_CHB.state(["!alternate"])  # deselect the checkbutton
         self.language_FRM       = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.language_LBL       = ttk.Label(self.language_FRM, style = "TLabel", text = lh.opt_win("Language"))
-        self.language_OMN       = wdg.OptionMenu(self.language_FRM, textvariable = self.language_VAR, default_option = ph.language(), options = lh.gt_langs_with_names(), command = lambda event: self.change(restart_required = True), style = "TMenubutton")
+        self.language_OMN       = wdg.OptionMenu(self.language_FRM, textvariable = self.language_VAR, default_option = ph.language(), options = lh.gt_langs_with_names(), command = lambda event: self.update_on_restart_required_change(), style = "TMenubutton")
         self.code_font_FRM      = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.code_font_LBL      = ttk.Label(self.code_font_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
-        self.code_font_size_SBX = ttk.Spinbox(self.code_font_FRM, textvariable = self.code_font_size_VAR, from_ = 5, to = 30, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 3, style = "TSpinbox")
-        self.code_font_face_OMN = wdg.OptionMenu(self.code_font_FRM, textvariable = self.code_font_face_VAR, default_option = ph.code_font_face(), options = gt_font_faces_with_names(), command = lambda event: self.change(), style = "TMenubutton")
+        self.code_font_size_SBX = wdg.Spinbox(self.code_font_FRM, self.subroot, textvariable = self.code_font_size_VAR, min = 5, max = 30, default = self.code_font_size_VAR.get())
+        self.code_font_face_OMN = wdg.OptionMenu(self.code_font_FRM, textvariable = self.code_font_face_VAR, default_option = ph.code_font_face(), options = gt_font_faces_with_names(), style = "TMenubutton")
         self.appearance_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
         self.light_theme_CHB.pack(   fill = "x",     pady = 5, padx = (20, 5))
         self.language_FRM      .pack(fill = "x",               padx = (20, 5))
@@ -134,13 +130,13 @@ class Options(Subwindow):
         self.assembler_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Assembler"))
         self.min_adr_len_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.min_adr_len_LBL = ttk.Label(self.min_adr_len_FRM, style = "TLabel", text = lh.opt_win("MinAdrLen"))
-        self.min_adr_len_SBX = ttk.Spinbox(self.min_adr_len_FRM, textvariable = self.min_adr_len_VAR, from_ = 1, to = 10, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 3, style = "TSpinbox")
+        self.min_adr_len_SBX = wdg.Spinbox(self.min_adr_len_FRM, self.subroot, textvariable = self.min_adr_len_VAR, min = 1, max = 10, default = self.min_adr_len_VAR.get())
         self.max_cels_FRM    = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.max_cels_LBL    = ttk.Label(self.max_cels_FRM, style = "TLabel", text = lh.opt_win("MaxCels"))
-        self.max_cels_SBX    = ttk.Spinbox(self.max_cels_FRM, textvariable = self.max_cels_VAR, from_ = 1, to = 1048576, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 6, style = "TSpinbox")
+        self.max_cels_SBX    = wdg.Spinbox(self.max_cels_FRM, self.subroot, textvariable = self.max_cels_VAR, min = 1, max = 1048576, default = self.max_cels_VAR.get(), threshold = 1)
         self.max_jmps_FRM    = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.max_jmps_LBL    = ttk.Label(self.max_jmps_FRM, style = "TLabel", text = lh.opt_win("MaxJmps"))
-        self.max_jmps_SBX    = ttk.Spinbox(self.max_jmps_FRM, textvariable = self.max_jmps_VAR, from_ = 1, to = 1048576, command = lambda: self.change(focus_flag = True), validate = "all", validatecommand = (vcmd, "%P"), width = 6, style = "TSpinbox")
+        self.max_jmps_SBX    = wdg.Spinbox(self.max_jmps_FRM, self.subroot, textvariable = self.max_jmps_VAR, min = 1, max = 1048576, default = self.max_jmps_VAR.get(), threshold = 1)
         self.assembler_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
         self.min_adr_len_FRM.pack(fill = "x",               padx = (20, 5))
         self.min_adr_len_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
@@ -156,7 +152,7 @@ class Options(Subwindow):
         self.file_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("File"))
         self.closing_unsaved_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.closing_unsaved_LBL = ttk.Label(self.closing_unsaved_FRM, style = "TLabel", text = lh.opt_win("ClosingUnsaved"))
-        self.closing_unsaved_OMN = wdg.OptionMenu(self.closing_unsaved_FRM, textvariable = self.closing_unsaved_VAR, default_option = ph.closing_unsaved(), options = lh.opt_win("ClosingUnsavedOptions"), command = lambda event: self.change(), style = "TMenubutton")
+        self.closing_unsaved_OMN = wdg.OptionMenu(self.closing_unsaved_FRM, textvariable = self.closing_unsaved_VAR, default_option = ph.closing_unsaved(), options = lh.opt_win("ClosingUnsavedOptions"), style = "TMenubutton")
         self.file_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
         self.closing_unsaved_FRM.pack(fill = "x",               padx = (20, 5))
         self.closing_unsaved_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
@@ -164,7 +160,7 @@ class Options(Subwindow):
 
         # Advanced
         self.advanced_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Advanced"))
-        self.dev_mode_CHB = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("DevMode"), variable = self.dev_mode_VAR, command = lambda: self.change(), onvalue = True, offvalue = False)
+        self.dev_mode_CHB = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("DevMode"), variable = self.dev_mode_VAR, onvalue = True, offvalue = False)
         if not self.dev_mode_VAR.get():
             self.dev_mode_CHB.state(["!alternate"])  # deselect the checkbutton
         self.dev_mode_TIP = wdg.Tooltip(self.dev_mode_CHB, text = lh.opt_win("DevModeTip"))
@@ -189,13 +185,6 @@ class Options(Subwindow):
         self.restart_LBL.pack(fill = "x", side = "bottom", pady = (5, 0), padx = 5)
         if self.restart_required_flag():
             self.restart_required()
-
-        # events
-        self.code_font_size_SBX.bind(sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
-        self.min_adr_len_SBX.bind(   sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
-        self.max_cels_SBX.bind(      sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
-        self.max_jmps_SBX.bind(      sequence = "<Return>", func = lambda event: self.change(focus_flag = True))
-
         super().build_gui()
 
     def set_option_vars(self):
@@ -214,10 +203,7 @@ class Options(Subwindow):
 
     def update_options(self):
         self.set_option_vars() # reset
-        if self.restart_required_flag():
-            self.restart_required()
-        else:
-            self.restart_no_longer_required()
+        self.update_on_restart_required_change()
 
     def ok_btn(self):
         self.save()
@@ -232,14 +218,11 @@ class Options(Subwindow):
         ph.reset_profile()
         self.update_options()
 
-    def change(self, restart_required = False, focus_flag = False, event = None):
-        if focus_flag: # remove focus from spinboxes (to remove cursor in the spinbox)
-            self.focus()
-        if restart_required:
-            if self.restart_required_flag():
-                self.restart_required()
-            else:
-                self.restart_no_longer_required() # also revert displaying restart_BTN & restart_LBL when changes got reverted
+    def update_on_restart_required_change(self):
+        if self.restart_required_flag():
+            self.restart_required()
+        else:
+            self.restart_no_longer_required() # also revert displaying restart_BTN & restart_LBL when changes got reverted
 
     def option_changed(self, option:str):
         return self.init_state[option] != self.current_state(option)
@@ -262,7 +245,7 @@ class Options(Subwindow):
 
     def save(self):
         for option in self.init_state:
-            if self.option_changed(option): # TODO also saves unchanged options?
+            if self.option_changed(option):
                 ph.save_profile_data(key = option, new_value = self.current_state(option))
                 self.init_state[option] = self.current_state(option)
                 eval(f"self.save_option_{option}()") # individual saving methods

@@ -253,16 +253,18 @@ class ErrorHandler:
 
 class SpriteHandler:
 
-    def __init__(self, theme):
+    def __init__(self, theme = None):
         self.theme = theme
-        self.set_theme(theme)
 
     def gt_sprite(self, group, sprite, x, y, theme_dependent = False):
         if theme_dependent:
-            try:
-                img = Image.open(f"{program_dir}/sprites/{group}/{sprite}_{self.theme}.png")
-            except:
-                raise FileNotFoundError(f"Couldn't fetch sprite '{sprite}' on {self.theme} theme for '{group}'.")
+            if self.theme:
+                try:
+                    img = Image.open(f"{program_dir}/sprites/{group}/{sprite}_{self.theme}.png")
+                except:
+                    raise FileNotFoundError(f"Couldn't fetch sprite '{sprite}' on {self.theme} theme for '{group}'.")
+            else:
+                raise RuntimeError(f"Can't get theme dependent sprite '{sprite}' for '{group}' if no theme is specified.")
         else:
             try:
                 img = Image.open(f"{program_dir}/sprites/{group}/{sprite}.png")

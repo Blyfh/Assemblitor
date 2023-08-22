@@ -2,7 +2,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.scrolledtext as st
 import string
-from program.source import Emulator as emu
+from program.source import Emulator    as emu
+from program.source import PackHandler as ph
+
+
+def gt_img_slider_wheel(): # img_slider_wheel is ideally 5x20 px
+    sh = ph.SpriteHandler()
+    return sh.gt_sprite("Spinbox", "slider_wheel", 5, 20)
 
 
 # ASSEMBLITOR WIDGETS
@@ -316,7 +322,7 @@ class Button(ttk.Label):
 
 class OptionMenu(ttk.OptionMenu):
 
-    def __init__(self, root, textvariable:tk.StringVar, default_option, options:dict, command, **kwargs):
+    def __init__(self, root, textvariable:tk.StringVar, default_option, options:dict, command = lambda event: print(), **kwargs):
         self.root = root
         self.options = options # {"option1_name": "option1_displaytext", "option2_name": "option2_displaytext"}
         self.textvariable = textvariable
@@ -348,27 +354,33 @@ class OptionMenu(ttk.OptionMenu):
 
 class Spinbox(tk.Frame):
     # TODO mark text when clicking on Text
-    def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = 50, bg = None, width:int = None, height = None, wrap = None, img_slider_wheel = None, *args, **kwargs):
+    def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = None, textvariable:tk.IntVar = None, threshold:int = 15, bg = None, width:int = None, height = None, wrap = None, *args, **kwargs):
+        if default is None:
+            default = min
         if min >= 0 and max >= 0 and default >= 0:
             self.min = min
             self.max = max
             self.last_valid_inp = default
         else:
             raise ValueError(f"Spinbox: Either min ({min}), max ({max}) or default ({default}) is negative.")
+        self.textvariable = textvariable
         self.root = root
         tk.Frame.__init__(self, self.root, bg = bg)
         width = len(str(max)) if not width else width
         self.text = tk.Text(self, width = width, height = 1, wrap = "none", *args, **kwargs)
         self.text.pack(side = "left")
         abs_root = abs_root if abs_root else self.root
-        self.slider = Slider(self, abs_root = abs_root, command = self.validate_range, img = img_slider_wheel) # img_slider_wheel is ideally 5x20 px
+        self.slider = Slider(self, abs_root = abs_root, command = self.update, threshold = threshold)
         self.slider.pack(side = "right")
         self.already_modified = False
         self.st(default)
+        if self.textvariable:
+            self.textvariable.set(self.gt())
+            self.textvariable.trace_add("write", self.on_textvariable_change)
         self.text.bind(sequence = "<<Modified>>", func = lambda event: self.validate_chars())
         self.text.bind(sequence = "<Return>",     func = lambda event: self.focus_out())
         self.text.bind(sequence = "<Escape>",     func = lambda event: self.focus_out())
-        self.text.bind(sequence = "<FocusOut>",   func = lambda event: self.validate_range())
+        self.text.bind(sequence = "<FocusOut>",   func = lambda event: self.update())
 
     def gt(self):
         return int(self.text.get(1.0, "end-1c"))
@@ -376,6 +388,9 @@ class Spinbox(tk.Frame):
     def st(self, value:int):
         self.text.delete(1.0, "end-1c")
         self.text.insert("end-1c", str(value))
+
+    def on_textvariable_change(self, *args):
+        self.st(self.textvariable.get())
 
     def validate_chars(self): # check for nonnumeral characters on <Key>
         if self.already_modified:
@@ -409,7 +424,12 @@ class Spinbox(tk.Frame):
         self.root.lift()
         self.root.update()
 
-    def validate_range(self, change:int = 0): # check for invalid numbers on <Enter> or <FocusOut>
+    def update(self, change:int = 0):
+        self.validate_range(change)
+        if self.textvariable:
+            self.textvariable.set(self.gt())
+
+    def validate_range(self, change): # check for invalid numbers on <Enter>, <FocusOut> or Slider change
         inp = self.gt() + change
         if inp < self.min:
             self.st(self.min)
@@ -419,19 +439,21 @@ class Spinbox(tk.Frame):
             self.st(inp)
 
 
-class Slider(tk.Label):
+class Slider(tk.Label): # used by Spinbox
 
-    def __init__(self, root, command, abs_root = None, img = None, steps:int = 1, width = 1, *args, **kwargs):
+    def __init__(self, root, command, abs_root = None, threshold:int = 15, width = 1, *args, **kwargs):
         self.root = root
-        super().__init__(self.root, height = 16, width = width, image = img, *args, **kwargs)
-        self.image = img # needs to be assigned for displaying to work
+        img_slider_wheel = gt_img_slider_wheel()
+        super().__init__(self.root, height = 16, width = width, image = img_slider_wheel, *args, **kwargs)
+        self.image = img_slider_wheel # needs to be assigned for displaying to work
         self.abs_root = abs_root if abs_root else self.root
         self.command = command
-        self.steps = steps
+        self.threshold = threshold # determines the speed; set to 1 for fastest sliding
         self.hovering = False
         self.pressed = False
         self.motion_tracker = None
         self.last_y = None
+        self.delta_y = 0
         self.bind(sequence = "<Enter>",           func = lambda event: self.on_enter())
         self.bind(sequence = "<Leave>",           func = lambda event: self.on_leave())
         self.bind(sequence = "<ButtonPress-1>",   func = lambda event: self.on_pressed())
@@ -452,7 +474,7 @@ class Slider(tk.Label):
 
     def on_pressed(self):
         self.pressed = True
-        self.motion_tracker = self.abs_root.bind(sequence = "<Motion>", func = self.on_motion) # abs_root needed for motion_tracker to work in custom widgets
+        self.motion_tracker = self.abs_root.bind(sequence = "<Motion>", func = self.on_motion) # abs_root is the root where the motion should be tracked (which goes beyond the Slider widget); it is ideally set to tk.Tk()
 
     def on_released(self):
         self.pressed = False
@@ -463,8 +485,13 @@ class Slider(tk.Label):
 
     def on_motion(self, event):
         if self.last_y:
-            change = (self.last_y - event.y) * self.steps
-            self.notify_listener(change)
+            self.delta_y += self.last_y - event.y
+            if self.delta_y >= self.threshold:
+                self.delta_y = 0
+                self.notify_listener(1)
+            elif self.delta_y <= -self.threshold:
+                self.delta_y = 0
+                self.notify_listener(-1)
         self.last_y = event.y
 
 

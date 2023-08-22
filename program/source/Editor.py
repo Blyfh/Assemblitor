@@ -146,8 +146,7 @@ class Editor:
         self.decr_TIP = wdg.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
 
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
-        img = sh.gt_sprite("Spinbox", "slider_wheel", 5, 20)
-        self.chng_SBX = wdg.Spinbox(self.chng_adjust_FRM, self.root, min = 1, max = 999, default = 1, img_slider_wheel = img)
+        self.chng_SBX = wdg.Spinbox(self.chng_adjust_FRM, self.root, min = 1, max = 999, default = 1)
         self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = lambda displaytext: self.update_incr_decr_tooltips())
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.chng_SBX.pack(anchor = "nw")
@@ -362,7 +361,7 @@ class Editor:
 # OPTIONS:
 #   last dir fixed (choose path) or automatic
 # rework output coloring
-# lock in-/decrement buttons when nothing is selected
+# clicking on the upper half of a slider will increment by one, lower half opposite
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()
