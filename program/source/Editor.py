@@ -3,7 +3,6 @@ import string
 import traceback
 import tkinter              as tk
 import tkinter.ttk          as ttk
-import tkinter.scrolledtext as st
 import tkinter.filedialog   as fd
 import tkinter.messagebox   as mb
 from program.source import Emulator    as emu
@@ -126,11 +125,11 @@ class Editor:
         self.inp_CDB.pack(side = "left",  fill = "both", expand = True, padx = (0, 5))
         self.out_CDB.pack(side = "right", fill = "both", expand = True)
 
-        self.run_BTN = wdg.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_all, img_default = sh.gt_sprite("BTN_run_default"), img_hovering = sh.gt_sprite("BTN_run_hovering"), img_clicked = sh.gt_sprite("BTN_run_clicked"))
+        self.run_BTN = wdg.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_all, **sh.gt_button_sprites("run_BTN"))
         self.run_BTN.pack(side = "left", anchor = "center")
         self.run_TIP = wdg.Tooltip(self.run_BTN, text = lh.gui("RunPrg"))
 
-        self.step_BTN = wdg.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_step, img_default = sh.gt_sprite("BTN_run_once_default"), img_hovering = sh.gt_sprite("BTN_run_once_hovering"), img_clicked = sh.gt_sprite("BTN_run_once_clicked"))
+        self.step_BTN = wdg.Button(self.taskbar_FRM, style = "img.TLabel", command = self.run_step, **sh.gt_button_sprites("step_BTN"))
         self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0))
         self.step_TIP = wdg.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
@@ -138,8 +137,8 @@ class Editor:
         self.seperator_FRM.pack(side = "left", anchor = "center", fill = "y", padx = (5, 0), pady = 3)
 
         self.chng_FRM = ttk.Frame(self.taskbar_FRM)
-        self.incr_BTN = wdg.Button(self.chng_FRM, style = "img.TLabel", command = self.inp_CDB.increment_selected_text, img_default = sh.gt_sprite("BTN_increment_default", x = 17, y = 17), img_hovering = sh.gt_sprite("BTN_increment_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_increment_clicked", x = 17, y = 17))
-        self.decr_BTN = wdg.Button(self.chng_FRM, style = "img.TLabel", command = self.inp_CDB.decrement_selected_text, img_default = sh.gt_sprite("BTN_decrement_default", x = 17, y = 17), img_hovering = sh.gt_sprite("BTN_decrement_hovering", x = 17, y = 17), img_clicked = sh.gt_sprite("BTN_decrement_clicked", x = 17, y = 17))
+        self.incr_BTN = wdg.Button(self.chng_FRM, style = "img.TLabel", command = self.inp_CDB.increment_selected_text, locked = True, **sh.gt_button_sprites("incr_BTN", 17, 17, lockable = True))
+        self.decr_BTN = wdg.Button(self.chng_FRM, style = "img.TLabel", command = self.inp_CDB.decrement_selected_text, locked = True, **sh.gt_button_sprites("decr_BTN", 17, 17, lockable = True))
         self.chng_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.incr_BTN.pack()
         self.decr_BTN.pack()
@@ -147,11 +146,11 @@ class Editor:
         self.decr_TIP = wdg.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
 
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
-        vcmd = self.chng_adjust_FRM.register(self.char_is_digit)
-        self.chng_ETR = ttk.Entry(self.chng_adjust_FRM, validate = "key", validatecommand = (vcmd, "%P"), textvariable = self.change_amount_VAR, width = 1)
-        self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = self.update_incr_decr_tooltips)
+        img = sh.gt_sprite("Spinbox", "slider_wheel", 5, 20)
+        self.chng_SBX = wdg.Spinbox(self.chng_adjust_FRM, self.root, min = 1, max = 999, default = 1, img_slider_wheel = img)
+        self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = lambda displaytext: self.update_incr_decr_tooltips())
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
-        self.chng_ETR.pack(anchor = "nw")
+        self.chng_SBX.pack(anchor = "nw")
         self.chng_opt_OMN.pack()
 
         self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
@@ -178,26 +177,24 @@ class Editor:
         self.prgc_value_LBL.pack(side = "bottom", fill = "x")
 
     # events
-        self.root.bind(sequence = "<F5>",                   func = lambda event: self.run_all())
-        self.root.bind(sequence = "<Shift-F5>",             func = lambda event: self.run_step())
-        self.root.bind(sequence = "<Control-n>",            func = lambda event: self.open_prg())
-        self.root.bind(sequence = "<Control-N>",            func = lambda event: self.open_prg()) # double binds necessary due to capslock overwriting lowercase sequence keys
-        self.root.bind(sequence = "<Control-o>",            func = lambda event: self.open_file())
-        self.root.bind(sequence = "<Control-O>",            func = lambda event: self.open_file())
-        self.root.bind(sequence = "<Control-r>",            func = lambda event: self.reload_file())
-        self.root.bind(sequence = "<Control-R>",            func = lambda event: self.reload_file())
-        self.root.bind(sequence = "<Control-s>",            func = lambda event: self.save_file())
-        self.root.bind(sequence = "<Control-S>",            func = lambda event: self.save_file())
-        self.root.bind(sequence = "<Control-Shift-s>",      func = lambda event: self.save_file_as())
-        self.root.bind(sequence = "<Control-Shift-S>",      func = lambda event: self.save_file_as()) # again: necessary due to capslock
-        self.root.bind(sequence = "<Shift-Tab>",            func = lambda event: self.switch_change_option())
-        self.root.bind(sequence = "<Shift-MouseWheel>",     func = self.on_shift_mousewheel)
+        self.root.bind(sequence = "<F5>",               func = lambda event: self.run_all())
+        self.root.bind(sequence = "<Shift-F5>",         func = lambda event: self.run_step())
+        self.root.bind(sequence = "<Control-n>",        func = lambda event: self.open_prg())
+        self.root.bind(sequence = "<Control-N>",        func = lambda event: self.open_prg()) # double binds necessary due to capslock overwriting lowercase sequence keys
+        self.root.bind(sequence = "<Control-o>",        func = lambda event: self.open_file())
+        self.root.bind(sequence = "<Control-O>",        func = lambda event: self.open_file())
+        self.root.bind(sequence = "<Control-r>",        func = lambda event: self.reload_file())
+        self.root.bind(sequence = "<Control-R>",        func = lambda event: self.reload_file())
+        self.root.bind(sequence = "<Control-s>",        func = lambda event: self.save_file())
+        self.root.bind(sequence = "<Control-S>",        func = lambda event: self.save_file())
+        self.root.bind(sequence = "<Control-Shift-s>",  func = lambda event: self.save_file_as())
+        self.root.bind(sequence = "<Control-Shift-S>",  func = lambda event: self.save_file_as()) # again: necessary due to capslock
+        self.root.bind(sequence = "<Shift-Tab>",        func = lambda event: self.switch_change_option())
+        self.root.bind(sequence = "<Shift-MouseWheel>", func = self.on_shift_mousewheel)
+        self.inp_CDB.SCT.bind(sequence = "<<Selection>>", func = lambda event: self.check_for_inp_selection())
 
     # protocols
-        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking the red x of the window
-
-    def char_is_digit(self, char): # used by Editor.chng_ETR to only allow entered digits
-        return str.isdigit(char) or char == ""
+        self.root.protocol(name = "WM_DELETE_WINDOW", func = self.destroy) # when clicking close button of the window
 
     def gt_code_font(self):
         return ph.code_font()
@@ -334,6 +331,15 @@ class Editor:
 
     def open_demo_prg(self):
         self.open_prg(lh.demo())
+
+    def check_for_inp_selection(self):
+        sel_range = self.inp_CDB.SCT.tag_ranges("sel")
+        if sel_range == ():
+            self.incr_BTN.lock()
+            self.decr_BTN.lock()
+        else:
+            self.incr_BTN.unlock()
+            self.decr_BTN.unlock()
 
     def on_shift_mousewheel(self, event):
         if event.delta > 0:

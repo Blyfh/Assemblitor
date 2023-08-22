@@ -254,22 +254,32 @@ class ErrorHandler:
 class SpriteHandler:
 
     def __init__(self, theme):
-        self.theme = None
+        self.theme = theme
         self.set_theme(theme)
 
-    def gt_sprite(self, file, x = 35, y = 35):
-        try:
-            img = Image.open(f"{program_dir}/sprites/{self.theme}/{file}.png")
-        except:
-            raise FileNotFoundError(f"Couldn't fetch sprite '{file}' for '{self.theme}'.")
+    def gt_sprite(self, group, sprite, x, y, theme_dependent = False):
+        if theme_dependent:
+            try:
+                img = Image.open(f"{program_dir}/sprites/{group}/{sprite}_{self.theme}.png")
+            except:
+                raise FileNotFoundError(f"Couldn't fetch sprite '{sprite}' on {self.theme} theme for '{group}'.")
+        else:
+            try:
+                img = Image.open(f"{program_dir}/sprites/{group}/{sprite}.png")
+            except:
+                raise FileNotFoundError(f"Couldn't fetch sprite '{sprite}' for '{group}'.")
         img = img.resize((x, y))
         return ImageTk.PhotoImage(img)
 
+    def gt_button_sprites(self, group, x = 35, y = 35, lockable = False):
+        default  = self.gt_sprite(group, "default",  x, y, theme_dependent = True)
+        hovering = self.gt_sprite(group, "hovering", x, y, theme_dependent = True)
+        clicked  = self.gt_sprite(group, "clicked",  x, y, theme_dependent = True)
+        locked   = self.gt_sprite(group, "locked",   x, y, theme_dependent = True) if lockable else None
+        return {"img_default": default, "img_hovering": hovering, "img_clicked": clicked, "img_locked": locked}
+
     def set_theme(self, theme):
-        if theme == "light":
-            self.theme = "light_theme"
-        elif theme == "dark":
-            self.theme = "dark_theme"
+        self.theme = theme
 
 
 ph = PackHandler()

@@ -9,11 +9,11 @@ from program.source import Emulator as emu
 
 class CodeBlock(tk.Frame):
 
-    def __init__(self, root, editor, *args, **kwargs):
+    def __init__(self, root, editor, **kwargs):
         self.root = root
         self.ed = editor
         tk.Frame.__init__(self, self.root)
-        self.SCT = st.ScrolledText(self, bg = self.ed.theme_text_bg, fg = self.ed.theme_text_fg, bd = 0, width = 10, wrap = "none", font = self.ed.gt_code_font(), *args, **kwargs)
+        self.SCT = st.ScrolledText(self, bg = self.ed.theme_text_bg, fg = self.ed.theme_text_fg, bd = 0, width = 10, wrap = "none", font = self.ed.gt_code_font(), **kwargs)
         self.xview_SCB = tk.Scrollbar(self, orient = "horizontal", command = self.SCT.xview)
         self.SCT["xscrollcommand"] = self.xview_SCB.set
         self.SCT.pack(side = "top", fill = "both", expand = True)
@@ -33,6 +33,7 @@ class CodeBlock(tk.Frame):
 
 
 class OutCodeBlock(CodeBlock):
+
     def pack(self, *args, **kwargs):
         tk.Frame.pack(self, *args, **kwargs)
         self.SCT.tag_config("pc_is_here", foreground = self.ed.theme_accent_color)
@@ -64,12 +65,20 @@ class InpCodeBlock(CodeBlock):
     # events
         bindtags = self.SCT.bindtags()
         self.SCT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3])) # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o> that adds a newline
-        self.SCT.bind(sequence = "<Control-Shift-Z>",   func = lambda event: self.edit_redo()) # automatic edit_redo() bind is <Control-y>
+        self.SCT.bind(sequence = "<Control-Shift-z>",   func = lambda event: self.redo()) # automatic edit_redo() bind is <Control-y>
+        self.SCT.bind(sequence = "<Control-Shift-Z>",   func = lambda event: self.redo()) # double binds necessary due to capslock overwriting lowercase sequence keys
         self.SCT.bind(sequence = "<Shift-Return>",      func = lambda event: self.regular_newline())
         self.SCT.bind(sequence = "<Return>",            func = lambda event: self.smart_newline())
         self.SCT.bind(sequence = "<Control-BackSpace>", func = lambda event: self.delete_word())
         self.SCT.bind(sequence = "<Key>",               func = lambda event: self.on_key_pressed())
         self.SCT.bind(sequence = "<<Modified>>",        func = lambda event: self.on_inp_modified(), add = "+") # 'add' keyword necessary because CodeBlock already uses bind "<<Modified>>"
+
+    def redo(self): # TODO not redoing when capslock and event <Control-Shift-z> gets triggered even though not throwing
+        try:
+            self.SCT.edit_redo()
+            print("redone1")
+        except tk.TclError: # when reaching the bottom of the stack and nothing can be redone this error is thrown
+            pass
 
     def regular_newline(self):
         pass # overwrites self.smart_newline()
@@ -114,10 +123,10 @@ class InpCodeBlock(CodeBlock):
             self.already_modified = False
 
     def increment_selected_text(self):
-        self.change_selected_text(change = +int(self.ed.change_amount_VAR.get()))
+        self.change_selected_text(change = +int(self.ed.chng_SBX.gt()))
 
     def decrement_selected_text(self):
-        self.change_selected_text(change = -int(self.ed.change_amount_VAR.get()))
+        self.change_selected_text(change = -int(self.ed.chng_SBX.gt()))
 
     def change_selected_text(self, change):
         option = self.ed.chng_opt_OMN.current_option() # either "adr", "adr_opr", "opr"
@@ -130,7 +139,7 @@ class InpCodeBlock(CodeBlock):
                 new_text = self.change_text(text, adrs_flag, oprs_flag, change)
                 self.SCT.delete(*sel_range)
                 self.SCT.insert(sel_range[0], new_text)
-                self.SCT.select_text(sel_range[0], new_text)
+                self.select_text(sel_range[0], new_text)
 
     def select_text(self, pos, text):
         self.SCT.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
@@ -216,7 +225,7 @@ class InpCodeBlock(CodeBlock):
 
 class Button(ttk.Label):
 
-    def __init__(self, root, command, text:str = None, img_default = None, img_hovering = None, img_clicked = None, click_display_time:int = 30, *args, **kwargs):
+    def __init__(self, root, command, text:str = None, img_default = None, img_hovering = None, img_clicked = None, img_locked = None, click_display_time:int = 30, locked:bool = False, *args, **kwargs):
         self.root = root
         ttk.Label.__init__(self, self.root, *args, **kwargs)
         self.command = command
@@ -224,16 +233,17 @@ class Button(ttk.Label):
         self.pressing = False # button is getting pressed down
         self.clicked  = False # button got activated
         self.click_display_time = click_display_time
+        self.locked = locked
         self.img_default  = None
         self.img_hovering = None
         self.img_clicked  = None
+        self.img_locked   = None
 
         if text:
             self.config(text = text)
         if img_default:
             self.image_flag = True
             self.img_default = img_default
-            self.on_leave()
             if img_hovering:
                 self.img_hovering = img_hovering
             else:
@@ -242,6 +252,11 @@ class Button(ttk.Label):
                 self.img_clicked = img_clicked
             else:
                 self.img_clicked = self.img_default
+            if img_locked:
+                self.img_locked = img_locked
+            else:
+                self.img_locked = self.img_default
+            self.set_img(self.img_default) if not self.locked else self.set_img(self.img_locked)
         else:
             self.image_flag = False
 
@@ -254,35 +269,49 @@ class Button(ttk.Label):
         if self.image_flag:
             self.config(image = img)
 
-    def on_enter(self, event = None):
-        self.hovering = True
-        if not self.pressing:
+    def lock(self):
+        self.locked = True
+        self.set_img(self.img_locked)
+
+    def unlock(self):
+        self.locked = False
+        if self.hovering:
             self.set_img(self.img_hovering)
         else:
-            self.set_img(self.img_clicked)
+            self.set_img(self.img_default)
+
+    def on_enter(self, event = None):
+        self.hovering = True
+        if not self.locked:
+            if not self.pressing:
+                self.set_img(self.img_hovering)
+            else:
+                self.set_img(self.img_clicked)
 
     def on_leave(self, event = None):
         self.hovering = False
-        if not self.clicked:
+        if not self.clicked and not self.locked:
             self.set_img(self.img_default)
 
     def on_pressed(self, event = None):
-        self.pressing = True
-        self.set_img(self.img_clicked)
+        if not self.locked:
+            self.pressing = True
+            self.set_img(self.img_clicked)
 
     def on_released(self, event = None):
         self.pressing = False
-        if self.hovering:
+        if self.hovering and not self.locked:
             self.clicked = True
             self.root.after(self.click_display_time, self.after_click)
             self.command()
 
     def after_click(self):
         self.clicked = False
-        if self.hovering:
-            self.set_img(self.img_hovering)
-        else:
-            self.set_img(self.img_default)
+        if not self.locked: # for the rare case that the button gets locked during the click
+            if self.hovering:
+                self.set_img(self.img_hovering)
+            else:
+                self.set_img(self.img_default)
 
 
 class OptionMenu(ttk.OptionMenu):
@@ -318,42 +347,41 @@ class OptionMenu(ttk.OptionMenu):
 
 
 class Spinbox(tk.Frame):
-
-    def __init__(self, root, min:int = 0, max:int = 100, default:int = 50, *args, **kwargs):
-        self.root = root
-        tk.Frame.__init__(self, self.root)
-        self.text = tk.Text(self, *args, **kwargs)
-        self.text.pack(side = "left", fill = "both", expand = True)
-        self.already_modified = False
+    # TODO mark text when clicking on Text
+    def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = 50, bg = None, width:int = None, height = None, wrap = None, img_slider_wheel = None, *args, **kwargs):
         if min >= 0 and max >= 0 and default >= 0:
             self.min = min
             self.max = max
             self.last_valid_inp = default
         else:
             raise ValueError(f"Spinbox: Either min ({min}), max ({max}) or default ({default}) is negative.")
-
-        # redirect every method to self.text except for packing methods, which still direct to the frame
-        methods = dir(tk.Text)
-        for m in methods:
-            if m[0] != "_" and m[:4] not in ["pack", "grid"] and m[:5] != "place": # won't redirect any standard/private/pack/grid/place methods
-                setattr(self, m, getattr(self.text, m))
-
-        self.insert("insert", default)
-        self.bind(sequence = "<<Modified>>", func = self.validate_chars)
-        self.bind(sequence = "<FocusOut>",   func = lambda event: self.validate_range())
+        self.root = root
+        tk.Frame.__init__(self, self.root, bg = bg)
+        width = len(str(max)) if not width else width
+        self.text = tk.Text(self, width = width, height = 1, wrap = "none", *args, **kwargs)
+        self.text.pack(side = "left")
+        abs_root = abs_root if abs_root else self.root
+        self.slider = Slider(self, abs_root = abs_root, command = self.validate_range, img = img_slider_wheel) # img_slider_wheel is ideally 5x20 px
+        self.slider.pack(side = "right")
+        self.already_modified = False
+        self.st(default)
+        self.text.bind(sequence = "<<Modified>>", func = lambda event: self.validate_chars())
+        self.text.bind(sequence = "<Return>",     func = lambda event: self.focus_out())
+        self.text.bind(sequence = "<Escape>",     func = lambda event: self.focus_out())
+        self.text.bind(sequence = "<FocusOut>",   func = lambda event: self.validate_range())
 
     def gt(self):
-        return int(self.get(1.0, "end-1c"))
+        return int(self.text.get(1.0, "end-1c"))
 
     def st(self, value:int):
-        self.delete(1.0, "end-1c")
-        self.insert("end-1c", str(value))
+        self.text.delete(1.0, "end-1c")
+        self.text.insert("end-1c", str(value))
 
-    def validate_chars(self, event): # check for nonnumeral characters on <Key>
+    def validate_chars(self): # check for nonnumeral characters on <Key>
         if self.already_modified:
             self.already_modified = False
         else:
-            inp = self.get(1.0, "end-1c")
+            inp = self.text.get(1.0, "end-1c")
             if inp.isdigit():
                 if inp[0] == "0": # overwriting to avoid "003" instead of "3"
                     i = 0
@@ -374,26 +402,32 @@ class Spinbox(tk.Frame):
             else: # reset invalid change
                 self.st(self.last_valid_inp)
             self.already_modified = True
-            self.edit_modified(False)
+            self.text.edit_modified(False)
 
-    def validate_range(self): # check for invalid numbers on <Enter> or <FocusOut>
-        print("focus out")
-        inp = self.gt()
+    def focus_out(self):
+        self.root.focus_force()
+        self.root.lift()
+        self.root.update()
+
+    def validate_range(self, change:int = 0): # check for invalid numbers on <Enter> or <FocusOut>
+        inp = self.gt() + change
         if inp < self.min:
             self.st(self.min)
         elif inp > self.max:
             self.st(self.max)
+        elif change != 0:
+            self.st(inp)
 
 
-class Slider(ttk.Label):
+class Slider(tk.Label):
 
-    def __init__(self, root, command, img = None, steps:int = 1, *args, **kwargs):
+    def __init__(self, root, command, abs_root = None, img = None, steps:int = 1, width = 1, *args, **kwargs):
         self.root = root
-        ttk.Label.__init__(self, self.root, *args, **kwargs)
+        super().__init__(self.root, height = 16, width = width, image = img, *args, **kwargs)
+        self.image = img # needs to be assigned for displaying to work
+        self.abs_root = abs_root if abs_root else self.root
         self.command = command
         self.steps = steps
-        if img:
-            self.config(image = img)
         self.hovering = False
         self.pressed = False
         self.motion_tracker = None
@@ -403,7 +437,7 @@ class Slider(ttk.Label):
         self.bind(sequence = "<ButtonPress-1>",   func = lambda event: self.on_pressed())
         self.bind(sequence = "<ButtonRelease-1>", func = lambda event: self.on_released())
 
-    def notify_listeners(self, change):
+    def notify_listener(self, change):
         if self.command:
             self.command(change = change)
 
@@ -418,19 +452,19 @@ class Slider(ttk.Label):
 
     def on_pressed(self):
         self.pressed = True
-        self.motion_tracker = self.root.bind(sequence = "<Motion>", func = self.on_motion)
+        self.motion_tracker = self.abs_root.bind(sequence = "<Motion>", func = self.on_motion) # abs_root needed for motion_tracker to work in custom widgets
 
     def on_released(self):
         self.pressed = False
-        self.root.unbind(sequence = "<Motion>", funcid = self.motion_tracker)
+        self.abs_root.unbind(sequence = "<Motion>", funcid = self.motion_tracker)
         self.last_y = None
         if not self.hovering:
             self.root.config(cursor = "arrow")
 
     def on_motion(self, event):
         if self.last_y:
-            change = (event.y - self.last_y) * self.steps
-            self.notify_listeners(change)
+            change = (self.last_y - event.y) * self.steps
+            self.notify_listener(change)
         self.last_y = event.y
 
 
@@ -587,13 +621,3 @@ class Tooltip:
         if tw:
             tw.destroy()
         self.tw = None
-
-
-root = tk.Tk()
-root.config(bg = "red")
-root.geometry("400x200")
-etr = Spinbox(root, height = 1)
-etr.pack()
-btn = Spinbox(root, height = 1)
-btn.pack()
-root.mainloop()

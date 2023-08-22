@@ -200,7 +200,6 @@ class Options(Subwindow):
 
     def set_option_vars(self):
         self.is_light_theme_VAR .set(value = ph.theme() == "light")
-        print("cur lang:", ph.language())
         self.language_VAR       .set(value = lh.gt_lang_name(ph.language())) # StringVar is language dependent displaytext
         self.code_font_face_VAR .set(value = font_face_name(ph.code_font_face())) # StringVar is language dependent displaytext
         self.code_font_size_VAR .set(value = ph.code_font_size())

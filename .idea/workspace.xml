@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="new Editor.file_MNU command &quot;New&quot;&#10;* added shortcut &quot;ctrl + n&quot; for command &quot;New&quot;&#10;* added missing translation for certain shortcut combos">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/program/source/Widgets.py" beforeDir="false" afterPath="$PROJECT_DIR$/program/source/Widgets.py" afterDir="false" />
-    </list>
+    <list default="true" id="807a8561-d217-45c0-b2cb-9e20e9c30835" name="Changes" comment="finished Spinbox and Slider&#10;* implemented Spinbox for Editor.chng_SBX&#10;* added a slider_wheel sprite&#10;* reworked structure of SpriteHandler and program/sprites&#10;* bugfixing for CodeBlock (bug for using &lt;Control-Shift-Z when all is redone, for reselecting changed text)&#10;* buttons can now get locked&#10;* incr-/decr_BTN now get locked when nothing is selected" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,7 +29,7 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.Widgets">
+  <component name="RunManager" selected="Python.Start File">
     <configuration name="Start File" type="PythonConfigurationType" factoryName="Python">
       <module name="assemblitor" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -40,12 +37,12 @@
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Users\Blyfh\Documents\Files\Programme\Scripts\python.exe" />
+      <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
+      <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="C:\Users\Blyfh\Documents\Files\Programme\assemblitor\Assemblitor.pyw" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Assemblitor.pyw" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -75,6 +72,10 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.Start File" />
+      <item itemvalue="Python.Widgets" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -246,7 +247,28 @@
       <option name="project" value="LOCAL" />
       <updated>1688307745130</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="new widget Slider&#10;* unifinished bugfixing because Spinbox event &lt;&lt;Modified&gt;&gt; won't get called">
+      <created>1689331981902</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1689331981902</updated>
+    </task>
+    <task id="LOCAL-00025" summary="finished bugfixing regarding Spinbox.validate_chars()&#10;* Spinbox is now unable to be blank -&gt; will default to 0&#10;* Spinbox will now cut off unnecessary zeros at the front&#10;* improved method redirecion in Spinbox.__init__()">
+      <created>1691841089091</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1691841089091</updated>
+    </task>
+    <task id="LOCAL-00026" summary="finished Spinbox and Slider&#10;* implemented Spinbox for Editor.chng_SBX&#10;* added a slider_wheel sprite&#10;* reworked structure of SpriteHandler and program/sprites&#10;* bugfixing for CodeBlock (bug for using &lt;Control-Shift-Z when all is redone, for reselecting changed text)&#10;* buttons can now get locked&#10;* incr-/decr_BTN now get locked when nothing is selected">
+      <created>1692708167429</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1692708167429</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -277,6 +299,10 @@
     <MESSAGE value="updated outdated example program in Editor.assembly_SUB" />
     <MESSAGE value="disable wrap for Codeblocks and instead introduced a dynamic horizontal scrollbar&#10;* renamed Editor.inp_SCT to Editor.inp_CDB and Editor.out_SCT to Editor.out_CDB&#10;* Codeblocks are now based on Frames, not ScrolledTexts" />
     <MESSAGE value="new Editor.file_MNU command &quot;New&quot;&#10;* added shortcut &quot;ctrl + n&quot; for command &quot;New&quot;&#10;* added missing translation for certain shortcut combos" />
-    <option name="LAST_COMMIT_MESSAGE" value="new Editor.file_MNU command &quot;New&quot;&#10;* added shortcut &quot;ctrl + n&quot; for command &quot;New&quot;&#10;* added missing translation for certain shortcut combos" />
+    <MESSAGE value="new widget Slider&#10;* unifinished bugfixing because Spinbox doesn't work" />
+    <MESSAGE value="new widget Slider&#10;* unifinished bugfixing because Spinbox event &lt;&lt;Modified&gt;&gt; won't get called" />
+    <MESSAGE value="finished bugfixing regarding Spinbox.validate_chars()&#10;* Spinbox is now unable to be blank -&gt; will default to 0&#10;* Spinbox will now cut off unnecessary zeros at the front&#10;* improved method redirecion in Spinbox.__init__()" />
+    <MESSAGE value="finished Spinbox and Slider&#10;* implemented Spinbox for Editor.chng_SBX&#10;* added a slider_wheel sprite&#10;* reworked structure of SpriteHandler and program/sprites&#10;* bugfixing for CodeBlock (bug for using &lt;Control-Shift-Z when all is redone, for reselecting changed text)&#10;* buttons can now get locked&#10;* incr-/decr_BTN now get locked when nothing is selected" />
+    <option name="LAST_COMMIT_MESSAGE" value="finished Spinbox and Slider&#10;* implemented Spinbox for Editor.chng_SBX&#10;* added a slider_wheel sprite&#10;* reworked structure of SpriteHandler and program/sprites&#10;* bugfixing for CodeBlock (bug for using &lt;Control-Shift-Z when all is redone, for reselecting changed text)&#10;* buttons can now get locked&#10;* incr-/decr_BTN now get locked when nothing is selected" />
   </component>
 </project>
