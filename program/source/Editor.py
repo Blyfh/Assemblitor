@@ -361,12 +361,10 @@ class Editor:
 # OPTIONS:
 #   last dir fixed (choose path) or automatic
 # rework output coloring
-# clicking on the upper half of a slider will increment by one, lower half opposite
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()
 # askyesnocancel buttons don't adjust to language
-# <Control-Shift-z> with capslock still buggy
 
 # SUGGESTIONS
 # ALU anzeigen

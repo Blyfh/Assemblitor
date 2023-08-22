@@ -79,12 +79,12 @@ class InpCodeBlock(CodeBlock):
         self.SCT.bind(sequence = "<Key>",               func = lambda event: self.on_key_pressed())
         self.SCT.bind(sequence = "<<Modified>>",        func = lambda event: self.on_inp_modified(), add = "+") # 'add' keyword necessary because CodeBlock already uses bind "<<Modified>>"
 
-    def redo(self): # TODO not redoing when capslock and event <Control-Shift-z> gets triggered even though not throwing
+    def redo(self):
         try:
             self.SCT.edit_redo()
-            print("redone1")
         except tk.TclError: # when reaching the bottom of the stack and nothing can be redone this error is thrown
             pass
+        return "break" # to prevent edit_undo() to trigger when having capslock on
 
     def regular_newline(self):
         pass # overwrites self.smart_newline()
@@ -455,15 +455,17 @@ class Slider(tk.Label): # used by Spinbox
         self.threshold = threshold # determines the speed; set to 1 for fastest sliding
         self.hovering = False
         self.pressed = False
+        self.click_flag = False
         self.motion_tracker = None
         self.last_y = None
         self.delta_y = 0
         self.bind(sequence = "<Enter>",           func = lambda event: self.on_enter())
         self.bind(sequence = "<Leave>",           func = lambda event: self.on_leave())
         self.bind(sequence = "<ButtonPress-1>",   func = lambda event: self.on_pressed())
-        self.bind(sequence = "<ButtonRelease-1>", func = lambda event: self.on_released())
+        self.bind(sequence = "<ButtonRelease-1>", func = self.on_released)
 
     def notify_listener(self, change):
+        self.click_flag = False # prevent clicks on change by motion
         if self.command:
             self.command(change = change)
 
@@ -478,9 +480,20 @@ class Slider(tk.Label): # used by Spinbox
 
     def on_pressed(self):
         self.pressed = True
+        self.click_flag = True
+        self.root.after(200, self.prevent_click)
         self.motion_tracker = self.abs_root.bind(sequence = "<Motion>", func = self.on_motion) # abs_root is the root where the motion should be tracked (which goes beyond the Slider widget); it is ideally set to tk.Tk()
 
-    def on_released(self):
+    def prevent_click(self):
+        self.click_flag = False
+
+    def on_released(self, event):
+        if self.click_flag:
+            self.click_flag = False
+            if event.y < 11:
+                self.notify_listener(1)
+            else:
+                self.notify_listener(-1)
         self.pressed = False
         self.abs_root.unbind(sequence = "<Motion>", funcid = self.motion_tracker)
         self.last_y = None
