@@ -162,15 +162,14 @@ Datei speichern unter"""
     },
     "abt_win": {
         "title":    "Über",
-        "geometry": "303x140",
+        "geometry": "410x170",
 
-        "text": """    Ein simpler Emulator und Editor für Assembly
-    Version: 0.9 Alpha
-    2022 von Blyfh erstellt
+        "text": """Ein simpler Emulator und Editor für Assembly
+Version: 0.9 Alpha
+2022/23 von Blyfh erstellt
 
-    Bug gefunden? Benachrichtige mich unter
-    https://github.com/Blyfh/assemblitor/issues/new
-        """
+Bug gefunden? Benachrichtige mich unter
+https://github.com/Blyfh/assemblitor/issues/new"""
     },
     "demo": """; Ein einfaches Countdown-Programm
 00 JMP 02

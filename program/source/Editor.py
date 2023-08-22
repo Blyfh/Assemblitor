@@ -1,5 +1,5 @@
 import os
-import string
+import ctypes
 import traceback
 import tkinter              as tk
 import tkinter.ttk          as ttk
@@ -9,6 +9,10 @@ from program.source import Emulator    as emu
 from program.source import Widgets     as wdg
 from program.source import Subwindows  as sub
 from program.source import PackHandler as pck
+
+
+ctypes.windll.shcore.SetProcessDpiAwareness(True)
+
 
 def startup(profile_dir, root, dev_mode = False):
     global ph
@@ -20,7 +24,7 @@ def startup(profile_dir, root, dev_mode = False):
     eh = pck.ErrorHandler()
     sh = pck.SpriteHandler(ph.theme())
     emu.startup(profile_handler = ph, error_handler = eh)
-    sub.startup(profile_handler = ph, language_handler = lh, emulator = emu)
+    sub.startup(profile_handler = ph, language_handler = lh, sprite_handler = sh, emulator = emu)
 
     ph.save_profile_data("dev_mode", dev_mode)
     ed = Editor(root = root)
@@ -39,7 +43,8 @@ class Editor:
         self.action_on_closing_unsaved_prg = ph.closing_unsaved()
         self.build_gui()
         if self.dev_mode: # special startup for developers
-            pass
+            self.about_SUB.open()
+            self.about_SUB.focus()
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object
@@ -78,6 +83,7 @@ class Editor:
         self.root.minsize(*lh.gui("minsize"))
         self.root.config(bg = self.theme_base_bg)
         self.root.title(lh.gui("title"))
+        self.root.iconphoto(True, sh.gt_sprite("Assemblitor", "icon", 16, 16))
 
     # style
         self.style = ttk.Style(self.root)

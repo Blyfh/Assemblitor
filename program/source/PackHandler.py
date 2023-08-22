@@ -256,21 +256,21 @@ class SpriteHandler:
     def __init__(self, theme = None):
         self.theme = theme
 
-    def gt_sprite(self, group, sprite, x, y, theme_dependent = False):
+    def gt_sprite(self, group, sprite, x, y, theme_dependent = False, type = "png"):
         if theme_dependent:
             if self.theme:
                 try:
-                    img = Image.open(f"{program_dir}/sprites/{group}/{sprite}_{self.theme}.png")
+                    img = Image.open(f"{program_dir}/sprites/{group}/{sprite}_{self.theme}.{type}")
                 except:
                     raise FileNotFoundError(f"Couldn't fetch sprite '{sprite}' on {self.theme} theme for '{group}'.")
             else:
                 raise RuntimeError(f"Can't get theme dependent sprite '{sprite}' for '{group}' if no theme is specified.")
         else:
             try:
-                img = Image.open(f"{program_dir}/sprites/{group}/{sprite}.png")
+                img = Image.open(f"{program_dir}/sprites/{group}/{sprite}.{type}")
             except:
                 raise FileNotFoundError(f"Couldn't fetch sprite '{sprite}' for '{group}'.")
-        img = img.resize((x, y))
+        img = img.resize((x, y), Image.ANTIALIAS)
         return ImageTk.PhotoImage(img)
 
     def gt_button_sprites(self, group, x = 35, y = 35, lockable = False):

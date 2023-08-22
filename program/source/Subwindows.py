@@ -5,12 +5,14 @@ import tkinter.font as fn
 from program.source import Widgets as wdg
 
 
-def startup(profile_handler, language_handler, emulator):
+def startup(profile_handler, language_handler, sprite_handler, emulator):
     global ph
     global lh
+    global sh
     global emu
     ph  = profile_handler
     lh  = language_handler
+    sh = sprite_handler
     emu = emulator
 
 def gt_font_faces_with_names():
@@ -307,6 +309,7 @@ class Assembly(Subwindow):
         if self.active:
             self.text_TXT.tag_config("asm_code", font = ph.code_font())
 
+
 class Shortcuts(Subwindow):
 
     def build_gui(self):
@@ -335,15 +338,23 @@ class About(Subwindow):
         text  = lh.abt_win("text")
         self.subroot = tk.Toplevel(self.ed.root)
         self.subroot.geometry(lh.abt_win("geometry"))
-        self.subroot.resizable(False, False)
-        self.subroot.config(bg = self.ed.theme_base_bg)
+        #self.subroot.resizable(False, False)
+        self.subroot.config(bg = self.ed.theme_text_bg)
         self.subroot.title(lh.abt_win("title"))
 
-        self.about_FRM = ttk.Frame(self.subroot, style ="text.TFrame")
-        self.title_LBL = ttk.Label(self.about_FRM, style = "TLabel", text = title, anchor = "center", justify = "left", font = self.ed.title_font)
-        self.text_LBL  = ttk.Label(self.about_FRM, style = "TLabel", text = text,  anchor = "w",      justify = "left")
-        self.about_FRM.pack(fill = "both", expand = True)
-        self.title_LBL.pack(fill = "both", expand = True, padx = 5, pady = (5, 0))
-        self.text_LBL.pack( fill = "both", expand = True, padx = 5, pady = (0, 5))
+        self.about_FRM = ttk.Frame(self.subroot, style = "text.TFrame")
+        self.title_TXT = tk.Text(self.about_FRM, height = 1, font = self.ed.title_font, bg = self.ed.theme_text_bg, fg = self.ed.theme_text_fg, bd = 0)
+        self.title_TXT.insert("1.0", title)
+        self.title_TXT.config(state = "disabled")
+        icon = sh.gt_sprite("Assemblitor", "icon", 90, 90)
+        self.icon_LBL = ttk.Label(self.about_FRM, image = icon)
+        self.icon_LBL.image = icon
+        self.text_TXT = tk.Text(self.about_FRM, height = 6, font = ("TkDefaultFont", 10), bg = self.ed.theme_text_bg, fg = self.ed.theme_text_fg, bd = 0)
+        self.text_TXT.insert("1.0", text)
+        self.text_TXT.config(state = "disabled")
+        self.about_FRM.pack(expand = True, anchor = "center")
+        self.title_TXT.pack(side = "top",   padx = 5, pady = 5)
+        self.icon_LBL. pack(side = "left",  padx = 5, pady = 5, anchor = "center", )
+        self.text_TXT .pack(side = "right", padx = 5, pady = 5)
 
         super().build_gui()
