@@ -10,7 +10,7 @@ It was made in Python 3.11 and supports any Python version above 3.9.
 
 # Getting Started
 
-Open 'Assemblitor.pyw' to start the program.
+Open "Assemblitor.pyw" to start the program.
 
 ## The Language
 
