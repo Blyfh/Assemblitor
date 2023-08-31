@@ -11,6 +11,12 @@ from program.source import Subwindows  as sub
 from program.source import PackHandler as pck
 
 
+#          Copyright Blyfh https://github.com/Blyfh
+# Distributed under the Boost Software License, Version 1.0.
+#     (See accompanying file LICENSE_1_0.txt or copy at
+#           http://www.boost.org/LICENSE_1_0.txt)
+
+
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
 
@@ -43,8 +49,7 @@ class Editor:
         self.action_on_closing_unsaved_prg = ph.closing_unsaved()
         self.build_gui()
         if self.dev_mode: # special startup for developers
-            self.about_SUB.open()
-            self.about_SUB.focus()
+            pass
         self.root.mainloop()
 
     def report_callback_exception(self, exc, val, tb): # exc = exception object, val = error message, tb = traceback object

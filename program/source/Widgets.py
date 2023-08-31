@@ -6,6 +6,12 @@ from program.source import Emulator    as emu
 from program.source import PackHandler as ph
 
 
+#          Copyright Blyfh https://github.com/Blyfh
+# Distributed under the Boost Software License, Version 1.0.
+#     (See accompanying file LICENSE_1_0.txt or copy at
+#           http://www.boost.org/LICENSE_1_0.txt)
+
+
 def gt_img_slider_wheel(): # img_slider_wheel is ideally 5x20 px
     sh = ph.SpriteHandler()
     return sh.gt_sprite("Spinbox", "slider_wheel", 5, 20)
@@ -539,6 +545,8 @@ class Tooltip:
       by Alberto Vassena on 2016.11.05.
 
       Tested on Ubuntu 16.04/16.10, running Python 3.5.2
+
+    - Modified slightly by Blyfh
 
     To-Do: themes styles support
     """

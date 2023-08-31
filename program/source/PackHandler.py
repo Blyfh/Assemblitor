@@ -3,6 +3,11 @@ import glob    as gl
 import pathlib as pl
 from PIL import ImageTk, Image
 
+#          Copyright Blyfh https://github.com/Blyfh
+# Distributed under the Boost Software License, Version 1.0.
+#     (See accompanying file LICENSE_1_0.txt or copy at
+#           http://www.boost.org/LICENSE_1_0.txt)
+
 
 program_dir = pl.Path(__file__).parent.parent.absolute()
 

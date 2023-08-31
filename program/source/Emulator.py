@@ -1,6 +1,12 @@
 import string
 
 
+#          Copyright Blyfh https://github.com/Blyfh
+# Distributed under the Boost Software License, Version 1.0.
+#     (See accompanying file LICENSE_1_0.txt or copy at
+#           http://www.boost.org/LICENSE_1_0.txt)
+
+
 CMDS        = ["STP", "ADD", "SUB", "MUL", "LDA", "STA", "JMP", "JLE", "JZE"]
 CMDS_no_val_opr = ["STA", "JMP", "JLE", "JZE"]
 MIN_ADR_LEN = 0

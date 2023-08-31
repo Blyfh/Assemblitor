@@ -5,6 +5,12 @@ import tkinter.font as fn
 from program.source import Widgets as wdg
 
 
+#          Copyright Blyfh https://github.com/Blyfh
+# Distributed under the Boost Software License, Version 1.0.
+#     (See accompanying file LICENSE_1_0.txt or copy at
+#           http://www.boost.org/LICENSE_1_0.txt)
+
+
 def startup(profile_handler, language_handler, sprite_handler, emulator):
     global ph
     global lh
