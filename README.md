@@ -1,6 +1,6 @@
 # Assemblitor
 
-<img src="https://github.com/Blyfh/assemblitor/assets/65491123/cfe52fef-8c91-4f10-811f-3284040c3152" align="left" width="100"/>
+<img src="https://github.com/Blyfh/Assemblitor/blob/main/program/sprites/Assemblitor/icon.png" align="left" width="100"/>
 
 Assemblitor is a light-weight editor for a simple dialect of Assembly.
 
