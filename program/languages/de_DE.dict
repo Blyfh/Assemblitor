@@ -165,7 +165,7 @@ Datei speichern unter"""
         "geometry": "410x170",
 
         "text": """Ein simpler Emulator und Editor für Assembly
-Version: 0.9 Alpha
+Version: 0.1 Beta
 2022/23 von Blyfh erstellt
 
 Bug gefunden? Benachrichtige mich unter
