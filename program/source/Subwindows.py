@@ -220,7 +220,7 @@ class Options(Subwindow):
     def restart(self):
         self.save()
         self.ed.destroy()
-        os.startfile("Assemblitor.pyw")
+        os.startfile(self.ed.root_dir / "Assemblitor.pyw")
 
     def reset(self):
         ph.reset_profile()

@@ -16,17 +16,17 @@ min_version = (3, 10)
 cur_version = sys.version_info
 dev_mode    = False
 is_portable = True
-root        = pl.Path(__file__).parent.absolute()
+root_dir    = pl.Path(__file__).parent.absolute()
 
 
 if is_portable:
-    profile_dir = os.path.join(root, "profile")
+    profile_dir = os.path.join(root_dir, "profile")
 else:
     profile_dir = ".../AppData/Assemblitor/profile"  # unfinished
 
 if cur_version >= min_version:
     try:
-        Editor.startup(profile_dir = profile_dir, root = root, dev_mode = dev_mode)
+        Editor.startup(profile_dir = profile_dir, root_dir = root_dir, dev_mode = dev_mode)
     except KeyboardInterrupt:
         pass
     except:

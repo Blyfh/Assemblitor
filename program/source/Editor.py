@@ -20,7 +20,7 @@ from program.source import PackHandler as pck
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
 
-def startup(profile_dir, root, dev_mode = False):
+def startup(profile_dir, root_dir, dev_mode = False):
     global ph
     global lh
     global eh
@@ -31,19 +31,20 @@ def startup(profile_dir, root, dev_mode = False):
     sh = pck.SpriteHandler(ph.theme())
     emu.startup(profile_handler = ph, error_handler = eh)
     sub.startup(profile_handler = ph, language_handler = lh, sprite_handler = sh, emulator = emu)
-
-    ph.save_profile_data("dev_mode", dev_mode)
-    ed = Editor(root = root)
+    if dev_mode: # overwrite profile if dev_mode is activated by startup
+        ph.save_profile_data("dev_mode", dev_mode)
+    ed = Editor(root_dir)
 
 
 class Editor:
 
-    def __init__(self, root):
+    def __init__(self, root_dir):
+        self.root_dir   = root_dir
         self.dev_mode   = ph.dev_mode()
         self.init_inp   = ""
         self.dirty_flag = False
         self.file_path  = None
-        self.last_dir   = root
+        self.last_dir   = root_dir
         self.file_types = ((lh.file_mng("AsmFiles"), "*.asm"), (lh.file_mng("TxtFiles"), "*.txt"))
         self.emu        = emu.Emulator()
         self.action_on_closing_unsaved_prg = ph.closing_unsaved()
@@ -56,7 +57,10 @@ class Editor:
         if self.dev_mode:
             traceback.print_exception(val)
         if exc.__name__ == "Exception" or self.dev_mode: # Exceptions are Assembly errors caused by user
-            self.out_CDB.display_error(self.format_exception_message(val))
+            try:
+                self.out_CDB.display_error(self.format_exception_message(val))
+            except tk.TclError: # if application and thus self.out_CDB is already destroyed, the TclError "invalid command name" will be thrown (winfo_exists() doesn't work here since the whole application is destroyed)
+                pass
         else: # internal errors caused by program will be displayed in a small pop-up window if developer mode isn't enabled
             mb.showerror("Internal Error", traceback.format_exception_only(exc, val)[0])
 

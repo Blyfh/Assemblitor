@@ -34,7 +34,7 @@ def concatenate(str1, str2): # used by Cell.gt_content() for adding spaces betwe
     else:
         return str1 + str2
 
-def split_cell_at_comment(cel_cmt_str): # used by Programm.gt_cells() and Editor.change_text() for splitting cell and comment
+def split_cell_at_comment(cel_cmt_str): # used by Program.gt_cells() and Editor.change_text() for splitting cell and comment
     i = 0
     while i < len(cel_cmt_str) and cel_cmt_str[i] != ";":
         i += 1
@@ -359,7 +359,7 @@ class Token:
 
     def create_tok(self, tok_str):
         tok = tok_str.rstrip()
-        if self.tpos == 0:
+        if self.tpos == 0: # address
             try:
                 tok_int = int(tok.lstrip()) # allow whitespaces before address
             except:
@@ -370,10 +370,10 @@ class Token:
                 return tok_int
             else:
                 raise Exception(eh.error("AdrTokIsNegative", tok = tok))
-        elif self.tpos == 1:
+        elif self.tpos == 1: # value or command
             try:
                 tok_int = int(tok)
-            except:
+            except ValueError:
                 if tok == "":
                     self.type = 2
                     return 0
@@ -382,9 +382,10 @@ class Token:
                     return tok.upper()
                 else:
                     raise Exception(eh.error("TokNotValOrCmd", adr = self.cpos, tok = tok))
-            self.type = 2
-            return tok_int
-        elif self.tpos == 2:
+            else:
+                self.type = 2
+                return tok_int
+        elif self.tpos == 2: # operand
             self.type = 3
             return Operand(tok, self.cpos)
         else:
