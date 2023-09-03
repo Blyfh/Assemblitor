@@ -57,7 +57,7 @@ A list of all accepted commands:
 
 ## The Editor
 
-The editor consists of a menubar, a toolbar and the two code blocks. Write your Assembly program in the left code block and execute it by clicking the green button on the left of the toolbar. You will find your executed code in the right code block. Use the orange buttonr to execute one step at a time.
+The editor consists of a menubar, a toolbar and the two code blocks. Write your Assembly program in the left code block and execute it by clicking the green button on the left of the toolbar. You will find your executed code in the right code block. Use the orange button to execute one step at a time.
 If you want to adjust addresses or operands, you can use the de-/increment tool found right to the execution buttons on the toolbar. Simply select the code you want to change and click the blue buttons. You can adjust the step size through the spinbox and which numbers it should affect with the option menu.
 
 ### Shortcuts
