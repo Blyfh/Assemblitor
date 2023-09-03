@@ -91,7 +91,7 @@ Das Programm orientiert sich an der Architektur eines Von-Neumann-Prozessors. Da
 
 Ein einfaches Programm könnte so aussehen:
 {    00 LDA #4 ; lade den Zahlenwert 4 in den AKKU
-    01 STA 04 ; speichere des AKKUs Zahlenwert in die 3. Speicherzelle
+    01 STA 04 ; speichere des AKKUs Zahlenwert in die 4. Speicherzelle
     02 STP    ; stoppe das Programm
 }
 So sieht das Ergebnis nach dem Ausführen des Programms aus:
@@ -165,7 +165,7 @@ Datei speichern unter"""
         "geometry": "410x170",
 
         "text": """Ein simpler Emulator und Editor für Assembly
-Version: 0.9 Alpha
+Version: 0.1 Beta
 2022/23 von Blyfh erstellt
 
 Bug gefunden? Benachrichtige mich unter

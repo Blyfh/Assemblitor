@@ -6,9 +6,15 @@ import tkinter.messagebox   as mb
 from program.source import Editor
 
 
+#          Copyright Blyfh https://github.com/Blyfh
+# Distributed under the Boost Software License, Version 1.0.
+#     (See accompanying file LICENSE_1_0.txt or copy at
+#           http://www.boost.org/LICENSE_1_0.txt)
+
+
 min_version = (3, 10)
 cur_version = sys.version_info
-dev_mode    = True
+dev_mode    = False
 is_portable = True
 root        = pl.Path(__file__).parent.absolute()
 

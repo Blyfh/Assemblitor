@@ -91,7 +91,7 @@ The program orients itself to the architecture of a von Neumann processor. This 
 
 A simple program may look like this:
 {    00 LDA #4 ; load the value 4 into the ACC
-    01 STA 04 ; store the value of the ACC into the 3rd MC
+    01 STA 04 ; store the value of the ACC into the 4th MC
     02 STP    ; stop the program
 }
 This would be the result after executing the program:
@@ -164,7 +164,7 @@ Save file as"""
         "geometry": "400x170",
 
         "text": """A simple emulator and editor for Assembly
-Version: 0.1 Alpha
+Version: 0.1 Beta
 Made by Blyfh in 2022/23
 
 Found a bug? Tell me on
