@@ -237,11 +237,11 @@ class Options(Subwindow):
 
     def current_state(self, option:str):
         if option == "language" or option == "code_font_face" or option == "closing_unsaved":
-            return eval(f"self.{option}_OMN.current_option()")
+            return getattr(self, f"{option}_OMN").current_option()
         elif option == "theme":
             return self.gt_theme()
         else:
-            return eval(f"self.{option}_VAR.get()")
+            return getattr(self, f"{option}_VAR").get()
 
     def restart_required(self):
         self.restart_LBL.config(text = lh.opt_win("RestartRequired"))
@@ -256,7 +256,7 @@ class Options(Subwindow):
             if self.option_changed(option):
                 ph.save_profile_data(key = option, new_value = self.current_state(option))
                 self.init_state[option] = self.current_state(option)
-                eval(f"self.save_option_{option}()") # individual saving methods
+                getattr(self, f"save_option_{option}")() # individual saving methods
 
     def save_option_theme(self):
         pass

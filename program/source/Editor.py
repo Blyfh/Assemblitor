@@ -273,7 +273,7 @@ class Editor:
                 return is_saving is not None
         elif self.action_on_closing_unsaved_prg == "save":
             self.save_file()
-            return not self.dirty_flag  # checks if user clicked cancel in save_file_as()
+            return not self.dirty_flag # checks if user clicked cancel in save_file_as()
         elif self.action_on_closing_unsaved_prg == "discard":
             return True
 
@@ -373,16 +373,29 @@ class Editor:
 
 
 # TO-DO:
-# OPTIONS:
-#   last dir fixed (choose path) or automatic
+# new option: last dir fixed (choose path) or automatic
 # rework output coloring
+# local wrap for error messages
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()
 # askyesnocancel buttons don't adjust to language
+# some* error messages don't get checked for xvisibility in out_CDB
+# + after xbar is visible, it won't get removed
 
 # SUGGESTIONS
 # ALU anzeigen
 # break points for debugging
 # farbige markierung der Sprache
 # strg + h
+
+#* this is a reproducible example:
+"""; A simple countdown program
+00 JMP 02
+01 5
+
+03 SUB #1
+04 JLE 07
+05 STA 01
+06 JMP 03
+07 STP"""

@@ -166,7 +166,7 @@ class Program:
     def execute_command(self, adr):
         cmd = self.gt_cel(adr).gt_cmd()
         opr = self.gt_cel(adr).gt_opr()
-        eval(f"self.cmd_{cmd}")(opr)
+        getattr(self, f"cmd_{cmd}")(opr)
 
     def fill_empty_cells(self, cells):
         i = 0
@@ -412,7 +412,7 @@ class Token:
             raise Exception(eh.error("TokNotVal_Overwrite", tpos = self.tpos, adr = self.cpos, tok = self.tok, new_val = new_val))
 
     def is_empty(self):
-        return self.tok_str.strip() == ""
+        return len(self.tok_str) == 0
 
     def gt_val(self):
         if self.type == 2:
@@ -425,7 +425,7 @@ class Token:
     def gt_cmd(self):
         if self.type == 1:
             return self.tok
-        elif len(self.tok_str) == 0:
+        elif self.is_empty():
             raise Exception(eh.error("TokNotCmd_EmptyTok", tpos = self.tpos, adr = self.cpos))
         elif self.type == 2:
             raise Exception(eh.error("TokNotCmd_ValTok", tpos = self.tpos, adr = self.cpos, tok = self.tok))
@@ -441,7 +441,7 @@ class Token:
     def gt_adr(self):
         if self.type == 0:
             return self.tok
-        elif len(self.tok_str) == 0:
+        elif self.is_empty():
             raise Exception(eh.error("TokNotAdr_EmptyTok", tpos = self.tpos, adr = self.cpos))
         else:
             raise Exception(eh.error("TokNotAdr", tpos = self.tpos, adr = self.cpos, tok = self.tok))

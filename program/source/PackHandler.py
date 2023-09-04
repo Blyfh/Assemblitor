@@ -2,6 +2,7 @@ import os
 import glob    as gl
 import pathlib as pl
 from PIL import ImageTk, Image
+from ast import literal_eval
 
 #          Copyright Blyfh https://github.com/Blyfh
 # Distributed under the Boost Software License, Version 1.0.
@@ -14,22 +15,22 @@ program_dir = pl.Path(__file__).parent.parent.absolute()
 
 class PackHandler:
 
-    def gt_pack_data(self, pack, direc):
-        return dict(eval(self.gt_pack_str(pack, direc)))
+    def gt_pack_data(self, pack, path):
+        return dict(literal_eval(self.gt_pack_str(pack, path))) # literal_eval safely evaluates literal structures, here a dict
 
-    def gt_pack_str(self, pack, direc):
+    def gt_pack_str(self, pack, path):
         try:
-            with open(f"{direc}/{pack}.dict", "r", encoding = "utf-8") as file:
+            with open(f"{path}/{pack}.dict", "r", encoding = "utf-8") as file:
                 return file.read()
         except:
-            raise FileNotFoundError(f"Couldn't fetch pack '{pack}' from directory '{direc}'.")
+            raise FileNotFoundError(f"Couldn't fetch pack '{pack}' from directory '{path}'.")
 
-    def st_pack_data(self, pack, direc, new_data):
+    def st_pack_data(self, pack, dir, new_data):
         try:
-            with open(f"{direc}/{pack}.dict", "w", encoding = "utf-8") as file:
+            with open(f"{dir}/{pack}.dict", "w", encoding = "utf-8") as file:
                 file.write(self.format(new_data))
         except:
-            raise FileNotFoundError(f"Couldn't update pack '{pack}' from directory '{direc}'.")
+            raise FileNotFoundError(f"Couldn't update pack '{pack}' from directory '{dir}'.")
 
     def format(self, dict_data, depth = 1):
         items_str = ""
