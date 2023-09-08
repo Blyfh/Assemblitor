@@ -164,7 +164,7 @@ Save file as"""
         "geometry": "400x170",
 
         "text": """A simple emulator and editor for Assembly
-Version: 0.1 Beta
+Version: 0.2 Beta
 Made by Blyfh in 2022/23
 
 Found a bug? Tell me on
