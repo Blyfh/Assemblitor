@@ -25,7 +25,7 @@ def display_warning(name, description):
 
 # check for missing package
 if find_spec("PIL") is None:
-    display_warning("Missing Package", "Needs Python package 'Pillow' to work properly.\nYou can install it via the console command 'pip install pillow'.")
+    display_warning("Missing Package", "Needs Python package 'Pillow' (v10.0.0+) to work properly.\nYou can install it via the console command 'pip install pillow'.")
     sys.exit()
 else:
     from program.source import Editor

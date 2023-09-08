@@ -11,7 +11,7 @@ Easily write, edit and execute your code in a visual user inteface that comes wi
 # Requirements
 
 * Python 3.10+
-* Pillow
+* Pillow 10.0.0
 
 # Getting Started
 

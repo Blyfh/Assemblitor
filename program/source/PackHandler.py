@@ -276,7 +276,7 @@ class SpriteHandler:
                 img = Image.open(f"{program_dir}/sprites/{group}/{sprite}.{type}")
             except:
                 raise FileNotFoundError(f"Couldn't fetch sprite '{sprite}' for '{group}'.")
-        img = img.resize((x, y), Image.ANTIALIAS)
+        img = img.resize((x, y), Image.LANCZOS)
         return ImageTk.PhotoImage(img)
 
     def gt_button_sprites(self, group, x = 35, y = 35, lockable = False):
