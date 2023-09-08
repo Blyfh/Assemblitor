@@ -2,11 +2,14 @@
 
 <img src="https://github.com/Blyfh/Assemblitor/blob/main/program/sprites/Assemblitor/icon.png" align="left" width="100"/>
 
-Assemblitor is a light-weight editor for a simple dialect of Assembly.
-
-It was made in Python 3.11 and supports any Python version above 3.9.
+Assemblitor is a light-weight editor for a simple dialect of Assembly. Easily write, edit and execute your code in a visual user inteface that comes with some quick tools to help you develop.
 
 <br clear="left"/>
+
+# Requirements
+
+* any Python version above 3.9
+* Python Imaging Library
 
 # Getting Started
 
