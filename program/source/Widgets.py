@@ -48,24 +48,29 @@ class OutCodeBlock(CodeBlock):
 
     def pack(self, *args, **kwargs):
         tk.Frame.pack(self, *args, **kwargs)
-        self.SCT.tag_config("pc_is_here", foreground = self.ed.theme_accent_color)
+        self.SCT.tag_config("code",        foreground = self.ed.theme_text_fg) # "fg" is an invalid argument
+        self.SCT.tag_config("active_code", foreground = self.ed.theme_accent_color) # used by step-by-step mode to highlight the current code line that the PC points to
+        self.SCT.tag_config("error",       foreground = self.ed.theme_error_color, wrap = "word")
         self.SCT.config(state = "disabled")
 
-    def display_output(self, out):
-        self.SCT.config(state = "normal", fg = self.ed.theme_text_fg)
+    def display_output(self, code_section1, active_code, code_section2):
+        self.SCT.config(state = "normal")
         self.SCT.delete("1.0", "end")
-        self.SCT.insert("insert", out[0][0])
-        if out[0][1]:
-            self.SCT.insert("insert", out[0][1], "pc_is_here")
+        self.SCT.insert("insert", code_section1, "code")
+        if active_code:
+            self.SCT.insert("insert", active_code, "active_code")
             self.SCT.yview_moveto(1) # jumps to current command
-        self.SCT.insert("insert", out[0][2])
+        self.SCT.insert("insert", code_section2, "code")
         self.SCT.config(state = "disabled")
 
-    def display_error(self, exception_message):
-        self.SCT.config(state = "normal", fg = self.ed.theme_error_color)
+    def display_error(self, exception_message, prg_state = None):
+        print(prg_state)
+        self.SCT.config(state = "normal")
         self.SCT.delete("1.0", "end")
-        self.SCT.insert("insert", exception_message)
-        self.SCT.config(state = "disabled")
+        self.SCT.insert("insert", exception_message, "error")
+        if prg_state:
+            self.SCT.insert("insert", prg_state, "code")
+        self.SCT.config(state ="disabled")
 
 
 class InpCodeBlock(CodeBlock):

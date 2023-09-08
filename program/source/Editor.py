@@ -58,7 +58,7 @@ class Editor:
             traceback.print_exception(val)
         if exc.__name__ == "Exception" or self.dev_mode: # Exceptions are Assembly errors caused by user
             try:
-                self.out_CDB.display_error(self.format_exception_message(val))
+                self.out_CDB.display_error(*self.format_exception_message(val))
             except tk.TclError: # if application and thus self.out_CDB is already destroyed, the TclError "invalid command name" will be thrown (winfo_exists() doesn't work here since the whole application is destroyed)
                 pass
         else: # internal errors caused by program will be displayed in a small pop-up window if developer mode isn't enabled
@@ -73,7 +73,7 @@ class Editor:
             self.emu.creating_new_prg_flag = False
             return error_msg
         else: # runtime exception
-            return error_msg + eh.prg_state_msg() + str(self.emu.prg)
+            return error_msg + eh.prg_state_msg(), str(self.emu.prg)
 
     def build_gui(self):
         self.root = tk.Tk()
@@ -292,7 +292,7 @@ class Editor:
         self.accu_value_LBL.config(text = out[2])
         self.ireg_cmd_LBL.config(  text = out[3][0])
         self.ireg_opr_LBL.config(  text = out[3][1])
-        self.out_CDB.display_output(out)
+        self.out_CDB.display_output(*out[0])
 
     def run_all(self):
         self.run(execute_all = True)
@@ -374,12 +374,11 @@ class Editor:
 
 # TO-DO:
 # new option: last dir fixed (choose path) or automatic
-# rework output coloring
-# local wrap for error messages
 
 # BUGS:
 # will default to save_as() when using save() after aborting one save_as()
 # askyesnocancel buttons don't adjust to language
+# errors raised in Editor.py won't be redirected to report_callback_exception (will instead be caught by the try/except in Assemblitor.pyw) -> esp bad if it's NOT an internal error (won't get displayed in CDB)
 # some* error messages don't get checked for xvisibility in out_CDB
 # + after xbar is visible, it won't get removed
 
