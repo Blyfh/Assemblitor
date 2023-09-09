@@ -5,7 +5,6 @@
 Assemblitor is a light-weight editor for a simple dialect of Assembly.
 
 Easily write, edit and execute your code in a visual user inteface that comes with some quick tools to help you develop.
-
 <br clear="left"/>
 
 # Requirements
