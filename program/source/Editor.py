@@ -71,7 +71,7 @@ class Editor:
             error_msg = str(val)
         if self.emu.prg is None: # program initialisation exception
             self.emu.creating_new_prg_flag = False
-            return error_msg
+            return error_msg, None
         else: # runtime exception
             return error_msg + eh.prg_state_msg(), str(self.emu.prg)
 
