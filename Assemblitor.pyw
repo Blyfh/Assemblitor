@@ -25,7 +25,7 @@ def display_warning(name, description):
 min_version = (3, 10)
 cur_version = sys.version_info
 min_pil_ver = (10, 0, 0)
-dev_mode    = False
+dev_mode    = True
 is_portable = True
 root_dir    = pl.Path(__file__).parent.absolute()
 

@@ -12,9 +12,9 @@ from program.source import PackHandler as ph
 #           http://www.boost.org/LICENSE_1_0.txt)
 
 
-def gt_img_slider_wheel(): # img_slider_wheel is ideally 5x20 px
+def gt_img_slider_wheel(height = 20): # img_slider_wheel is ideally 5x20 px
     sh = ph.SpriteHandler()
-    return sh.gt_sprite("Spinbox", "slider_wheel", 5, 20)
+    return sh.gt_sprite("Spinbox", "slider_wheel", 5, height)
 
 
 # ASSEMBLITOR WIDGETS
@@ -365,7 +365,15 @@ class OptionMenu(ttk.OptionMenu):
 
 class Spinbox(tk.Frame):
 
-    def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = None, textvariable:tk.IntVar = None, threshold:int = 15, bg = None, width:int = None, height = None, wrap = None, *args, **kwargs):
+    def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = None, textvariable:tk.IntVar = None, threshold:int = 15, bg = None, width:int = None, height = 4, wrap = None, *args, **kwargs):
+        if height == 3:
+            heights = {"font": 7, "slider": 12, "image": 17}
+        elif height == 4:
+            heights = {"font": 10, "slider": 16, "image": 20}
+        elif height == 5:
+            heights = {"font": 13, "slider": 18, "image": 25}
+        else:
+            heights = {"font": int(10 * height/4), "slider": 16 * height/4, "image": int(20 * height/4)}
         if default is None:
             default = min
         if min >= 0 and max >= 0 and default >= 0:
@@ -378,10 +386,10 @@ class Spinbox(tk.Frame):
         self.root = root
         tk.Frame.__init__(self, self.root, bg = bg)
         width = len(str(max)) if not width else width
-        self.text = tk.Text(self, width = width, height = 1, wrap = "none", *args, **kwargs)
+        self.text = tk.Text(self, width = width, height = 1, wrap = "none", font = ("Segoe", heights["font"]), *args, **kwargs)
         self.text.pack(side = "left")
         abs_root = abs_root if abs_root else self.root
-        self.slider = Slider(self, abs_root = abs_root, command = self.update, threshold = threshold)
+        self.slider = Slider(self, abs_root = abs_root, command = self.update, threshold = threshold, heights = heights)
         self.slider.pack(side = "right")
         self.already_modified = False
         self.st(default)
@@ -456,10 +464,10 @@ class Spinbox(tk.Frame):
 
 class Slider(tk.Label): # used by Spinbox
 
-    def __init__(self, root, command, abs_root = None, threshold:int = 15, width = 1, *args, **kwargs):
+    def __init__(self, root, command, abs_root = None, threshold:int = 15, width = 1, heights = {"slider": 16, "image": 20}, *args, **kwargs):
         self.root = root
-        img_slider_wheel = gt_img_slider_wheel()
-        super().__init__(self.root, height = 16, width = width, image = img_slider_wheel, *args, **kwargs)
+        img_slider_wheel = gt_img_slider_wheel(heights["image"])
+        super().__init__(self.root, height = heights["slider"], width = width, image = img_slider_wheel, *args, **kwargs)
         self.image = img_slider_wheel # needs to be assigned for displaying to work
         self.abs_root = abs_root if abs_root else self.root
         self.command = command

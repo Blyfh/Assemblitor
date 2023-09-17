@@ -161,10 +161,10 @@ class Editor:
         self.decr_TIP = wdg.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
 
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
-        self.chng_SBX = wdg.Spinbox(self.chng_adjust_FRM, self.root, min = 1, max = 999, default = 1)
+        self.chng_SBX = wdg.Spinbox(self.chng_adjust_FRM, self.root, min = 1, max = 999, default = 1, height = 3)
         self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = lambda displaytext: self.update_incr_decr_tooltips())
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
-        self.chng_SBX.pack(anchor = "nw")
+        self.chng_SBX.pack(anchor = "nw", pady = (0, 2))
         self.chng_opt_OMN.pack()
 
         self.ireg_FRM = ttk.Frame(self.taskbar_FRM, style = "info.TFrame")
