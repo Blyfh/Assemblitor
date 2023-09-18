@@ -148,7 +148,7 @@ class Editor:
         self.step_BTN.pack(side = "left", anchor = "center", padx = (5, 0))
         self.step_TIP = wdg.Tooltip(self.step_BTN, text = lh.gui("RunStep"))
 
-        self.seperator_FRM = tk.Frame(self.taskbar_FRM, width = 2, bg = self.theme_text_bg) # not using ttk.Seperator because width and color can't be customized
+        self.seperator_FRM = tk.Frame(self.taskbar_FRM, width = 2, bg = self.theme_base_fg) # not using ttk.Seperator because width and color can't be customized
         self.seperator_FRM.pack(side = "left", anchor = "center", fill = "y", padx = (5, 0), pady = 3)
 
         self.chng_FRM = ttk.Frame(self.taskbar_FRM)
@@ -217,6 +217,7 @@ class Editor:
         if theme == "light":
             sh.set_theme(theme = "light")
             self.theme_base_bg = "#DDDDDD"
+            self.theme_base_fg = "#444444"
             self.theme_text_bg = "#FFFFFF"
             self.theme_text_fg = "#000000"
             self.theme_cursor_color = "#222222"
@@ -228,6 +229,7 @@ class Editor:
         elif theme == "dark":
             sh.set_theme(theme = "dark")
             self.theme_base_bg = "#222222"
+            self.theme_base_fg = "#444444"
             self.theme_text_bg = "#333333"
             self.theme_text_fg = "#FFFFFF"
             self.theme_cursor_color = "#AAAAAA"

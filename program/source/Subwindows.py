@@ -109,7 +109,7 @@ class Options(Subwindow):
         self.subroot.resizable(False, False)
         self.subroot.config(bg = self.ed.theme_base_bg)
         self.subroot.title(lh.opt_win("title"))
-        self.options_FRM = ttk.Frame(self.subroot, style ="text.TFrame")
+        self.options_FRM = ttk.Frame(self.subroot, style = "text.TFrame")
         self.options_FRM.pack(fill = "both", expand = True)
 
         # appearance
@@ -124,7 +124,7 @@ class Options(Subwindow):
         self.code_font_LBL      = ttk.Label(self.code_font_FRM, style = "TLabel", text = lh.opt_win("EditorFont"))
         self.code_font_size_SBX = wdg.Spinbox(self.code_font_FRM, self.subroot, textvariable = self.code_font_size_VAR, min = 5, max = 30, default = self.code_font_size_VAR.get(), height = 23)
         self.code_font_face_OMN = wdg.OptionMenu(self.code_font_FRM, textvariable = self.code_font_face_VAR, default_option = ph.code_font_face(), options = gt_font_faces_with_names(), style = "TMenubutton")
-        self.appearance_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        self.appearance_subtitle_LBL.pack(fill = "x", pady = 5, padx = 10)
         self.light_theme_CHB.pack(   fill = "x",     pady = 5, padx = (20, 5))
         self.language_FRM      .pack(fill = "x",               padx = (20, 5))
         self.language_LBL      .pack(side = "left",  pady = 5, padx = (0, 15))
@@ -135,6 +135,7 @@ class Options(Subwindow):
         self.code_font_face_OMN.pack(side = "right", pady = 5, padx = 5)
 
         # Assembler
+        self.seperator1_FRM = tk.Frame(self.options_FRM, height = 2, bg = self.ed.theme_base_fg) # not using ttk.Seperator because width and color can't be customized
         self.assembler_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Assembler"))
         self.min_adr_len_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.min_adr_len_LBL = ttk.Label(self.min_adr_len_FRM, style = "TLabel", text = lh.opt_win("MinAdrLen"))
@@ -145,7 +146,8 @@ class Options(Subwindow):
         self.max_jmps_FRM    = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.max_jmps_LBL    = ttk.Label(self.max_jmps_FRM, style = "TLabel", text = lh.opt_win("MaxJmps"))
         self.max_jmps_SBX    = wdg.Spinbox(self.max_jmps_FRM, self.subroot, textvariable = self.max_jmps_VAR, min = 1, max = 1048576, default = self.max_jmps_VAR.get(), threshold = 1, height = 23)
-        self.assembler_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        self.seperator1_FRM.pack(anchor = "center", fill = "x", pady = 5, padx = 10)
+        self.assembler_subtitle_LBL.pack(fill = "x", pady = 5, padx = 10)
         self.min_adr_len_FRM.pack(fill = "x",               padx = (20, 5))
         self.min_adr_len_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
         self.min_adr_len_SBX.pack(side = "right", pady = 5, padx = 5)
@@ -157,22 +159,26 @@ class Options(Subwindow):
         self.max_jmps_SBX   .pack(side = "right", pady = 5, padx = 5)
 
         # File
+        self.seperator2_FRM = tk.Frame(self.options_FRM, height = 2, bg = self.ed.theme_base_fg) # not using ttk.Seperator because width and color can't be customized
         self.file_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("File"))
         self.closing_unsaved_FRM = ttk.Frame(self.options_FRM, style = "text.TFrame")
         self.closing_unsaved_LBL = ttk.Label(self.closing_unsaved_FRM, style = "TLabel", text = lh.opt_win("ClosingUnsaved"))
         self.closing_unsaved_OMN = wdg.OptionMenu(self.closing_unsaved_FRM, textvariable = self.closing_unsaved_VAR, default_option = ph.closing_unsaved(), options = lh.opt_win("ClosingUnsavedOptions"), style = "TMenubutton")
-        self.file_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        self.seperator2_FRM.pack(anchor = "center", fill = "x", pady = 5, padx = 10)
+        self.file_subtitle_LBL.pack(fill = "x", pady = 5, padx = 10)
         self.closing_unsaved_FRM.pack(fill = "x",               padx = (20, 5))
         self.closing_unsaved_LBL.pack(side = "left",  pady = 5, padx = (0, 15))
         self.closing_unsaved_OMN.pack(side = "right", pady = 5, padx = 5)
 
         # Advanced
+        self.seperator3_FRM = tk.Frame(self.options_FRM, height = 2, bg = self.ed.theme_base_fg) # not using ttk.Seperator because width and color can't be customized
         self.advanced_subtitle_LBL = ttk.Label(self.options_FRM, style = "subtitle.TLabel", text = lh.opt_win("Advanced"))
         self.dev_mode_CHB = ttk.Checkbutton(self.options_FRM, style = "embedded.TCheckbutton", text = lh.opt_win("DevMode"), variable = self.dev_mode_VAR, onvalue = True, offvalue = False)
         if not self.dev_mode_VAR.get():
             self.dev_mode_CHB.state(["!alternate"])  # deselect the checkbutton
         self.dev_mode_TIP = wdg.Tooltip(self.dev_mode_CHB, text = lh.opt_win("DevModeTip"))
-        self.advanced_subtitle_LBL.pack(fill = "x", pady = 5, padx = 5)
+        self.seperator3_FRM.pack(anchor = "center", fill = "x", pady = 5, padx = 10)
+        self.advanced_subtitle_LBL.pack(fill = "x", pady = 5, padx = 10)
         self.dev_mode_CHB.pack(fill = "x", pady = 5, padx = (20, 5))
 
         # taskbar
