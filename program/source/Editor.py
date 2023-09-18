@@ -106,8 +106,8 @@ class Editor:
         self.style.configure("info_title.TLabel",     background = self.theme_highlight_base_bg, foreground = self.theme_highlight_text_fg, anchor = "center")
         self.style.configure("info_value.TLabel",     background = self.theme_highlight_text_bg, foreground = self.theme_highlight_text_fg, anchor = "center", font = self.gt_code_font())
         self.style.configure("subtitle.TLabel",       background = self.theme_text_bg,           foreground = self.theme_text_fg, font = self.subtitle_font)
-        self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg) # , relief = "flat", borderwidth = 1)
-        self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg) # , relief = "flat", borderwidth = 1)
+        self.style.configure("TCheckbutton",          background = self.theme_base_bg,           foreground = self.theme_text_fg)
+        self.style.configure("embedded.TCheckbutton", background = self.theme_text_bg,           foreground = self.theme_text_fg)
 
     # elements
         self.menubar = tk.Menu(self.root)
@@ -161,7 +161,7 @@ class Editor:
         self.decr_TIP = wdg.Tooltip(self.decr_BTN, text = lh.gui("DecrAdrs"))
 
         self.chng_adjust_FRM = ttk.Frame(self.taskbar_FRM)
-        self.chng_SBX = wdg.Spinbox(self.chng_adjust_FRM, self.root, min = 1, max = 999, default = 1, height = 3)
+        self.chng_SBX = wdg.Spinbox(self.chng_adjust_FRM, self.root, min = 1, max = 999, default = 1, height = 15, font_size = 8)
         self.chng_opt_OMN = wdg.OptionMenu(self.chng_adjust_FRM, options = lh.gui("ChngOptions"), default_option = "adr", textvariable = self.change_options_VAR, width = 20, command = lambda displaytext: self.update_incr_decr_tooltips())
         self.chng_adjust_FRM.pack(side = "left", anchor = "center", padx = (5, 0))
         self.chng_SBX.pack(anchor = "nw", pady = (0, 2))
@@ -379,8 +379,7 @@ class Editor:
 # will default to save_as() when using save() after aborting one save_as()
 # askyesnocancel buttons don't adjust to language
 # errors raised in Editor.py won't be redirected to report_callback_exception (will instead be caught by the try/except in Assemblitor.pyw) -> esp bad if it's NOT an internal error (won't get displayed in CDB)
-# some* error messages don't get checked for xvisibility in out_CDB
-# + after xbar is visible, it won't get removed
+# some* error messages don't get checked for xvisibility in out_CDB + after xbar is visible, it won't get removed
 
 # SUGGESTIONS
 # ALU anzeigen

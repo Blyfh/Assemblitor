@@ -64,7 +64,6 @@ class OutCodeBlock(CodeBlock):
         self.SCT.config(state = "disabled")
 
     def display_error(self, exception_message, prg_state = None):
-        print(prg_state)
         self.SCT.config(state = "normal")
         self.SCT.delete("1.0", "end")
         self.SCT.insert("insert", exception_message, "error")
@@ -365,15 +364,7 @@ class OptionMenu(ttk.OptionMenu):
 
 class Spinbox(tk.Frame):
 
-    def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = None, textvariable:tk.IntVar = None, threshold:int = 15, bg = None, width:int = None, height = 4, wrap = None, *args, **kwargs):
-        if height == 3:
-            heights = {"font": 7, "slider": 12, "image": 17}
-        elif height == 4:
-            heights = {"font": 10, "slider": 16, "image": 20}
-        elif height == 5:
-            heights = {"font": 13, "slider": 18, "image": 25}
-        else:
-            heights = {"font": int(10 * height/4), "slider": 16 * height/4, "image": int(20 * height/4)}
+    def __init__(self, root, abs_root = None, min:int = 0, max:int = 100, default:int = None, textvariable:tk.IntVar = None, threshold:int = 15, bg = None, height:int = 19, font_size:int = 10, wrap = None, *args, **kwargs):
         if default is None:
             default = min
         if min >= 0 and max >= 0 and default >= 0:
@@ -384,13 +375,19 @@ class Spinbox(tk.Frame):
             raise ValueError(f"Spinbox: Either min ({min}), max ({max}) or default ({default}) is negative.")
         self.textvariable = textvariable
         self.root = root
-        tk.Frame.__init__(self, self.root, bg = bg)
-        width = len(str(max)) if not width else width
-        self.text = tk.Text(self, width = width, height = 1, wrap = "none", font = ("Segoe", heights["font"]), *args, **kwargs)
-        self.text.pack(side = "left")
         abs_root = abs_root if abs_root else self.root
-        self.slider = Slider(self, abs_root = abs_root, command = self.update, threshold = threshold, heights = heights)
-        self.slider.pack(side = "right")
+        font = tk.font.Font(family = "Segoe", size = font_size)
+        width_chars  = len(str(max))
+        width_text   = font.measure("9"*width_chars)
+        height_text  = font.metrics("linespace")
+        padx_text    = 1
+        pady_text    = 0 if (pady_fill := int((height - height_text)/2)) < 1 else pady_fill
+        width_slider = 5
+        tk.Frame.__init__(self, self.root, width = width_text + padx_text*2 + 2 + width_slider, height = height, bg = bg)
+        self.text      = tk.Text(self, width = width_chars, height = 1, wrap = "none", font = font, padx = padx_text, pady = pady_text, *args, **kwargs)
+        self.slider    = Slider(self, abs_root = abs_root, command = self.update, threshold = threshold, width = width_slider, height = height)
+        self.text.place(x = 0, y = 0, height = height)
+        self.slider.place(x = width_text + padx_text*2 + 2, y = 0)
         self.already_modified = False
         self.st(default)
         if self.textvariable:
@@ -445,6 +442,7 @@ class Spinbox(tk.Frame):
         self.root.update()
 
     def select_all(self):
+        self.text.mark_set("insert", "end-1c") # move cursor to the end
         self.text.tag_add("sel", 1.0, "end-1c")
 
     def update(self, change:int = 0):
@@ -464,10 +462,10 @@ class Spinbox(tk.Frame):
 
 class Slider(tk.Label): # used by Spinbox
 
-    def __init__(self, root, command, abs_root = None, threshold:int = 15, width = 1, heights = {"slider": 16, "image": 20}, *args, **kwargs):
+    def __init__(self, root, command, abs_root = None, threshold:int = 15, width = 5, height = 20, *args, **kwargs):
         self.root = root
-        img_slider_wheel = gt_img_slider_wheel(heights["image"])
-        super().__init__(self.root, height = heights["slider"], width = width, image = img_slider_wheel, *args, **kwargs)
+        img_slider_wheel = gt_img_slider_wheel(height)
+        super().__init__(self.root, height = height, width = width, image = img_slider_wheel, borderwidth = 0, *args, **kwargs)
         self.image = img_slider_wheel # needs to be assigned for displaying to work
         self.abs_root = abs_root if abs_root else self.root
         self.command = command
