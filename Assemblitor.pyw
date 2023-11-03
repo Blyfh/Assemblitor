@@ -1,8 +1,8 @@
 import sys
 import os
-import pathlib as pl
 import tkinter as tk
 import tkinter.messagebox as mb
+from pathlib import Path
 
 
 #          Copyright Blyfh https://github.com/Blyfh
@@ -26,11 +26,11 @@ def ver_str(ver: tuple[int, ...]):
 
 
 min_version = (3, 10)
-cur_version = sys.version_info[:3]
+cur_version = sys.version_info[:3] # only get major.minor.micro
 min_pil_ver = (10, 0, 0)
 dev_mode    = True
 is_portable = True
-root_dir    = pl.Path(__file__).parent.absolute()
+root_dir    = Path(getattr(sys, "_MEIPASS", Path.cwd()))
 
 
 # safely import Editor
