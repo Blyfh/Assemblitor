@@ -111,8 +111,7 @@ class Program:
             else:
                 cell = Cell(line[0], line[1])
                 cells.append(cell)
-        cells = self.fill_empty_cells(cells)
-        return cells
+        return self.fill_empty_cells(cells)
 
     def gt_prg(self, execute_all_flag = False): # returns a tuple with the executing cell in the middle to colorcode it in the output widget
         if not execute_all_flag and len(self.cells) > 0:
@@ -148,10 +147,10 @@ class Program:
             self.start_executing()
 
     def start_executing(self):
-        self.executing   = True
-        self.halted      = False
-        self.accu        = 0
-        self.pc          = 0
+        self.executing = True
+        self.halted    = False
+        self.accu      = 0
+        self.pc        = 0
         self.jmps_to_adr.clear()
 
     def execute_cell(self):
