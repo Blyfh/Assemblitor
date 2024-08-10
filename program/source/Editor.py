@@ -292,7 +292,7 @@ class Editor:
     
     def can_close_unsaved_prg(self):  # returns if it is okay to continue
         if self.action_on_closing_unsaved_prg == "ask":
-            is_saving = mb.askyesnocancel(lh.file_mng("UnsavedChanges"), lh.file_mng("Save?"))  # return None on Cancel
+            is_saving = mb.askyesnocancel(lh.file_mng("UnsavedChanges"), lh.file_mng("Save?"))  # returns None on Cancel
             if is_saving:
                 self.save_file()
                 return not self.dirty_flag  # checks if user clicked cancel in save_file_as()
@@ -300,7 +300,7 @@ class Editor:
                 return is_saving is not None
         elif self.action_on_closing_unsaved_prg == "save":
             self.save_file()
-            return not self.dirty_flag # checks if user clicked cancel in save_file_as()
+            return not self.dirty_flag  # checks if user clicked cancel in save_file_as()
         elif self.action_on_closing_unsaved_prg == "discard":
             return True
     
@@ -349,7 +349,7 @@ class Editor:
     def save_file(self):
         if self.file_path:
             self.init_inp = self.inp_CDB.gt_input()
-            with open(self.file_path, "w", encoding = "utf-8") as file:
+            with open(self.file_path, "w", encoding="utf-8") as file:
                 file.write(self.init_inp)
             self.set_dirty_flag(False)
         else:
