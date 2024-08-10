@@ -6,8 +6,7 @@
 
 # BUGS
 
-* will default to save_as() when using save() after aborting one save_as()
-* askyesnocancel buttons don't adjust to language
+* tkinter.messagebox.askyesnocancel() buttons don't adjust to program language and will instead use the OS language
 * errors raised in Editor.py won't be redirected to report_callback_exception (will instead be caught by the try/except
   in Assemblitor.pyw) -> esp bad if it's NOT an internal error (won't get displayed in CDB)
 * some error messages don't get checked for xvisibility in out_CDB + after xbar is visible, it won't get removed

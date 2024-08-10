@@ -356,9 +356,10 @@ class Editor:
             self.save_file_as()
     
     def save_file_as(self):
-        self.file_path = self.file_path = fd.asksaveasfilename(title=lh.file_mng("SaveFile"), initialdir=self.last_dir,
-                                                               filetypes=self.file_types, defaultextension=".asm")
-        if self.file_path:
+        file_path = fd.asksaveasfilename(title=lh.file_mng("SaveFile"), initialdir=self.last_dir,
+                                         filetypes=self.file_types, defaultextension=".asm")
+        if file_path:  # check for cancellation
+            self.file_path = file_path
             self.save_file()
             self.root.title(self.file_path + " – " + lh.gui("title"))
     
