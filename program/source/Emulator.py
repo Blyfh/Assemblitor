@@ -114,8 +114,7 @@ class Program:
             else:
                 cell = Cell(line[0], line[1])
                 cells.append(cell)
-        cells = self.fill_empty_cells(cells)
-        return cells
+        return self.fill_empty_cells(cells)
     
     def gt_prg(self, execute_all_flag=False):
         """Return a tuple with the executing cell in the middle to colorcode it in the output widget"""
@@ -519,3 +518,4 @@ class Operand:
                     return opr_int
                 else:
                     raise Exception(eh.error("DirOprIsNegative", adr = self.cpos, opr_str = opr_str))
+
