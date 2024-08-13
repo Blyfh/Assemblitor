@@ -333,20 +333,20 @@ class Assembly(Subwindow):
         self.subroot.title(lh.asm_win("title"))
         
         self.assembly_FRM = ttk.Frame(self.subroot, style="TFrame")
-        self.text_SCB = tk.Scrollbar(self.assembly_FRM)
+        self.text_BAR = tk.Scrollbar(self.assembly_FRM)
         self.text_TXT = tk.Text(self.assembly_FRM, bg=self.ed.theme_text_bg, fg=self.ed.theme_text_fg, bd=5,
                                 relief="flat", wrap="word", font=("TkDefaultFont", 10),
-                                yscrollcommand=self.text_SCB.set)
+                                yscrollcommand=self.text_BAR.set)
         self.assembly_FRM.pack(fill="both", expand=True)
         self.text_TXT.pack(side="left",  fill="both", expand=True)
-        self.text_SCB.pack(side="right", fill="y")
+        self.text_BAR.pack(side="right", fill="y")
         self.set_code_font()
         
         text_code_pairs = lh.asm_win("text")
         for text_code_pair in text_code_pairs:
             self.text_TXT.insert("end", text_code_pair[0])
             self.text_TXT.insert("end", text_code_pair[1], "asm_code")
-        self.text_SCB.config(command=self.text_TXT.yview)
+        self.text_BAR.config(command=self.text_TXT.yview)
         self.text_TXT.config(state="disabled")
         super().build_gui()
     

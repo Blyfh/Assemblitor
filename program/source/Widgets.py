@@ -2,6 +2,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.scrolledtext as st
 import string
+from typing import Literal
+
 from program.source import Emulator as emu
 from program.source import PackHandler as ph
 
@@ -24,56 +26,56 @@ class CodeBlock(tk.Frame):
     def __init__(self, root, editor, **kwargs):
         self.root = root
         self.ed = editor
-        tk.Frame.__init__(self, self.root)
-        self.SCT = st.ScrolledText(self, bg=self.ed.theme_text_bg, fg=self.ed.theme_text_fg, bd=0, width=10,
-                                   wrap="none", font=self.ed.gt_code_font(), **kwargs)
-        self.xview_SCB = tk.Scrollbar(self, orient="horizontal", command=self.SCT.xview)
-        self.SCT["xscrollcommand"] = self.xview_SCB.set
-        self.SCT.pack(side="top", fill="both", expand=True)
-        self.xview_SCB_flag = False
+        super().__init__(self.root)
         
-        # events
+        self.x_BAR = AutohideScrollbar(self, orient="horizontal")
+        self.y_BAR = AutohideScrollbar(self, orient="vertical")
+        self.TXT = tk.Text(self, yscrollcommand=self.y_BAR.set, xscrollcommand=self.x_BAR.set, wrap="none",
+                           bg=self.ed.theme_text_bg, fg=self.ed.theme_text_fg, font=self.ed.gt_code_font(),
+                           insertbackground=self.ed.theme_cursor_color, width=10, bd=0, **kwargs)
+        self.TXT.grid(row=0, column=0, sticky="NSEW")
         
-        self.SCT.bind(sequence="<Configure>",  func=lambda event: self.check_for_xvisibility())
-        self.SCT.bind(sequence="<<Modified>>", func=lambda event: self.check_for_xvisibility())
-    
-    def check_for_xvisibility(self):  # hide/display xview_SCB if necessary
-        if self.SCT.xview() == (0.0, 1.0):
-            if self.xview_SCB_flag:
-                self.xview_SCB.pack_forget()
-                self.xview_SCB_flag = False
-        elif not self.xview_SCB_flag:
-            self.xview_SCB.pack(side="bottom", fill="x")
-            self.xview_SCB_flag = True
+        self.x_BAR.config(command=self.TXT.xview)
+        self.y_BAR.config(command=self.TXT.yview)
+        
+        # make Text widget expandable
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
 
 class OutCodeBlock(CodeBlock):
     
-    def pack(self, *args, **kwargs):
-        tk.Frame.pack(self, *args, **kwargs)
-        self.SCT.tag_config("code",        foreground=self.ed.theme_text_fg)  # "fg" is an invalid argument
+    def __init__(self, root, editor):
+        super().__init__(root, editor)
+        self.TXT.tag_config("code", foreground=self.ed.theme_text_fg)  # "fg" is an invalid argument
         # used by step-by-step mode to highlight the current code line that the PC points to
-        self.SCT.tag_config("active_code", foreground=self.ed.theme_accent_color)
-        self.SCT.tag_config("error",       foreground=self.ed.theme_error_color, wrap="word")
-        self.SCT.config(state="disabled")
+        self.TXT.tag_config("active_code", foreground=self.ed.theme_accent_color)
+        self.TXT.tag_config("error", foreground=self.ed.theme_error_color, wrap="word")
+        self.TXT.config(state="disabled")
+    
+    def append_text(self, text, tag):
+        self.TXT.config(state="normal")
+        self.TXT.insert("insert", text, tag)
+        self.TXT.config(state="disabled")
+    
+    def clear_text(self):
+        self.TXT.config(state="normal")
+        self.TXT.delete("1.0", "end")
+        self.TXT.config(state="disabled")
     
     def display_output(self, code_section1, active_code, code_section2):
-        self.SCT.config(state="normal")
-        self.SCT.delete("1.0", "end")
-        self.SCT.insert("insert", code_section1, "code")
+        self.clear_text()
+        self.append_text(code_section1, "code")
         if active_code:
-            self.SCT.insert("insert", active_code, "active_code")
-            self.SCT.yview_moveto(1)  # jumps to current command
-        self.SCT.insert("insert", code_section2, "code")
-        self.SCT.config(state="disabled")
+            self.append_text(active_code, "active_code")
+            self.TXT.yview_moveto(1)  # jumps to current command
+        self.append_text(code_section2, "code")
     
     def display_error(self, exception_message, prg_state=None):
-        self.SCT.config(state="normal")
-        self.SCT.delete("1.0", "end")
-        self.SCT.insert("insert", exception_message, "error")
+        self.clear_text()
+        self.append_text(exception_message, "error")
         if prg_state:
-            self.SCT.insert("insert", prg_state, "code")
-        self.SCT.config(state="disabled")
+            self.append_text(prg_state, "code")
 
 
 class InpCodeBlock(CodeBlock):
@@ -81,29 +83,27 @@ class InpCodeBlock(CodeBlock):
     def __init__(self, root, editor):
         super().__init__(root, editor, undo=True)
         self.already_modified = False
-        # necessary because self.ed isn't defined beforehand
-        self.SCT.config(insertbackground=self.ed.theme_cursor_color)
         
         # events
         
-        bindtags = self.SCT.bindtags()
+        bindtags = self.TXT.bindtags()
         # changes bindtag order to let open_file() return "break" before standard class-level binding of <Control-o>
         # that adds a newline
-        self.SCT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3]))
+        self.TXT.bindtags((bindtags[2], bindtags[0], bindtags[1], bindtags[3]))
         # automatic edit_redo() bind is <Control-y>
         # double binds necessary due to capslock overwriting lowercase sequence keys
-        self.SCT.bind(sequence="<Control-Shift-z>",   func=lambda event: self.redo())
-        self.SCT.bind(sequence="<Control-Shift-Z>",   func=lambda event: self.redo())
-        self.SCT.bind(sequence="<Shift-Return>",      func=lambda event: self.regular_newline())
-        self.SCT.bind(sequence="<Return>",            func=lambda event: self.smart_newline())
-        self.SCT.bind(sequence="<Control-BackSpace>", func=lambda event: self.delete_word())
-        self.SCT.bind(sequence="<Key>",               func=lambda event: self.on_key_pressed())
+        self.TXT.bind(sequence="<Control-Shift-z>", func=lambda event: self.redo())
+        self.TXT.bind(sequence="<Control-Shift-Z>", func=lambda event: self.redo())
+        self.TXT.bind(sequence="<Shift-Return>", func=lambda event: self.regular_newline())
+        self.TXT.bind(sequence="<Return>", func=lambda event: self.smart_newline())
+        self.TXT.bind(sequence="<Control-BackSpace>", func=lambda event: self.delete_word())
+        self.TXT.bind(sequence="<Key>", func=lambda event: self.on_key_pressed())
         # 'add' keyword necessary because CodeBlock already uses bind "<<Modified>>"
-        self.SCT.bind(sequence="<<Modified>>",        func=lambda event: self.on_inp_modified(), add="+")
+        self.TXT.bind(sequence="<<Modified>>", func=lambda event: self.on_inp_modified(), add="+")
     
     def redo(self):
         try:
-            self.SCT.edit_redo()
+            self.TXT.edit_redo()
         except tk.TclError:  # when reaching the bottom of the stack and nothing can be redone this error is thrown
             pass
         return "break"  # to prevent edit_undo() to trigger when having capslock on
@@ -113,37 +113,40 @@ class InpCodeBlock(CodeBlock):
     
     def smart_newline(self):
         self.insert_address()
-        self.SCT.see("insert") # jump to cursor pos if it gets out of sight (due to newline)
+        self.TXT.see("insert")  # jump to cursor pos if it gets out of sight (due to newline)
         return "break"  # overwrites excessive newline printing
     
     def insert_address(self):
-        last_line = self.SCT.get("insert linestart", "insert")
+        last_line = self.TXT.get("insert linestart", "insert")
         last_line_stripped = last_line.lstrip()
+        if last_line_stripped == "":  # empty cell (extra check since split() returns empty list without index 0)
+            self.TXT.insert("insert", "\n")
+            return
         try:
             last_adr = int(last_line_stripped.split()[0])
         except ValueError:
-            self.SCT.insert("insert", "\n")
+            self.TXT.insert("insert", "\n")
             return
         whitespace_wrapping = last_line.split(last_line_stripped)[0]
         new_adr = emu.add_leading_zeros(str(last_adr + 1))
-        self.SCT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
+        self.TXT.insert("insert", "\n" + whitespace_wrapping + new_adr + " ")
     
     def delete_word(self):
-        if self.SCT.index("insert") != "1.0":  # to prevent deleting word after cursor on position 0
-            if self.SCT.get("insert-1c", "insert") != "\n":  # to prevent deleting the word of the line above
-                self.SCT.delete("insert-1c", "insert")  # delete potential space before word
-            self.SCT.delete("insert-1c wordstart", "insert")  # delete word
+        if self.TXT.index("insert") != "1.0":  # to prevent deleting word after cursor on position 0
+            if self.TXT.get("insert-1c", "insert") != "\n":  # to prevent deleting the word of the line above
+                self.TXT.delete("insert-1c", "insert")  # delete potential space before word
+            self.TXT.delete("insert-1c wordstart", "insert")  # delete word
             return "break"
     
     def on_key_pressed(self):
-        if self.SCT.get("insert-1c") in string.whitespace:  # last written char is a whitespace
+        if self.TXT.get("insert-1c") in string.whitespace:  # last written char is a whitespace
             # add seperator to undo stack so that all actions up to the seperator can be undone -> undoes whole words
-            self.SCT.edit_separator()
+            self.TXT.edit_separator()
     
     def on_inp_modified(self):
         if not self.already_modified:  # because somehow on_inp_modified always gets called twice
-            self.SCT.edit_modified(False)
-            if self.ed.init_inp == self.SCT.get(1.0, "end-1c"):
+            self.TXT.edit_modified(False)
+            if self.ed.init_inp == self.TXT.get(1.0, "end-1c"):
                 # checks if code got reverted to last saved instance (to avoid pointless ask-to-save'ing)
                 self.ed.set_dirty_flag(False)
             else:
@@ -162,17 +165,17 @@ class InpCodeBlock(CodeBlock):
         option = self.ed.chng_opt_OMN.current_option()  # either "adr", "adr_opr", "opr"
         adrs_flag = "adr" in option
         oprs_flag = "opr" in option
-        sel_range = self.SCT.tag_ranges("sel")
+        sel_range = self.TXT.tag_ranges("sel")
         if sel_range:
-            text = self.SCT.get(*sel_range)
+            text = self.TXT.get(*sel_range)
             if text.strip():
                 new_text = self.change_text(text, adrs_flag, oprs_flag, change)
-                self.SCT.delete(*sel_range)
-                self.SCT.insert(sel_range[0], new_text)
+                self.TXT.delete(*sel_range)
+                self.TXT.insert(sel_range[0], new_text)
                 self.select_text(sel_range[0], new_text)
     
     def select_text(self, pos, text):
-        self.SCT.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
+        self.TXT.tag_add("sel", pos, str(pos) + f"+{len(text)}c")
     
     def change_text(self, text, adrs_flag, oprs_flag, change=1):
         lines = text.split("\n")
@@ -246,11 +249,11 @@ class InpCodeBlock(CodeBlock):
         return cell
     
     def gt_input(self):
-        return self.SCT.get(1.0, "end-1c")
+        return self.TXT.get(1.0, "end-1c")
     
     def st_input(self, inp_str: str):
-        self.SCT.delete("1.0", "end")
-        self.SCT.insert("insert", inp_str)
+        self.TXT.delete("1.0", "end")
+        self.TXT.insert("insert", inp_str)
 
 
 # UNIVERSAL WIDGETS
@@ -486,7 +489,7 @@ class Spinbox(tk.Frame):
 
 class Slider(tk.Label):  # used by Spinbox
     
-    def __init__(self, root, command, abs_root=None, threshold: int = 15, width=5, height=20, *args, **kwargs):
+    def __init__(self, root, command, abs_root=None, threshold: int = 15, width: int = 5, height: int = 20, *args, **kwargs):
         self.root = root
         img_slider_wheel = gt_img_slider_wheel(height)
         super().__init__(self.root, height=height, width=width, image=img_slider_wheel, borderwidth=0, *args, **kwargs)
@@ -710,3 +713,27 @@ class Tooltip:
         if tw:
             tw.destroy()
         self.tw = None
+
+
+class AutohideScrollbar(tk.Scrollbar):
+    
+    def __init__(self, root, orient: Literal["vertical", "horizontal"], **kw):
+        if orient == "vertical":
+            self.grid_kw = {"row": 0, "column": 1, "sticky": "NS"}
+        elif orient == "horizontal":
+            self.grid_kw = {"row": 1, "column": 0, "sticky": "EW"}
+        else:
+            raise ValueError(f"AutohideScrollbar: orient takes only 'vertical' or 'horizontal', not '{orient}'")
+        self.is_needed = False
+        self.orient = orient
+        super().__init__(root, orient=orient, **kw)
+    
+    def set(self, first, last):
+        if float(first) > 0.0 or float(last) < 1.0:  # if visible text is not at the bounds of the Text
+            if not self.is_needed:
+                self.grid(**self.grid_kw)
+                self.is_needed = True
+        elif self.is_needed:
+            self.grid_forget()
+            self.is_needed = False
+        super().set(first, last)

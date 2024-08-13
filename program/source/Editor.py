@@ -229,7 +229,7 @@ class Editor:
         self.root.bind(sequence="<Control-Shift-S>",  func=lambda event: self.save_file_as())
         self.root.bind(sequence="<Shift-Tab>",        func=lambda event: self.switch_change_option())
         self.root.bind(sequence="<Shift-MouseWheel>", func=self.on_shift_mousewheel)
-        self.inp_CDB.SCT.bind(sequence="<<Selection>>", func=lambda event: self.check_for_inp_selection())
+        self.inp_CDB.TXT.bind(sequence="<<Selection>>", func=lambda event: self.check_for_inp_selection())
         
         # protocols
         
@@ -266,8 +266,8 @@ class Editor:
     
     def update_code_font(self):
         code_font = self.gt_code_font()
-        self.inp_CDB.SCT   .config(font=code_font)
-        self.out_CDB.SCT   .config(font=code_font)
+        self.inp_CDB.TXT   .config(font=code_font)
+        self.out_CDB.TXT   .config(font=code_font)
         self.ireg_cmd_LBL  .config(font=code_font)
         self.ireg_opr_LBL  .config(font=code_font)
         self.accu_value_LBL.config(font=code_font)
@@ -377,7 +377,7 @@ class Editor:
         self.open_prg(lh.demo())
     
     def check_for_inp_selection(self):
-        sel_range = self.inp_CDB.SCT.tag_ranges("sel")
+        sel_range = self.inp_CDB.TXT.tag_ranges("sel")
         if sel_range == ():
             self.incr_BTN.lock()
             self.decr_BTN.lock()
