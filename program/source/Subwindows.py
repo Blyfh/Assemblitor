@@ -21,16 +21,19 @@ def startup(profile_handler, language_handler, sprite_handler, emulator):
     sh = sprite_handler
     emu = emulator
 
+
 def gt_font_faces_with_names():
     font_faces_with_names = {}
     for font_face in gt_font_faces():
         font_faces_with_names[font_face] = font_face_name(font_face)
     return font_faces_with_names
 
+
 def gt_font_faces():
     fonts = list(fn.families())
     fonts.sort()
     return fonts
+
 
 def font_face_name(font_face):
     return font_face  # unfinished

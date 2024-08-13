@@ -13,12 +13,14 @@ MIN_ADR_LEN = 0
 MAX_JMPS = 0
 MAX_CELS = 0
 
+
 def startup(profile_handler, error_handler):
     global ph
     global eh
     ph = profile_handler
     eh = error_handler
     update_properties()
+
 
 def update_properties():
     global MIN_ADR_LEN
@@ -28,11 +30,13 @@ def update_properties():
     MAX_JMPS = ph.max_jmps()
     MAX_CELS = ph.max_cels()
 
+
 def concatenate(str1, str2):  # used by Cell.gt_content() to add spaces between tokens if necessary
     if len(str1) > 0 and len(str2) > 0 and not str1[-1] in string.whitespace:
         return str1 + " " + str2
     else:
         return str1 + str2
+
 
 def split_cell_at_comment(cel_cmt_str):  # used by Program.gt_cells() and Editor.change_text() to split cell and comment
     i = 0
@@ -42,6 +46,7 @@ def split_cell_at_comment(cel_cmt_str):  # used by Program.gt_cells() and Editor
     while i > 1 and cel_cmt_str[i - 1] in string.whitespace and cel_cmt_str[i - 2] in string.whitespace:
         i -= 1
     return cel_cmt_str[:i], cel_cmt_str[i:]
+
 
 def add_leading_zeros(adr_str, offset=0):
     adr_str_stripped = adr_str.strip()

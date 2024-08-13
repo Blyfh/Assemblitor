@@ -24,6 +24,7 @@ lh: pck.LangHandler
 eh: pck.ErrorHandler
 sh: pck.SpriteHandler
 
+
 def startup(profile_dir, root_dir, dev_mode=False):
     global ph
     global lh

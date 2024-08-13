@@ -16,17 +16,19 @@ def display_error(name, description):
     win.withdraw()
     mb.showerror(name, description)
 
+
 def display_warning(name, description):
     win = tk.Tk()
     win.withdraw()
     mb.showwarning(name, description)
+
 
 def ver_str(ver: tuple[int, ...]):
     return ".".join([str(subver) for subver in ver])
 
 
 min_version = (3, 10)
-cur_version = sys.version_info[:3] # only get major.minor.micro
+cur_version = sys.version_info[:3]  # only get major.minor.micro
 min_pil_ver = (10, 0, 0)
 dev_mode = True
 is_portable = True
@@ -71,6 +73,7 @@ if cur_version >= min_version:
     except Exception as e:
         if dev_mode:
             import traceback
+            
             traceback.print_exception(e)
         else:
             display_error("Internal Error", f"{type(e).__name__}: {e}")
