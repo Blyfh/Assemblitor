@@ -42,5 +42,5 @@
 * display ALU
 * break points for debugging
 * colorcoding for Assembler
-* strg + h
+* ctrl + h
 
