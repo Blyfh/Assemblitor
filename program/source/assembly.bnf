@@ -1,0 +1,32 @@
+// experimental grammar for assembly dialect using BNF notation
+
+text ::= char [text]
+    char ::= letter | digit | whitespace // + other ASCII/Unicode symbols (except newline)
+        letter ::= ("a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" |
+                    "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z")
+        digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+        whitespace ::= " " | "\t"
+int ::= ["-" | "+"] uint
+    uint ::= digit [uint]
+
+program ::= [line] [program]
+line ::= [spacing] memory_cell [spacing] [comment] "\n"
+    spacing ::= [sep] // optional spacing
+        sep ::= whitespace (whitespace | "") // non-optional spacing (used as token separator)
+    memory_cell ::= value_cell | command_cell
+    comment ::= ";" [text]
+
+value_cell ::= address [sep int]
+    address ::= uint
+command_cell ::= operand_command_cell | stop_command_cell
+    operand_command_cell ::= number_command_cell | address_command_cell
+        number_command_cell ::= number_command sep number_operand
+            // note that double quoted string literals are considered case-insensitive
+            number_command ::= "LDA" | "ADD" | "SUB" | "MUL"
+            number_operand ::= address_operand | indirect_address_operand | value_operand
+                address_operand ::= address
+                indirect_address_operand ::= "(" address ")"
+                value_operand ::= "#" int
+        address_command_cell ::= address_command sep address_operand
+            address_command ::= "STA" | "JMP" | "JZE" | "JLE"
+    stop_command_cell ::= "STP"
